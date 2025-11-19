@@ -1,0 +1,43 @@
+// add-3d-buildings
+export const adminAssetMenuCategory =  [{
+        index: 1,
+        name: 'General',
+        active: true
+}, {
+        index: 2,
+        name: 'History',
+        active: false
+}, {
+        index: 3,
+        name: 'Profitability',
+        active: false
+}, {
+        index: 4,
+        name: 'Location',
+        active: false
+}, {
+        index: 5,
+        name: 'Acccessibility',
+        active: false
+}, {
+        index: 6,
+        name: 'Sizes',
+        active: false
+}, {
+        index: 7,
+        name: 'Facility',
+        active: false
+}, {
+        index: 8,
+        name: 'Floor',
+        active: false
+}, {
+        index: 9,
+        name: 'Photo',
+        active: false
+}, {
+        index: 10,
+        name: 'File',
+        active: false
+}]
+

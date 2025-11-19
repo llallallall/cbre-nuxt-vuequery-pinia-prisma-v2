@@ -1,0 +1,77 @@
+@font-face {
+        font-family: 'calibre-bold';
+        src: url('~/assets/fonts/calibre/calibre-web-bold.eot')
+                        format('embedded-opentype'),
+                url('~/assets/fonts/calibre/calibre-web-bold.woff')
+                        format('woff'),
+                url('~/assets/fonts/calibre/calibre-web-bold.woff2')
+                        format('woff2');
+        font-weight: 'bold';
+        font-style: 'normal';
+}
+
+@font-face {
+        font-family: 'calibre-semibold';
+        src: url('~/assets/fonts/calibre/calibre-web-semibold.eot')
+                        format('embedded-opentype'),
+                url('~/assets/fonts/calibre/calibre-web-semibold.woff')
+                        format('woff'),
+                url('~/assets/fonts/calibre/calibre-web-semibold.woff2')
+                        format('woff2');
+        font-weight: 'semibold';
+        font-style: 'normal';
+}
+
+@font-face {
+        font-family: 'calibre-medium';
+        src: url('~/assets/fonts/calibre/calibre-web-medium.eot')
+                        format('embedded-opentype'),
+                url('~/assets/fonts/calibre/calibre-web-medium.woff')
+                        format('woff'),
+                url('~/assets/fonts/calibre/calibre-web-medium.woff2')
+                        format('woff2');
+        font-weight: 'medium';
+        font-style: 'normal';
+}
+
+@font-face {
+        font-family: 'calibre';
+        src: url('~/assets/fonts/calibre/calibre-web-regular.eot')
+                        format('embedded-opentype'),
+                url('~/assets/fonts/calibre/calibre-web-regular.woff')
+                        format('woff'),
+                url('~/assets/fonts/calibre/calibre-web-regular.woff2')
+                        format('woff2');
+        font-weight: 'normal';
+        font-style: 'normal';
+}
+/* 
+@font-face {
+  font-family: "calibre";
+  src: url("~/assets/fonts/calibre/calibre-web-regular-italic.eot") format("embedded-opentype"),
+    url("~/assets/fonts/calibre/calibre-web-regular-italic.woff") format("woff"),
+    url("~/assets/fonts/calibre/calibre-web-regular-italic.woff2") format("woff2");
+  font-weight: "normal";
+  font-style: "italic";
+}
+ */
+@font-face {
+        font-family: 'calibre-light';
+        src: url('~/assets/fonts/calibre/calibre-web-light.eot')
+                        format('embedded-opentype'),
+                url('~/assets/fonts/calibre/calibre-web-light.woff')
+                        format('woff'),
+                url('~/assets/fonts/calibre/calibre-web-light.woff2')
+                        format('woff2');
+        font-weight: 'light';
+        font-style: 'normal';
+}
+
+/* @font-face {
+  font-family: "calibre";
+  src: url("~/assets/fonts/calibre/calibre-web-light-italic.eot") format("embedded-opentype"),
+    url("~/assets/fonts/calibre/calibre-web-light-italic.woff") format("woff"),
+    url("~/assets/fonts/calibre/calibre-web-light-italic.woff2") format("woff2");
+  font-weight: "light";
+  font-style: "italic";
+} */

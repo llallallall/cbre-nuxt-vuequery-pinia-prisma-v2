@@ -1,0 +1,50 @@
+@import '~/assets/fonts/cbre-fonts.css';
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* * {
+        box-sizing: content-box;
+} */
+
+html,
+body {
+        margin: 0;
+        padding: 0;
+        width: 100vw;
+        height: 100vh;
+        overflow: hidden;
+        font-family: 'notoSans';
+}
+
+/** scrollbar */
+/* width */
+::-webkit-scrollbar {
+        width: 3px;
+        height: 3px;
+        background: transparent;
+}
+
+/* Track */
+::-webkit-scrollbar-track {
+        background: transparent;
+}
+
+/* Handle */
+::-webkit-scrollbar-thumb {
+        border-right: transparent;
+        background: #17e88f;
+}
+
+/* Handle on hover */
+::-webkit-scrollbar-thumb:hover {
+        background: #003f2d;
+}
+
+/* Handle on hover */
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus,
+input:-webkit-autofill:active {
+        transition: background-color 5000000s ease-in-out 0s;
+}

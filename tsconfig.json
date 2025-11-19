@@ -1,0 +1,9 @@
+{
+  // https://nuxt.com/docs/guide/concepts/typescript
+  "extends": "./.nuxt/tsconfig.json",
+  // TypeScript 검사에서 제외할 파일들을 명시합니다.
+  "exclude": [
+    "node_modules", 
+    // 빌드 출력 폴더나 기타 불필요한 폴더를 제외합니다.
+  ]
+}

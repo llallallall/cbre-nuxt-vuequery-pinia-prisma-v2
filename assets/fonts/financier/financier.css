@@ -1,0 +1,65 @@
+@font-face {
+        font-family: 'financier-semibold';
+        src: url('~/assets/fonts/financier/financier-display-web-semibold.eot')
+                        format('embedded-opentype'),
+                url('~/assets/fonts/financier/financier-display-web-semibold.woff')
+                        format('woff'),
+                url('~/assets/fonts/financier/financier-display-web-semibold.woff2')
+                        format('woff2');
+        font-weight: 'semibold';
+        font-style: 'normal';
+}
+
+/* @font-face {
+  font-family: "financier";
+  src: url("~/assets/fonts/financier/financier-display-web-semibold-italic.eot")
+      format("embedded-opentype"),
+    url("~/assets/fonts/financier/financier-display-web-semibold-italic.woff") format("woff"),
+    url("~/assets/fonts/financier/financier-display-web-semibold-italic.woff2") format("woff2");
+  font-weight: "semibold";
+  font-style: "italic";
+} */
+
+@font-face {
+        font-family: 'financier-medium';
+        src: url('~/assets/fonts/financier/financier-display-web-medium.eot')
+                        format('embedded-opentype'),
+                url('~/assets/fonts/financier/financier-display-web-medium.woff')
+                        format('woff'),
+                url('~/assets/fonts/financier/financier-display-web-medium.woff2')
+                        format('woff2');
+        font-weight: 'medium';
+        font-style: 'normal';
+}
+/* 
+@font-face {
+  font-family: "financier";
+  src: url("~/assets/fonts/financier/financier-display-web-medium-italic.eot")
+      format("embedded-opentype"),
+    url("~/assets/fonts/financier/financier-display-web-medium-italic.woff") format("woff"),
+    url("~/assets/fonts/financier/financier-display-web-medium-italic.woff2") format("woff2");
+  font-weight: "medium";
+  font-style: "italic";
+}  */
+
+@font-face {
+        font-family: 'financier';
+        src: url('~/assets/fonts/financier/financier-display-web-regular.eot')
+                        format('embedded-opentype'),
+                url('~/assets/fonts/financier/financier-display-web-regular.woff')
+                        format('woff'),
+                url('~/assets/fonts/financier/financier-display-web-regular.woff2')
+                        format('woff2');
+        font-weight: 'normal';
+        font-style: 'normal';
+}
+
+/* @font-face {
+  font-family: "financier";
+  src: url("~/assets/fonts/financier/financier-display-web-regular-italic.eot")
+      format("embedded-opentype"),
+    url("~/assets/fonts/financier/financier-display-web-regular-italic.woff") format("woff"),
+    url("~/assets/fonts/financier/financier-display-web-regular-italic.woff2") format("woff2");
+  font-weight: "normal";
+  font-style: "italic";
+} */
