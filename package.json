@@ -18,6 +18,7 @@
     "@types/lodash-es": "^4.17.12",
     "@types/mapbox__mapbox-gl-draw": "^1.4.5",
     "@types/multer": "^1.4.11",
+    "@types/node": "^24.10.1",
     "@types/uuid": "^9.0.7",
     "@vue-final-modal/nuxt": "^1.0.3",
     "mapbox-gl": "^2.15.0",

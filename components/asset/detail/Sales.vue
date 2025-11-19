@@ -1,121 +1,99 @@
 <template>
         <Disclosure>
                 <DisclosureButton class="py-2 font-financier text-2xl text-primary w-full ">
-
                         <div class="flex justify-between gap-3 w-full">
                                 <div class="w-1/2 flex justify-start">Sales Information</div>
-
                                 <div class="w-1/2 flex justify-end">
-                                        <div v-if="info && info?.total > 0" class="bg-primary/10 hover:bg-primary/25 
+                                        <div v-if="info && info.length > 0" class="bg-primary/10 hover:bg-primary/25 
                                         text-primary rounded-full
                                         px-4 py-1 min-w-[100px]
                                         flex justify-center items-center ">
-                                                {{ info.total }}
+                                                {{ info.length }}
                                         </div>
                                 </div>
                         </div>
-
                 </DisclosureButton>
                 <DisclosurePanel class="font-calibreLight text-lg text-primary">
-                        <table class="table-auto w-full">
-                                <thead>
-                                        <tr class="font-calibre">
-                                                <th>
-                                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                                                                stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
-                                                                <path stroke-linecap="round" stroke-linejoin="round"
-                                                                        d="M5.25 7.5A2.25 2.25 0 017.5 5.25h9a2.25 2.25 0 012.25 2.25v9a2.25 2.25 0 01-2.25 2.25h-9a2.25 2.25 0 01-2.25-2.25v-9z" />
-                                                        </svg>
+                        <div class="overflow-x-auto">
+                                <table class="table-auto w-full border border-gray-200">
+                                        <thead class="bg-gray-50">
+                                                <tr class="font-calibre text-sm text-gray-600 border-b">
+                                                        <th class="px-2 py-1 w-8"><svg class="w-4 h-4" fill="none"
+                                                                        stroke="currentColor" viewBox="0 0 24 24">
+                                                                        <path stroke-linecap="round"
+                                                                                stroke-linejoin="round" stroke-width="2"
+                                                                                d="M5 13l4 4L19 7"></path>
+                                                                </svg></th>
+                                                        <th class="px-2 py-1 text-left">Seller</th>
+                                                        <th class="px-2 py-1 text-left">Buyer</th>
+                                                        <th class="px-2 py-1 text-center">YR-Q</th>
+                                                        <th class="px-2 py-1 text-center">Type</th>
+                                                        <th class="px-2 py-1 text-right">GFA</th>
+                                                        <th class="px-2 py-1 text-right">NFA</th>
+                                                        <th class="px-2 py-1 text-right">Price<sub>(KRW)</sub></th>
+                                                        <th class="px-2 py-1 text-right">P/GFA</th>
+                                                        <th class="px-2 py-1 text-right">P/NFA</th>
+                                                        <th class="px-2 py-1 text-right">ECR</th>
+                                                        <th class="px-2 py-1 text-right">Disc.</th>
+                                                        <th class="px-2 py-1 text-left">Remarks</th>
+                                                </tr>
+                                        </thead>
+                                        <tbody>
+                                                <tr v-for="(t, idx) in info" :key="t.id || idx"
+                                                        class="font-calibreLight text-sm border-b hover:bg-gray-50">
+                                                        <td class="text-center"><input :id="'t' + idx" type="checkbox"
+                                                                        class="ml-[4px]" /></td>
 
-                                                </th>
-                                                <th>Seller
-                                                </th>
-                                                <th>Buyer
-                                                </th>
-                                                <th>YR-Q
-                                                </th>
-                                                <th>Type
-                                                </th>
-                                                <th>GFA
-                                                </th>
-                                                <th>NFA</th>
-                                                <th>Price<sub>(KRW)</sub>
-                                                </th>
-                                                <th>Price/GFA
-                                                </th>
-                                                <th>Price/NFA
-                                                </th>
-                                                <th>ECR
-                                                </th>
-                                                <th>IRR
-                                                </th>
-                                                <th>Remarks
-                                                </th>
-                                        </tr>
-                                </thead>
-                                <tbody>
-                                        <tr v-for="(item, idx) in info?.transactions" class="font-calibreLight">
-                                                <td><input :id="'t' + idx" type="checkbox" class="ml-[4px] border border-primary text-primary rounded-[5px]
-                                                                focus:outline-none focus:ring-offset-0 focus:ring-0
-                                                                checked:outline-none checked:ring-offset-0 checked:ring-0
-                                                                hover:outline-none hover:ring-offset-0 hover:ring-0
-                                                                " />
-                                                </td>
-                                                <td>{{ item.seller }}</td>
-                                                <td>{{ item.buyer }}</td>
-                                                <td>{{ item.transactionYear + '-' + item.transactionQuarter }}</td>
-                                                <td>{{ item.transactionType }}</td>
-                                                <td>{{ numberFormat(item.gfaSqm,
-                                                        2)
-                                                }} m<sup>2</sup></td>
-                                                <td>{{
-                                                        numberFormat(item.nfaSqm,
-                                                                2)
-                                                }}
-                                                        m<sup>2</sup></td>
-                                                <td>{{
-                                                        numberFormat(item.priceKrw,
-                                                                0)
-                                                }} ₩</td>
-                                                <td>{{
-                                                        numberFormat(item.pricePerGfa,
-                                                                0)
-                                                }} ₩/m<sup>2</sup>
-                                                        m<sup>2</sup></td>
-                                                <td>{{
-                                                        numberFormat(item.pricePerNfa,
-                                                                0)
-                                                }} ₩/m<sup>2</sup></td>
-                                                <td>{{
-                                                        numberFormat(item.estCapRate,
-                                                                2)
-                                                }} %</td>
-                                                <td>{{
-                                                        numberFormat(item.estDiscountRate,
-                                                                2)
-                                                }} %</td>
-                                                <td>{{ item.remarks }}</td>
-                                        </tr>
-
-                                </tbody>
-                        </table>
+                                                        <td class="px-2 py-1">{{ t.sale?.seller || '-' }}</td>
+                                                        <td class="px-2 py-1">{{ t.sale?.buyer || '-' }}</td>
+                                                        <td class="px-2 py-1 text-center">{{ t.year }}-{{ t.quarter ||
+                                                                'Q?' }}</td>
+                                                        <td class="px-2 py-1 text-center">{{ t.sale?.saleType || '-' }}
+                                                        </td>
+                                                        <td class="px-2 py-1 text-right">{{
+                                                                formatDecimal(t.sale?.gfaSqm) }}</td>
+                                                        <td class="px-2 py-1 text-right">{{
+                                                                formatDecimal(t.sale?.nfaSqm) }}</td>
+                                                        <td class="px-2 py-1 text-right">{{ formatInt(t.sale?.priceKrw)
+                                                        }}</td>
+                                                        <td class="px-2 py-1 text-right">{{
+                                                                formatInt(t.sale?.pricePerGfa) }}</td>
+                                                        <td class="px-2 py-1 text-right">{{
+                                                                formatInt(t.sale?.pricePerNfa) }}</td>
+                                                        <td class="px-2 py-1 text-right">{{
+                                                                formatDecimal(t.sale?.estCapRate) }}%</td>
+                                                        <td class="px-2 py-1 text-right">{{
+                                                                formatDecimal(t.sale?.estDiscountRate) }}%</td>
+                                                        <td class="px-2 py-1 text-xs text-gray-500 truncate max-w-[150px]"
+                                                                :title="t.sale?.remarks || ''">
+                                                                {{ t.sale?.remarks }}
+                                                        </td>
+                                                </tr>
+                                                <tr v-if="!info || info.length === 0">
+                                                        <td colspan="13" class="text-center py-4 text-gray-500 italic">
+                                                                No Sales Data</td>
+                                                </tr>
+                                        </tbody>
+                                </table>
+                        </div>
                 </DisclosurePanel>
         </Disclosure>
 </template>
 
 <script setup lang="ts">
-const { info } = defineProps({
-        info: {
-                required: false,
-                type: Object
-        }
-})
+import { Disclosure, DisclosureButton, DisclosurePanel } from '@headlessui/vue';
+import { useFormat } from '~/composables/useFormat';
+// 💡 1. 타입 임포트 추가
+import type { TransactionType } from '~/types/property.type';
 
+// 💡 2. defineProps에 Generic Type 적용
+const props = withDefaults(defineProps<{
+        info?: TransactionType[]
+}>(), {
+        info: () => []
+});
 
-import {
-        Disclosure,
-        DisclosureButton,
-        DisclosurePanel,
-} from '@headlessui/vue'
+const { numberFormat } = useFormat();
+const formatInt = (val: any) => numberFormat(val, 0);
+const formatDecimal = (val: any) => numberFormat(val, 2);
 </script>
-

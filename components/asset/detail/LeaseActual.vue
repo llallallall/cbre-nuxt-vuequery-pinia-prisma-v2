@@ -5,218 +5,163 @@
                                 <div class="w-1/2 flex justify-start">Lease Actual Information</div>
 
                                 <div class="w-1/2 flex justify-end">
-                                        <div v-if="info && info?.actualCnt > 0" class="bg-primary/10 hover:bg-primary/25 
+                                        <div v-if="info && info.length > 0" class="bg-primary/10 hover:bg-primary/25 
                                         text-primary rounded-full
                                         px-4 py-1 min-w-[100px]
                                         flex justify-center items-center ">
-                                                {{ info.actualCnt }}
+                                                {{ info.length }}
                                         </div>
                                 </div>
                         </div>
                 </DisclosureButton>
                 <DisclosurePanel class="font-calibreLight text-lg text-primary w-full overflow-x-scroll pb-5">
-                        <table class="table-auto w-full whitespace-nowrap ">
-                                <thead>
-                                        <tr class="font-calibre ">
-                                                <th>
-                                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                                                                stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
-                                                                <path stroke-linecap="round" stroke-linejoin="round"
-                                                                        d="M5.25 7.5A2.25 2.25 0 017.5 5.25h9a2.25 2.25 0 012.25 2.25v9a2.25 2.25 0 01-2.25 2.25h-9a2.25 2.25 0 01-2.25-2.25v-9z" />
-                                                        </svg>
+                        <div class="w-full h-full">
+                                <table class="table-auto w-full whitespace-nowrap pb-10 border-collapse">
+                                        <thead>
+                                                <tr class="font-calibre bg-gray-100 border-b text-sm">
+                                                        <th class="px-2 py-1 w-8">
+                                                                <svg xmlns="http://www.w3.org/2000/svg" fill="none"
+                                                                        viewBox="0 0 24 24" stroke-width="1.5"
+                                                                        stroke="currentColor" class="w-6 h-6">
+                                                                        <path stroke-linecap="round"
+                                                                                stroke-linejoin="round"
+                                                                                d="M5.25 7.5A2.25 2.25 0 017.5 5.25h9a2.25 2.25 0 012.25 2.25v9a2.25 2.25 0 01-2.25 2.25h-9a2.25 2.25 0 01-2.25-2.25v-9z" />
+                                                                </svg>
+                                                        </th>
+                                                        <th class="px-4 py-1">Floor</th>
+                                                        <th class="px-4 py-1">Unit</th>
+                                                        <th class="px-4 py-1">Date</th>
+                                                        <th class="px-4 py-1 text-right">GFA(Sqm)</th>
+                                                        <th class="px-4 py-1 text-right">GFA(Py)</th>
+                                                        <th class="px-4 py-1 text-right">NFA(Sqm)</th>
+                                                        <th class="px-4 py-1 text-right">NFA(Py)</th>
+                                                        <th class="px-4 py-1 text-right">Eff. Ratio</th>
+                                                        <th class="px-4 py-1 text-right">Monthly Rent</th>
+                                                        <th class="px-4 py-1 text-right">Monthly CAMF</th>
+                                                        <th class="px-4 py-1 text-right">Deposit</th>
+                                                        <th class="px-4 py-1 text-right">Rent Mth Py</th>
+                                                        <th class="px-4 py-1 text-right">CAMF Mth Py</th>
+                                                        <th class="px-4 py-1 text-right">Deposit Py</th>
+                                                        <th class="px-4 py-1 text-right">IOD</th>
+                                                        <th class="px-4 py-1 text-right">GDM</th>
+                                                        <th class="px-4 py-1 text-right">NOC</th>
+                                                        <th class="px-4 py-1 text-right">Lease Term Year</th>
+                                                        <th class="px-4 py-1 text-right">Rent Free Type</th>
+                                                        <th class="px-4 py-1 text-right">Rent Free Mth</th>
+                                                        <th class="px-4 py-1 text-right">Effective Noc</th>
+                                                        <th class="px-4 py-1 text-right">Fit-Out</th>
+                                                        <th class="px-4 py-1 text-right">Amount Krw</th>
+                                                        <th class="px-4 py-1 text-right">Amount Nfa Py</th>
+                                                        <th class="px-4 py-1 text-right">Total Free Rent Period Mth</th>
+                                                        <th class="px-4 py-1 text-right">Total Occupying Period Year
+                                                        </th>
+                                                        <th class="px-4 py-1 text-right">Total Free Rent Occupying Year
+                                                        </th>
+                                                        <th class="px-4 py-1 text-right">Monthly Cash Support Gfa</th>
+                                                        <th class="px-4 py-1 text-right">All In Effective Rent Mth Py
+                                                        </th>
+                                                        <th class="px-4 py-1 text-right">All In Noc</th>
+                                                </tr>
+                                        </thead>
+                                        <tbody>
+                                                <tr v-for="(t, idx) in info" :key="t.id || idx"
+                                                        class="font-calibreLight text-sm border-b hover:bg-gray-50">
+                                                        <td class="text-center"><input :id="'lt' + idx" type="checkbox"
+                                                                        class="ml-[4px]" /></td>
 
-                                                </th>
-                                                <th class="px-4">Floor
-                                                </th>
-                                                <th class="px-4">Unit
-                                                </th>
-                                                <th class="px-4">Date
-                                                </th>
-                                                <th class="px-4">GFA(Sqm)
-                                                </th>
-                                                <th class="px-4">GFA(Py)
-                                                </th>
-                                                <th class="px-4">NFA(Sqm)</th>
-                                                <th class="px-4">NFA(Py)
-                                                </th>
-                                                <th class="px-4">Eff. Ratio
-                                                </th>
-                                                <th class="px-4">Monthly Rent
-                                                </th>
-                                                <th class="px-4">Monthly CAMF
-                                                </th>
-                                                <th class="px-4">Deposit
-                                                </th>
-                                                <th class="px-4">Rent Mth Py
-                                                </th>
-                                                <th class="px-4">CAMF Mth Py
-                                                </th>
-                                                <th class="px-4">Deposit Py
-                                                </th>
-                                                <th class="px-4">IOD
-                                                </th>
-                                                <th class="px-4">GDM
-                                                </th>
-                                                <th class="px-4">NOC
-                                                </th>
-                                                <th class="px-4">Lease Term Year
-                                                </th>
-                                                <th class="px-4">Rent Free Type
-                                                </th>
-                                                <th class="px-4">Rent Free Mth
-                                                </th>
-                                                <th class="px-4">Effective Noc
-                                                </th>
-                                                <th class="px-4">Fit-Out
-                                                </th>
-                                                <th class="px-4">Amount Krw
-                                                </th>
-                                                <th class="px-4">Amount Nfa Py
-                                                </th>
-                                                <th class="px-4">Total Free Rent Period Mth
-                                                </th>
-                                                <th class="px-4">Total Occupying Period Year
-                                                </th>
-                                                <th class="px-4">Total Free Rent Occupying Year
-                                                </th>
-                                                <th class="px-4">Monthly Cash Support Gfa
-                                                </th>
-                                                <th class="px-4">All In Effective Rent Mth Py
-                                                </th>
-                                                <th class="px-4">All In Noc
-                                                </th>
-                                        </tr>
-                                </thead>
-                                <tbody>
-                                        <tr v-for="(leaseItem, idx) in info?.leases" class="font-calibreLight text-right">
-                                                <td class="text-left"><input :id="'lt' + idx" type="checkbox" class="ml-[4px] border border-primary text-primary rounded-[5px]
-                                                                focus:outline-none focus:ring-offset-0 focus:ring-0
-                                                                checked:outline-none checked:ring-offset-0 checked:ring-0
-                                                                hover:outline-none hover:ring-offset-0 hover:ring-0
-                                                                " />
-                                                </td>
-                                                <td class="px-4">{{ leaseItem.actualFloor }}</td>
-                                                <td class="px-4">{{ leaseItem.actualUnit }}</td>
-                                                <td class="px-4">{{ formatDate(leaseItem.actualLeaseStartDate)
-                                                }}</td>
-                                                <td class="px-4">{{
-                                                        numberFormat(leaseItem.actualGfaSqm,
-                                                                2)
-                                                }} m<sup>2</sup></td>
-                                                <td class="px-4">{{
-                                                        numberFormat(leaseItem.actualGfaPy,
-                                                                2)
-                                                }} py</td>
-                                                <td class="px-4">{{
-                                                        numberFormat(leaseItem.actualNfaSqm,
-                                                                2)
-                                                }} m<sup>2</sup></td>
-                                                <td class="px-4">{{
-                                                        numberFormat(leaseItem.actualNfaPy,
-                                                                2)
-                                                }} py</td>
-                                                <td class="px-4">{{
-                                                        numberFormat(leaseItem.actualEffRatio,
-                                                                2)
-                                                }} %</td>
-                                                <td class="px-4">{{
-                                                        numberFormat(leaseItem.actualMonthlyRent,
-                                                                0)
-                                                }} ₩</td>
-                                                <td class="px-4">{{
-                                                        numberFormat(leaseItem.actualMonthlyCAMF,
-                                                                0)
-                                                }} ₩</td>
-                                                <td class="px-4">{{
-                                                        numberFormat(leaseItem.actualDeposit,
-                                                                0)
-                                                }} ₩</td>
-                                                <td class="px-4">{{
-                                                        numberFormat(leaseItem.actualRentMthPy,
-                                                                2)
-                                                }} ₩</td>
-                                                <td class="px-4">{{
-                                                        numberFormat(leaseItem.actualCamfMthPy,
-                                                                2)
-                                                }} ₩</td>
-                                                <td class="px-4">{{
-                                                        numberFormat(leaseItem.actualDepositPy,
-                                                                2)
-                                                }} ₩</td>
-                                                <td class="px-4">{{
-                                                        numberFormat(leaseItem.actualIod,
-                                                                2)
-                                                }}</td>
-                                                <td class="px-4">{{
-                                                        numberFormat(leaseItem.actualGdm,
-                                                                2)
-                                                }}</td>
-                                                <td class="px-4">{{
-                                                        numberFormat(leaseItem.actualNoc,
-                                                                2)
-                                                }}</td>
-                                                <td class="px-4">{{ leaseItem.actualLeaseTermYear
-                                                }}</td>
-                                                <td class="px-4">{{ leaseItem.actualRentFreeType
-                                                }}</td>
-                                                <td class="px-4">{{ leaseItem.actualRentFreeMth
-                                                }}</td>
-                                                <td class="px-4">{{
-                                                        numberFormat(leaseItem.actualEffectiveNoc,
-                                                                2)
-                                                }}</td>
-                                                <td class="px-4">{{ leaseItem.actualFitOut }}</td>
-                                                <td class="px-4">{{
-                                                        numberFormat(leaseItem.actualTIAmountKrw,
-                                                                2)
-                                                }}</td>
-                                                <td class="px-4">{{
-                                                        numberFormat(leaseItem.actualTIAmountNfaPy,
-                                                                2)
-                                                }}</td>
-                                                <td class="px-4">{{
-                                                        numberFormat(leaseItem.actualTotalFreeRentPeriodMth,
-                                                                2)
-                                                }}</td>
-                                                <td class="px-4">{{
-                                                        numberFormat(leaseItem.actualTotalOccupyingPeriodYear,
-                                                                2)
-                                                }}</td>
-                                                <td class="px-4">{{
-                                                        numberFormat(leaseItem.actualTotalFreeRentOccupyingYear,
-                                                                2)
-                                                }}</td>
-                                                <td class="px-4">{{
-                                                        numberFormat(leaseItem.actualMonthlyCashSupportGfa,
-                                                                2)
-                                                }}</td>
-                                                <td class="px-4">{{
-                                                        numberFormat(leaseItem.actualAllInEffectiveRentMthPy,
-                                                                2)
-                                                }}</td>
-                                                <td class="px-4">{{
-                                                        numberFormat(leaseItem.actualAllInNoc,
-                                                                2)
-                                                }}</td>
-                                        </tr>
-
-                                </tbody>
-                        </table>
+                                                        <td class="px-4 py-1 text-center">{{ t.lease?.floor || '-' }}
+                                                        </td>
+                                                        <td class="px-4 py-1 text-center">{{ t.lease?.unit || '-' }}
+                                                        </td>
+                                                        <td class="px-4 py-1 text-center">{{
+                                                                formatDate(t.lease?.leaseStartDate) }}</td>
+                                                        <td class="px-4 py-1 text-right">{{
+                                                                formatDecimal(t.lease?.gfaSqm) }}</td>
+                                                        <td class="px-4 py-1 text-right">{{
+                                                                formatDecimal(t.lease?.gfaPy) }}</td>
+                                                        <td class="px-4 py-1 text-right">{{
+                                                                formatDecimal(t.lease?.nfaSqm) }}</td>
+                                                        <td class="px-4 py-1 text-right">{{
+                                                                formatDecimal(t.lease?.nfaPy) }}</td>
+                                                        <td class="px-4 py-1 text-right">{{
+                                                                formatDecimal(t.lease?.effRatio) }}%</td>
+                                                        <td class="px-4 py-1 text-right">{{
+                                                                formatInt(t.lease?.monthlyRent) }}</td>
+                                                        <td class="px-4 py-1 text-right">{{
+                                                                formatInt(t.lease?.monthlyCamf) }}</td>
+                                                        <td class="px-4 py-1 text-right">{{ formatInt(t.lease?.deposit)
+                                                        }}</td>
+                                                        <td class="px-4 py-1 text-right">{{
+                                                                formatInt(t.lease?.rentMonthlyPy) }}</td>
+                                                        <td class="px-4 py-1 text-right">{{
+                                                                formatInt(t.lease?.camfMonthlyPy) }}</td>
+                                                        <td class="px-4 py-1 text-right">{{
+                                                                formatInt(t.lease?.depositPy) }}</td>
+                                                        <td class="px-4 py-1 text-right">{{ formatDecimal(t.lease?.iod)
+                                                        }}</td>
+                                                        <td class="px-4 py-1 text-right">{{ formatDecimal(t.lease?.gdm)
+                                                        }}</td>
+                                                        <td class="px-4 py-1 text-right">{{ formatDecimal(t.lease?.noc)
+                                                        }}</td>
+                                                        <td class="px-4 py-1 text-right">{{ t.lease?.leaseTermYear ||
+                                                                '-' }}</td>
+                                                        <td class="px-4 py-1 text-right">{{ t.lease?.rentFreeType || '-'
+                                                        }}</td>
+                                                        <td class="px-4 py-1 text-right">{{ t.lease?.rentFreeMonth ||
+                                                                '-' }}</td>
+                                                        <td class="px-4 py-1 text-right">{{
+                                                                formatDecimal(t.lease?.effectiveNoc) }}</td>
+                                                        <td class="px-4 py-1 text-right">{{ formatInt(t.lease?.fitOut)
+                                                        }}</td>
+                                                        <td class="px-4 py-1 text-right">{{
+                                                                formatInt(t.lease?.tiAmountKrw) }}</td>
+                                                        <td class="px-4 py-1 text-right">{{
+                                                                formatDecimal(t.lease?.tiAmountNfaPy) }}</td>
+                                                        <td class="px-4 py-1 text-right">{{
+                                                                formatInt(t.lease?.totalFreeRentPeriodMonth) }}</td>
+                                                        <td class="px-4 py-1 text-right">{{
+                                                                formatDecimal(t.lease?.totalOccupyingPeriodYear) }}</td>
+                                                        <td class="px-4 py-1 text-right">{{
+                                                                formatDecimal(t.lease?.totalFreeRentOccupyingYear) }}
+                                                        </td>
+                                                        <td class="px-4 py-1 text-right">{{
+                                                                formatInt(t.lease?.monthlyCashSupportGfa) }}</td>
+                                                        <td class="px-4 py-1 text-right">{{
+                                                                formatInt(t.lease?.allInEffectiveRentMonthlyPy) }}</td>
+                                                        <td class="px-4 py-1 text-right">{{
+                                                                formatDecimal(t.lease?.allInNoc) }}</td>
+                                                </tr>
+                                                <tr v-if="!info || info.length === 0">
+                                                        <td colspan="31" class="text-center py-4 text-gray-500 italic">
+                                                                No Actual Lease Data</td>
+                                                </tr>
+                                        </tbody>
+                                </table>
+                        </div>
                 </DisclosurePanel>
         </Disclosure>
 </template>
 
 <script setup lang="ts">
-const { info } = defineProps({
-        info: {
-                required: false,
-                type: Object
-        }
-})
-import {
-        Disclosure,
-        DisclosureButton,
-        DisclosurePanel,
-} from '@headlessui/vue'
-</script>
+import { Disclosure, DisclosureButton, DisclosurePanel } from '@headlessui/vue';
+import { useFormat } from '~/composables/useFormat';
+import type { TransactionType } from '~/types/property.type';
 
+// 💡 Generic Type 적용
+const props = withDefaults(defineProps<{
+        info?: TransactionType[]
+}>(), {
+        info: () => []
+});
+
+const { numberFormat } = useFormat();
+const formatInt = (val: any) => numberFormat(val, 0);
+const formatDecimal = (val: any) => numberFormat(val, 2);
+
+const formatDate = (dateInput: Date | string | null | undefined): string => {
+        if (!dateInput) return '-';
+        const date = dateInput instanceof Date ? dateInput : new Date(dateInput);
+        if (isNaN(date.getTime())) return '-';
+        return date.toISOString().split('T')[0];
+};
+</script>

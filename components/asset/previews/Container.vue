@@ -1,20 +1,19 @@
 <template>
         <div class="bg-[rgba(255,255,255,0.2)] rounded-[15px] outline-none 
-                    flex w-full justify-start transition-all duration-600 ease-in-out">
+                flex w-full justify-start transition-all duration-600 ease-in-out">
 
                 <div class="relative 
-                                px-[0.5em] py-[0.5em] 
-                                backdrop-blur-[25px] shadow-[0_0_10px_2px_rgba(0,0,0,0.2)]
-                                border-2 border-[rgba(255,255,255,0.4)] rounded-[15px] 
-                                flex flex-col gap-10 m-5
-                                transition-all duration-600 ease-in-out" :class="[
-                                        // 너비 변경 로직
-                                        panelStore.growPreview ? 'w-full' : 'w-1/2',
-                                        // 2. 위치 변경 로직 (justify-content 대신 margin 사용)
-                                        // shrinkPreview가 true: mr-auto로 왼쪽 정렬
-                                        // shrinkPreview가 false: mx-auto로 중앙 정렬
-                                        panelStore.shrinkPreview ? 'mr-auto' : 'mx-auto'
-                                ]">
+                    px-[0.5em] py-[0.5em] 
+                    backdrop-blur-[25px] shadow-[0_0_10px_2px_rgba(0,0,0,0.2)]
+                    border-2 border-[rgba(255,255,255,0.4)] rounded-[15px] 
+                    flex flex-col gap-10 m-5
+                    transition-all duration-600 ease-in-out" :class="[
+                        // 💡 수정: panelStore.growPreview -> uiStore.isGrownPreview
+                        uiStore.isGrownPreview ? 'w-full' : 'w-1/2',
+
+                        // 💡 수정: panelStore.shrinkPreview -> uiStore.isShrunkPreview
+                        uiStore.isShrunkPreview ? 'mr-auto' : 'mx-auto'
+                ]">
 
                         <div class="relative bg-white w-full min-h-[50em]  rounded-[10px] p-6">
                                 <div
@@ -32,22 +31,23 @@
                                         </div>
                                         <div class="flex flex-1 items-center justify-end">
                                                 <button class="text-sm font-bold text-[#ff6057] mr-[1.5em] hover:bg-[#28c840]/20 px-2 rounded-[10px] "
-                                                        @click="goToAdminList(); panelStore.closePanel();">
+                                                        @click="goToAdminList(); uiStore.closeModifyPanel();">
                                                         Return to the list
                                                 </button>
+
                                                 <icon name="ic:outline-minus" size="1.2em"
                                                         class="mr-[0.5em] text-cbre_primary_4 cursor-pointer" :class="{
-                                                                'bg-cbre_primary_2/40 rounded-full ': !panelStore.growPreview,
-                                                                'bg-transparent ': panelStore.growPreview,
+                                                                'bg-cbre_primary_2/40 rounded-full ': !uiStore.isGrownPreview,
+                                                                'bg-transparent ': uiStore.isGrownPreview,
                                                         }" @click.prevent="() => {
-                                                                panelStore.growPreview = false
+                                                                uiStore.isGrownPreview = false
                                                         }" />
                                                 <icon name="openmoji:overlapping-white-squares" size="1.2em"
                                                         class="mr-[0.5em] text-cbre_primary_4 cursor-pointer" :class="{
-                                                                'bg-cbre_primary_2/40 rounded-full ': panelStore.growPreview,
-                                                                'bg-transparent ': !panelStore.growPreview,
+                                                                'bg-cbre_primary_2/40 rounded-full ': uiStore.isGrownPreview,
+                                                                'bg-transparent ': !uiStore.isGrownPreview,
                                                         }" @click.prevent="() => {
-                                                                panelStore.growPreview = true;
+                                                                uiStore.isGrownPreview = true;
                                                         }" />
 
                                         </div>
@@ -56,8 +56,7 @@
 
                                         <div
                                                 class="detail-title text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-financierMedium leading-6 text-primary">
-                                                {{ propertyStore?.propertyName || 'Modify Property' }}
-
+                                                {{ propertyStore.currentProperty?.name || 'Modify Property' }}
                                         </div>
 
                                         <div class="space-y-8 border-b pb-10">
@@ -100,7 +99,6 @@
                                                 <AssetPreviewsFacility />
                                         </div>
 
-
                                         <div class="space-y-8 border-b pb-10">
                                                 <AssetPreviewsAccessibility />
                                         </div>
@@ -108,8 +106,6 @@
                                         <div class="space-y-8 border-b pb-10">
                                                 <AssetPreviewsTransaction />
                                         </div>
-
-
 
                                 </div>
                         </div>
@@ -119,11 +115,11 @@
 </template>
 
 <script setup lang="ts">
-// 컨테이너는 로직 없이 구조적 역할만 수행합니다.
-import { useModifyPanelStore } from '~/stores/modifyPanel';
+// 💡 1. 수정: Store Import 경로 변경
+import { useRouter } from 'vue-router';
 import { usePropertyStore } from '~/stores/property';
-import { useAppStore } from '~/stores/app'; // 💡 Pinia app Store를 가져옵니다.
-import { useRouter } from 'vue-router'
+import { useUiStore } from '~/stores/ui';         // ModifyPanelStore 대체
+import { useStatusStore } from '~/stores/status'; // AppStore 대체
 
 const props = defineProps({
         floorDataKey: {
@@ -132,22 +128,22 @@ const props = defineProps({
         }
 });
 
-const panelStore = useModifyPanelStore();
+// 💡 2. 수정: Store 인스턴스 생성
+const uiStore = useUiStore();          // Panel UI 상태
 const propertyStore = usePropertyStore();
-const appStore = useAppStore(); // ✨ appStore 인스턴스 생성
+const statusStore = useStatusStore();  // 전역 상태 (Modal 등)
 
-// 라우터 인스턴스 가져오기
-const router = useRouter()
+const router = useRouter();
 
 const goToAdminList = () => {
-        // propertyStore.resetProperty(); // 상태 초기화
-        router.push('/admin')
+        // 선택 사항: propertyStore.$reset() 등을 호출할 수 있습니다.
+        router.push('/admin');
 }
 
 const handleOpenPdfModal = (url: string) => {
-        // console.log('PDF 모달 열기 요청:', url) // 한국어 주석
         if (url) {
-                appStore.setPdfModalOpen(url); // Pinia Store의 액션 호출
+                // 💡 3. 수정: Status Store의 새로운 액션 사용
+                statusStore.openViewerModal(url, 'pdf');
         }
 };
 

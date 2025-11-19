@@ -1,26 +1,15 @@
-<template >
-        <div class="font-financier text-2xl text-primary">
-                History</div>
+<template>
+        <div class="font-financier text-2xl text-primary mb-2">History</div>
 
-
-        <ul v-if="item.historyList && item.historyList.length > 0 && item.historyList[0].year.length > 0"
-                class="cbre_bulletList font-calibreLight text-lg text-primary grid " :class="{
-                        'grid-cols-1': propertyStore.shrinkPreview && !propertyStore.growPreview,
-                        'grid-cols-2': !propertyStore.shrinkPreview && !propertyStore.growPreview,
-                        'grid-cols-3': !propertyStore.shrinkPreview && propertyStore.growPreview,
-                }">
-
-                <li class="flex items-center" v-for="(history, index) in item.historyList" :key="history">
-                        <div v-if="history.type == 'COMPLETION'" class="w-full flex items-center">
+        <ul v-if="hasHistory" class="cbre_bulletList font-calibreLight text-lg text-primary grid grid-cols-1 gap-y-1">
+                <li class="flex items-center" v-for="(h, index) in item.history" :key="h.id || index">
+                        <div v-if="h.type === 'COMPLETION'" class="w-full flex items-center">
                                 <IconMinus class="w-[18px] mr-1" />
                                 <div class="min-w-[130px] whitespace-nowrap text-right mr-4 font-calibre">
                                         <span class="text-xs font-normal">#{{ index + 1 }}</span> YR. Built :
                                 </div>
                                 <div class="flex-1">
-                                        {{
-                                                history.year
-                                        }}
-
+                                        {{ h.year }}
                                 </div>
                         </div>
                         <div v-else class="w-full flex items-center">
@@ -29,27 +18,28 @@
                                         <span class="text-xs font-normal">#{{ index + 1 }}</span> YR. Reno. :
                                 </div>
                                 <div class="flex-1">
-                                        {{
-                                                history.year
-                                        }}
-
+                                        {{ h.year }}
                                 </div>
                         </div>
                 </li>
         </ul>
+        <div v-else class="text-gray-400 text-sm italic pl-6">No history data.</div>
 </template>
 
 <script setup lang="ts">
-import { usePropertyStore } from '~/stores/property';
-const propertyStore = usePropertyStore()
-const { item } = defineProps({
+import { computed } from 'vue';
+
+const props = defineProps({
         item: {
                 required: true,
                 type: Object
         }
-})
+});
 
-
+// 데이터 존재 여부 확인
+const hasHistory = computed(() => {
+        return props.item.history && props.item.history.length > 0 && props.item.history[0].year;
+});
 </script>
 
 <style scoped>

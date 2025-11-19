@@ -2,7 +2,7 @@
   <div class="bg-white mt-4">
     <div class="relative font-financier text-2xl text-primary mb-4 flex justify-between">
       <span>Facility</span>
-      <button @click="panelStore.openPanel('facility')"
+      <button @click="openEditPanel"
         class="outline-none bg-cbre_primary_2 text-white text-sm font-medium py-1 px-3 border rounded-[10px] transition duration-150">
         Edit
       </button>
@@ -17,15 +17,15 @@
             <th class="px-2 py-1">Total</th>
             <th class="px-2 py-1">Passenger</th>
             <th class="px-2 py-1">Service</th>
-            <th class="px-2 py-1">Shuttle</th>
+            <th class="px-2 py-1">Freight</th>
           </tr>
         </thead>
         <tbody>
           <tr class="text-center border-t">
-            <td class="px-2 py-1">{{ formatInt(property.facility?.elevators?.total) }}</td>
-            <td class="px-2 py-1">{{ formatInt(property.facility?.elevators?.passenger) }}</td>
-            <td class="px-2 py-1">{{ formatInt(property.facility?.elevators?.service) }}</td>
-            <td class="px-2 py-1">{{ formatInt(property.facility?.elevators?.shuttle) }}</td>
+            <td class="px-2 py-1">{{ formatInt(property?.facility?.elevatorsTotal) }}</td>
+            <td class="px-2 py-1">{{ formatInt(property?.facility?.elevatorsPassenger) }}</td>
+            <td class="px-2 py-1">{{ formatInt(property?.facility?.elevatorsService) }}</td>
+            <td class="px-2 py-1">{{ formatInt(property?.facility?.elevatorsFreight) }}</td>
           </tr>
         </tbody>
       </table>
@@ -38,36 +38,36 @@
 
     <template v-if="hasParkingInfo">
       <ul class="relative cbre_bulletList font-calibreLight text-lg text-primary grid md:grid-cols-2 grid-cols-1">
-        <li v-if="property.facility?.parking?.cpsExisting !== null" class="flex items-center">
+        <li v-if="property?.facility?.cpsExisting !== null" class="flex items-center">
           <h3 class="text-base font-semibold">Parking Capacity(existing) :</h3>
           <div class="flex-1 pl-2">
-            {{ formatInt(property.facility?.parking?.cpsExisting) }} units
+            {{ formatInt(property?.facility?.cpsExisting) }} units
           </div>
         </li>
-        <li v-if="property.facility?.parking?.cpsRequired !== null" class="flex items-center">
+        <li v-if="property?.facility?.cpsRequired !== null" class="flex items-center">
           <h3 class="text-base font-semibold">Parking Capacity(required) :</h3>
           <div class="flex-1 pl-2">
-            {{ formatInt(property.facility?.parking?.cpsRequired) }} units
+            {{ formatInt(property?.facility?.cpsRequired) }} units
           </div>
         </li>
-        <li v-if="property.facility?.parking?.paidParkingFee !== null" class="flex items-center">
+        <li v-if="property?.facility?.paidParkingFee !== null" class="flex items-center">
           <h3 class="text-base font-semibold">Paid Parking Fee (VAT include) :</h3>
           <div class="flex-1 pl-2">
-            {{ formatDecimal(property.facility?.parking?.paidParkingFee) }} KRW/Unit
+            {{ formatDecimal(property?.facility?.paidParkingFee) }} KRW/Unit
           </div>
         </li>
       </ul>
       <ul class="relative cbre_bulletList font-calibreLight text-lg text-primary grid md:grid-cols-2 grid-cols-1">
-        <li v-if="property.facility?.parking?.freeCpsSqm !== null" class="flex items-center">
+        <li v-if="property?.facility?.freeCpsSqm !== null" class="flex items-center">
           <h3 class="text-base font-semibold">Free Parking :</h3>
           <div class="flex-1 pl-2">
-            {{ formatDecimal(property.facility?.parking?.freeCpsSqm) }} units/m²
+            {{ formatDecimal(property?.facility?.freeCpsSqm) }} units/m²
           </div>
         </li>
-        <li v-if="property.facility?.parking?.freeCpsPy !== null" class="flex items-center">
+        <li v-if="property?.facility?.freeCpsPy !== null" class="flex items-center">
           <h3 class="text-base font-semibold">Free Parking :</h3>
           <div class="flex-1 pl-2">
-            {{ formatDecimal(property.facility?.parking?.freeCpsPy) }} units/py
+            {{ formatDecimal(property?.facility?.freeCpsPy) }} units/py
           </div>
         </li>
       </ul>
@@ -80,25 +80,25 @@
 
     <template v-if="hasMaterialsInfo">
       <ul class="relative cbre_bulletList font-calibreLight text-lg text-primary grid md:grid-cols-2 grid-cols-1">
-        <li v-if="property.facility?.materials?.roofMaterial" class="flex items-start">
+        <li v-if="property?.facility?.roofMaterial" class="flex items-start">
           <h3 class="text-base font-semibold w-[150px] whitespace-nowrap">Roof Material :</h3>
-          <div class="flex-1 pl-2">{{ property.facility?.materials?.roofMaterial }}</div>
+          <div class="flex-1 pl-2">{{ property?.facility?.roofMaterial }}</div>
         </li>
-        <li v-if="property.facility?.materials?.facade" class="flex items-start">
+        <li v-if="property?.facility?.facade" class="flex items-start">
           <h3 class="text-base font-semibold w-[150px] whitespace-nowrap">Facade :</h3>
-          <div class="flex-1 pl-2">{{ property.facility?.materials?.facade }}</div>
+          <div class="flex-1 pl-2">{{ property?.facility?.facade }}</div>
         </li>
-        <li v-if="property.facility?.materials?.mechanicalElectrical" class="flex items-start">
+        <li v-if="property?.facility?.mechanicalElectrical" class="flex items-start">
           <h3 class="text-base font-semibold w-[150px] whitespace-nowrap">Mechanical/Electrical :</h3>
-          <div class="flex-1 pl-2">{{ property.facility?.materials?.mechanicalElectrical }}</div>
+          <div class="flex-1 pl-2">{{ property?.facility?.mechanicalElectrical }}</div>
         </li>
-        <li v-if="property.facility?.materials?.lighting" class="flex items-start">
+        <li v-if="property?.facility?.lighting" class="flex items-start">
           <h3 class="text-base font-semibold w-[150px] whitespace-nowrap">Lighting :</h3>
-          <div class="flex-1 pl-2">{{ property.facility?.materials?.lighting }}</div>
+          <div class="flex-1 pl-2">{{ property?.facility?.lighting }}</div>
         </li>
-        <li v-if="property.facility?.materials?.fireFighting" class="flex items-start">
+        <li v-if="property?.facility?.fireFighting" class="flex items-start">
           <h3 class="text-base font-semibold w-[150px] whitespace-nowrap">Fire Fighting :</h3>
-          <div class="flex-1 pl-2">{{ property.facility?.materials?.fireFighting }}</div>
+          <div class="flex-1 pl-2">{{ property?.facility?.fireFighting }}</div>
         </li>
       </ul>
     </template>
@@ -111,40 +111,63 @@
 
 <script setup lang="ts">
 import { computed } from 'vue';
+import { storeToRefs } from 'pinia';
 import { usePropertyStore } from '~/stores/property';
-import { useModifyPanelStore } from '~/stores/modifyPanel';
+import { useUiStore } from '~/stores/ui'; // ModifyPanelStore 대체
 import { useFormat } from '~/composables/useFormat';
 
 const propertyStore = usePropertyStore();
-const panelStore = useModifyPanelStore();
-const property = computed(() => propertyStore.$state);
+const uiStore = useUiStore();
 
-// ⭐ 컴포저블 사용: numberFormat 함수 사용
+// 💡 수정: currentProperty 참조
+const { currentProperty: property } = storeToRefs(propertyStore);
+
+// 컴포저블 사용
 const { numberFormat } = useFormat();
 
-// ⭐ 포맷팅 헬퍼 함수 정의 (Preview 표시용)
-// 1. 정수형 (엘리베이터 대수, 주차 대수)
+// 포맷팅 헬퍼
 const formatInt = (value: any) => numberFormat(value, 0);
-// 2. 소수점형 (주차 요금, 주차 비율)
 const formatDecimal = (value: any) => numberFormat(value, 2);
 
-// ⭐ 섹션별 정보 유무를 판단하는 Computed 속성 추가
+// 패널 열기
+const openEditPanel = () => {
+  uiStore.openModifyPanel(propertyStore.currentPropertyId, 'facility');
+}
+
+// 💡 수정: 섹션별 정보 유무 판단 (Flat 구조 반영)
 const hasElevatorInfo = computed(() => {
-  const e = property.value.facility?.elevators;
-  // total, passenger, service, shuttle 중 하나라도 값이 있으면 true
-  return e && (e.total !== null || e.passenger !== null || e.service !== null || e.shuttle !== null);
+  const f = property.value?.facility;
+  // elevatorsTotal, elevatorsPassenger, elevatorsService, elevatorsFreight
+  return f && (
+    f.elevatorsTotal !== null ||
+    f.elevatorsPassenger !== null ||
+    f.elevatorsService !== null ||
+    f.elevatorsFreight !== null
+  );
 });
 
 const hasParkingInfo = computed(() => {
-  const p = property.value.facility?.parking;
-  // 모든 Parking 필드 중 하나라도 값이 있으면 true
-  return p && (p.cpsExisting !== null || p.cpsRequired !== null || p.paidParkingFee !== null || p.freeCpsSqm !== null || p.freeCpsPy !== null);
+  const f = property.value?.facility;
+  // cpsExisting, cpsRequired, paidParkingFee, freeCpsSqm, freeCpsPy
+  return f && (
+    f.cpsExisting !== null ||
+    f.cpsRequired !== null ||
+    f.paidParkingFee !== null ||
+    f.freeCpsSqm !== null ||
+    f.freeCpsPy !== null
+  );
 });
 
 const hasMaterialsInfo = computed(() => {
-  const m = property.value.facility?.materials;
-  // roofMaterial, facade, mechanicalElectrical, lighting, fireFighting 중 하나라도 값이 있으면 true
-  return m && (m.roofMaterial || m.facade || m.mechanicalElectrical || m.lighting || m.fireFighting);
+  const f = property.value?.facility;
+  // roofMaterial, facade, mechanicalElectrical, lighting, fireFighting
+  return f && (
+    !!f.roofMaterial ||
+    !!f.facade ||
+    f.mechanicalElectrical !== null ||
+    !!f.lighting ||
+    !!f.fireFighting
+  );
 });
 </script>
 

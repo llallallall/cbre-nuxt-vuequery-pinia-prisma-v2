@@ -1,37 +1,24 @@
-// server/api/property/[id]/general.put.ts
+// server/api/property/admin/[id]/general.put.ts
 
 import { defineEventHandler, readBody, getRouterParams, createError } from 'h3';
 import prisma from '@/prisma/cbredb';
 import { Prisma } from '@prisma/client';
+import type { TemperatureTypeEnum } from '~/types/property.type'; // TemperatureType Enum (ROOM, LOW, CONSTANT)
 
-// 💡 [개선] 매퍼 및 타입 임포트
-import {
-  mapClientWarehouseToPrisma,
-  mapPrismaGeneralToClient,
-  PrismaPropertyWithGeneral,
-  PropertyGeneralResponse // 클라이언트 응답 타입
-} from '~/utils/assetMapper';
-
-import type { GeneralType, WarehouseType } from '~/types/asset.type';
-
-
-// 프론트엔드 (General.vue)에서 넘어오는 Payload 타입 정의
+// 1. 프론트엔드에서 보내는 Payload 정의 (camelCase)
 interface GeneralUpdatePayload {
-  propertyName: string;
-  sectorId?: string;
-  subSectorId?: string;
-  warehouse: WarehouseType;
+  name: string;
+  sectorId: string;
+  subsectorId?: string | null;
+
+  // Warehouse 리스트
+  warehouse: {
+    temperatureType: TemperatureTypeEnum;
+    ratio: number | null;
+  }[];
 }
 
-// 프론트엔드 Pinia Store에 반환할 데이터의 타입
-interface PropertyGeneralResponse {
-  propertyId: string;
-  propertyName: string;
-  general: GeneralType;
-}
-
-
-export default defineEventHandler(async (event): Promise<PropertyGeneralResponse> => {
+export default defineEventHandler(async (event) => {
   const params = getRouterParams(event);
   const propertyId = params.id;
 
@@ -39,99 +26,72 @@ export default defineEventHandler(async (event): Promise<PropertyGeneralResponse
     throw createError({ statusCode: 400, statusMessage: 'Property ID is missing.' });
   }
 
-  const payload: GeneralUpdatePayload = await readBody(event);
-  const { propertyName, sectorId, subSectorId, warehouse } = payload;
+  const body = await readBody<GeneralUpdatePayload>(event);
 
-  // 트랜잭션을 사용하여 원자성(Atomicity) 보장
+  // 필수 값 검증
+  if (!body.name || !body.sectorId) {
+    throw createError({ statusCode: 400, statusMessage: 'Name and Sector are required.' });
+  }
+
   try {
+    // 트랜잭션으로 일괄 처리
     const result = await prisma.$transaction(async (tx) => {
 
-      // 1. Property.name 업데이트
+      // [Step 1] Property 기본 정보 업데이트
+      // 💡 핵심 수정: 프론트엔드(camelCase) -> DB(snake_case) 필드명 매칭
       await tx.property.update({
         where: { id: propertyId },
-        data: { name: propertyName },
+        data: {
+          name: body.name,
+          sector_id: body.sectorId,          // DB 컬럼명: sector_id
+          subsector_id: body.subsectorId,    // DB 컬럼명: subsector_id
+        },
       });
 
-      // 2. General 레코드 upsert 처리
-      let generalRecord = await tx.general.findUnique({
-        where: { property_id: propertyId },
-        select: { id: true }
-      });
-
-      const generalData = {
-        sector_id: sectorId,
-        sub_sector_id: subSectorId,
-      };
-
-      if (generalRecord) {
-        await tx.general.update({
-          where: { id: generalRecord.id },
-          data: generalData,
-        });
-      } else {
-        generalRecord = await tx.general.create({
-          data: {
-            property_id: propertyId,
-            ...generalData,
-          },
-        });
-      }
-
-      const generalId = generalRecord.id;
-
-      // 3. Warehouse 레코드 업데이트 (기존 삭제 후 새로운 레코드 삽입)
-      // 💡 [개선] 매퍼 사용: 클라이언트 WarehouseType -> Prisma WarehouseCreateManyInput
-      const warehousePrismaPayload = mapClientWarehouseToPrisma(warehouse, generalId);
-
-      // 기존 Warehouse 레코드 삭제
+      // [Step 2] Warehouse 정보 업데이트 (전체 삭제 후 재생성)
+      // 2-1. 기존 데이터 삭제
       await tx.warehouse.deleteMany({
-        where: { general_id: generalId },
+        where: { property_id: propertyId },  // DB 컬럼명: property_id
       });
 
-      // 새로운 Warehouse 레코드 생성
-      if (warehousePrismaPayload.length > 0) {
+      // 2-2. 새로운 데이터 생성
+      if (body.warehouse && body.warehouse.length > 0) {
         await tx.warehouse.createMany({
-          data: warehousePrismaPayload,
-          skipDuplicates: true,
+          data: body.warehouse.map((item) => ({
+            property_id: propertyId,         // DB 컬럼명: property_id
+            temperature_type: item.temperatureType, // DB 컬럼명: temperature_type
+            ratio: item.ratio,
+          })),
         });
       }
 
-
-      // 4. 업데이트된 전체 Property 레코드 조회
-      // (매퍼에서 필요로 하는 include 구조 유지)
+      // [Step 3] 업데이트된 최신 데이터 조회 (Relation 포함)
       const updatedProperty = await tx.property.findUnique({
         where: { id: propertyId },
         include: {
-          general: {
-            include: {
-              sector: true,
-              sub_sector: true,
-              warehouse: true,
-            },
-          },
+          sector: true,
+          subsector: true,
+          warehouse: true,
         },
-      }) as PrismaPropertyWithGeneral;
+      });
 
-      if (!updatedProperty || !updatedProperty.general) {
-        throw createError({ statusCode: 404, statusMessage: 'Property or General data not found after update.' });
-      }
-
-      // 5. Pinia CbreAsset 구조에 맞게 매퍼를 사용하여 매핑하여 반환
-      // 💡 [개선] 매퍼 사용: DB Read Payload -> Client Response
-      return mapPrismaGeneralToClient(updatedProperty);
+      return updatedProperty;
     });
 
     return result;
 
-  } catch (e) {
-    console.error('Property General Update Error:', e);
+  } catch (e: any) {
+    console.error('General Update Error:', e);
 
     // Prisma 에러 처리
     if (e instanceof Prisma.PrismaClientKnownRequestError && e.code === 'P2025') {
       throw createError({ statusCode: 404, statusMessage: 'Property not found.' });
     }
 
-    // 기타 에러 처리
-    throw createError({ statusCode: 500, statusMessage: 'Failed to update property general record.' });
+    throw createError({
+      statusCode: 500,
+      statusMessage: 'Failed to update property general info.',
+      data: e.message
+    });
   }
 });
