@@ -18,7 +18,7 @@
 
             <div v-show="!uiStore.isHiddenList" :class="[
                 'h-full transition-all duration-300 border-l border-gray-200',
-                'w-[40%] min-w-[400px] max-w-[600px]' // 리스트 너비 고정 (반응형 조정 가능)
+                uiStore.isExpandedList ? 'w-[50%]' : 'w-[40%] min-w-[400px] max-w-[600px]'
             ]">
                 <ListCard :data="filteredAssets" :totalCount="filteredAssets.length" :itemsPerRender="6"
                     containerClasses="bg-[#f4f7f7] p-4 h-full" defaultLoadingColor="#222" />

@@ -61,6 +61,7 @@ interface UiState {
         // 3. 리스트 표시 설정 (List View Settings)
         isGridView: boolean; // Grid / List 뷰 전환
         isHiddenList: boolean; // 리스트 숨김/보임 (지도와 함께 표시될 때)
+        isExpandedList: boolean; // 리스트 확장 여부 (50% 너비)
 
         // 4. 마스터 데이터 (Master Data)
         sectorList: MasterDataType[];
@@ -96,6 +97,7 @@ const getInitialState = (): UiState => ({
         // 리스트 표시 초기 설정
         isGridView: false, // 기본은 리스트 뷰
         isHiddenList: false,
+        isExpandedList: false,
 
         // 마스터 데이터 초기 상태
         sectorList: [],
@@ -104,7 +106,6 @@ const getInitialState = (): UiState => ({
 
         currentLocale: 'en', // 기본은 영어
         isUserProfileModalOpen: false,
-
 });
 
 // ----------------------------------------------------------------------
@@ -118,10 +119,10 @@ export const useUiStore = defineStore('ui', {
                 // ------------------- A. Admin 수정 패널 액션 -------------------
 
                 /**
- * @description Admin 수정/생성 패널을 열고, 수정할 자산 ID와 시작 섹션을 설정합니다.
- * @param propertyIdToModify - 수정할 자산의 ID (생성 시 null)
- * @param section - 패널을 열 때 기본으로 표시할 섹션 ('general'이 기본값)
- */
+                 * @description Admin 수정/생성 패널을 열고, 수정할 자산 ID와 시작 섹션을 설정합니다.
+                 * @param propertyIdToModify - 수정할 자산의 ID (생성 시 null)
+                 * @param section - 패널을 열 때 기본으로 표시할 섹션 ('general'이 기본값)
+                 */
                 openModifyPanel(
                         propertyIdToModify: string | null, // 💡 첫 번째 인자: 수정할 자산 ID
                         section: AdminModifySectionType = 'general' // 💡 두 번째 인자: 열 섹션 (기본값 설정)

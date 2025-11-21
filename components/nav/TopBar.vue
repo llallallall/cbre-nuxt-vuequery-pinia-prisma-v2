@@ -128,7 +128,7 @@
                                                         <Icon name="ph:caret-up-down" size="14" class="text-gray-400" />
                                                 </span>
                                         </div>
-                                        <div class="grid grid-cols-2 absolute top-10 right-0 mt-1 bg-white min-w-[200px] cursor-default rounded-sm border border-gray-200 p-2"
+                                        <div class="grid grid-cols-2 absolute top-10 right-0 mt-1 bg-white min-w-[200px] cursor-default rounded-sm border border-gray-200 p-2 z-[100]"
                                                 :class="openSectors ? 'block' : 'hidden'">
                                                 <div v-for="option in sectors" :key="option.name"
                                                         @click="toggleSelectedSector(option)"
@@ -164,7 +164,7 @@
                                                         <Icon name="ph:caret-up-down" size="14" class="text-gray-400" />
                                                 </span>
                                         </div>
-                                        <div class="grid grid-cols-2 absolute top-10 right-0 mt-1 bg-white min-w-[300px] cursor-default rounded-sm border border-gray-200 p-2"
+                                        <div class="grid grid-cols-2 absolute top-10 right-0 mt-1 bg-white min-w-[300px] cursor-default rounded-sm border border-gray-200 p-2 z-[100]"
                                                 :class="openSubSectors ? 'block' : 'hidden'">
                                                 <div v-for="option in subsectors" :key="option.name"
                                                         @click="toggleSelectedSubSector(option)"
@@ -220,7 +220,7 @@
                 </div>
 
                 <div class="menu-more absolute"
-                        :class="openMenuMore ? 'z-10 animate-slideShowFromTop' : 'z-0 animate-slideHideToTop hidden'">
+                        :class="openMenuMore ? 'z-[100] animate-slideShowFromTop' : 'z-0 animate-slideHideToTop hidden'">
                         <NavMoreMenu />
                 </div>
 

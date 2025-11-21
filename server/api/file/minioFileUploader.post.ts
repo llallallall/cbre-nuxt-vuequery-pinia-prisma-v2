@@ -1,7 +1,6 @@
 // server/api/file/minioFileUploader.post.ts
 
 import * as Minio from 'minio';
-import { createThumbnail, getThumbnailKey } from '~/utils/imageResizer'; // 유틸리티 import
 
 export default defineEventHandler(async (event) => {
         const { MINIO_SERVER_URL, MINIO_SERVER_PORT, MINIO_ACCESS_KEY, MINIO_SECRET_KEY } = useRuntimeConfig();
@@ -22,7 +21,7 @@ export default defineEventHandler(async (event) => {
         }
 
         // MultiPart Form Data 파싱
-        const fileObj = files.find(e => e.name === 'file' || e.name === 'fileObj'); // 클라이언트에서 보내는 키 확인 필요
+        const fileObj = files.find(e => e.name === 'file' || e.name === 'fileObj');
         const keyObj = files.find(e => e.name === 'fileKey');
 
         if (!fileObj || !keyObj) {
@@ -40,18 +39,8 @@ export default defineEventHandler(async (event) => {
                         'Content-Type': contentType
                 });
 
-                // 2. 이미지 파일인 경우 썸네일 생성 및 업로드
-                if (contentType.startsWith('image/')) {
-                        const thumbBuffer = await createThumbnail(fileBuffer);
-
-                        if (thumbBuffer) {
-                                const thumbKey = getThumbnailKey(fileKey);
-                                await minioClient.putObject(bucket, thumbKey, thumbBuffer, thumbBuffer.length, {
-                                        'Content-Type': contentType
-                                });
-                                console.log(`Thumbnail uploaded: ${thumbKey}`);
-                        }
-                }
+                // 2. 이미지 파일인 경우 썸네일 생성 및 업로드 (Client Side Resizing으로 대체됨)
+                // if (contentType.startsWith('image/')) { ... }
 
                 // 3. 결과 반환 (원본 URL 반환)
                 const publicUrl = `https://${MINIO_SERVER_URL}/${bucket}/${fileKey}`;

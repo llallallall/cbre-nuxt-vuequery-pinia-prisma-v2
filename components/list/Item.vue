@@ -127,31 +127,20 @@ watch(() => props.item, () => {
  * 3. 원본 실패 -> Placeholder
  */
 const handleImageError = () => {
-        const mainImage = props.item.propertyImageFile?.find(img => img.main);
-        const originalUrl = mainImage?.fileUrl;
-        const originalKey = mainImage?.fileKey;
+	const mainImage = props.item.propertyImageFile?.find(img => img.main);
+	const originalUrl = mainImage?.fileUrl;
 
-        // [Step 1] 현재 URL이 "직접 접근 썸네일"인 경우 -> "생성 API"로 변경하여 재시도
-        // (API는 썸네일을 생성하고 307 리다이렉트로 이미지를 보여줌)
-        if (currentImage.value.includes('thumb_') && !currentImage.value.includes('/api/file/thumbnail')) {
-                if (originalKey) {
-                        // console.log('썸네일 생성 시도:', originalKey);
-                        currentImage.value = `/api/file/thumbnail?key=${originalKey}`;
-                        return;
-                }
-        }
+	// [Step 2] "생성 API"도 실패했거나, 키가 없는 경우 -> "원본 이미지"로 변경
+	if (originalUrl && currentImage.value !== originalUrl) {
+		// console.warn('썸네일 로드 실패, 원본 사용:', originalUrl);
+		currentImage.value = originalUrl;
+		return;
+	}
 
-        // [Step 2] "생성 API"도 실패했거나, 키가 없는 경우 -> "원본 이미지"로 변경
-        if (originalUrl && currentImage.value !== originalUrl) {
-                // console.warn('썸네일 로드 실패, 원본 사용:', originalUrl);
-                currentImage.value = originalUrl;
-                return;
-        }
-
-        // [Step 3] 원본도 실패 -> "Placeholder"
-        if (currentImage.value !== '/images/placeholder.jpg') {
-                currentImage.value = '/images/placeholder.jpg';
-        }
+	// [Step 3] 원본도 실패 -> "Placeholder"
+	if (currentImage.value !== '/images/placeholder.jpg') {
+		currentImage.value = '/images/placeholder.jpg';
+	}
 };
 
 const hasSale = computed(() => props.item.transaction?.some(t => t.type === 'SALE'));
@@ -178,9 +167,6 @@ const moveToMap = () => {
 
 <style scoped>
 /* Hover 시 이미지 확대 효과 등을 위한 설정 */
-</style>
-
-<style scoped>
 .cbre_bulletList {
         list-style: none;
         margin: 0 0 1em;

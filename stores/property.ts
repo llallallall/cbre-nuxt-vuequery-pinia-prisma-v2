@@ -234,7 +234,7 @@ export const usePropertyStore = defineStore('property', {
                         statusStore.setGlobalLoading(true, 'fetchPropertyDetail');
 
                         try {
-                                const response = await $fetch<PropertyType>(`/ api / property / ${propertyId} `);
+                                const response = await $fetch<PropertyType>(`/api/property/${propertyId}`);
                                 // 💡 단일 자산 상세 정보 변환
                                 this.currentProperty = transformPropertyResponse(response);
                                 return true;
@@ -438,7 +438,7 @@ export const usePropertyStore = defineStore('property', {
                         statusStore.setGlobalLoading(true, `update_${String(sectionName)} `);
 
                         try {
-                                const updatedData = await $fetch<PropertyType>(`/ api / property / admin / ${this.currentPropertyId}/${String(sectionName)}`, {
+                                const updatedData = await $fetch<PropertyType>(`/api/property/admin/${this.currentPropertyId}/${String(sectionName)}`, {
                                         method: 'PUT',
                                         body: data
                                 });
