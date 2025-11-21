@@ -17,9 +17,9 @@
                                         <span v-if="item.facility.elevatorsPassenger">{{
                                                 item.facility.elevatorsPassenger }} Passenger</span>
                                         <span v-if="item.facility.elevatorsService"> / {{ item.facility.elevatorsService
-                                        }} Service</span>
+                                                }} Service</span>
                                         <span v-if="item.facility.elevatorsFreight"> / {{ item.facility.elevatorsFreight
-                                        }} Freight</span>
+                                                }} Freight</span>
                                         )
                                 </span>
                         </div>
@@ -79,7 +79,6 @@
 </template>
 
 <script setup lang="ts">
-import { defineProps } from 'vue';
 import { useFormat } from '~/composables/useFormat';
 
 const { item } = defineProps({

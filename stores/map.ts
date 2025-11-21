@@ -1,53 +1,13 @@
-// /store/map.ts
-
-// 지도 관련 UI 상태 (핀 위치, 확대/축소, 검색 결과).
+// stores/map.ts
 
 import { defineStore } from 'pinia';
-import { usePropertyStore } from './property'; // 필터링된 자산 목록을 가져오기 위해 참조
+import { usePropertyStore } from './property';
+// 💡 분리된 상수와 타입 Import
+import { MapDefaultOptions } from '~/context/mapData';
+import type { MapState, Coordinate } from '~/types/map.type';
 
 // ----------------------------------------------------------------------
-// 1. 타입 정의
-// ----------------------------------------------------------------------
-
-/**
- * @description 지도상의 핀 좌표 및 줌 레벨 정의
- */
-type Coordinate = {
-        latitude: number;
-        longitude: number;
-        zoom?: number;
-        speed?: number;
-        curve?: number;
-};
-
-/**
- * @description Map Store의 상태 정의
- */
-interface MapState {
-        // 1. UI 상태
-        showMiniMap: boolean;
-        keepStateMiniMap: boolean; // 미니맵 상태 유지 여부
-        filterMapPins: boolean; // 핀 필터링 활성화 여부
-
-        // 2. 지도 컨트롤 상태
-        flyTo: boolean; // 특정 좌표로 지도를 이동해야 하는지 여부
-        pinCoordinate: Coordinate; // 지도 이동 대상 좌표
-
-        // 3. 지도 스타일/설정
-        mapLanguage: any; // 지도 언어 설정 (MapboxLanguage 플러그인 인스턴스를 저장)
-        mapStyleOptions: Record<string, any>; // 지도 스타일 옵션
-
-        // 4. 검색 결과 (Kakao, Google Geocoder)
-        searchedMarkers: Coordinate[]; // 사용자가 지도에 추가한 검색 마커 목록
-        searchedMarkersChanged: number; // 마커 목록 변경 시 UI 갱신을 위한 타임스탬프
-        kakaoAddress: any[];
-        kakaoKeyword: any[];
-        googleGeocoder: any[];
-}
-
-
-// ----------------------------------------------------------------------
-// 2. 초기 상태 정의
+// 1. 초기 상태 정의
 // ----------------------------------------------------------------------
 
 const getInitialState = (): MapState => ({
@@ -64,8 +24,10 @@ const getInitialState = (): MapState => ({
                 curve: 1,
         },
 
-        mapLanguage: 'ko', // 기본값 설정 (필요에 따라 Nuxt i18n 설정 사용)
-        mapStyleOptions: {}, // [TODO] 기본 MapDefaultOptions 로드 필요
+        mapLanguage: null,
+
+        // 💡 context/mapData.ts에서 가져온 기본값 사용
+        mapStyleOptions: { ...MapDefaultOptions },
 
         searchedMarkers: [],
         searchedMarkersChanged: Date.now(),
@@ -76,7 +38,7 @@ const getInitialState = (): MapState => ({
 
 
 // ----------------------------------------------------------------------
-// 3. Pinia Store 정의 (useMapStore)
+// 2. Pinia Store 정의
 // ----------------------------------------------------------------------
 
 export const useMapStore = defineStore('map', {
@@ -88,13 +50,12 @@ export const useMapStore = defineStore('map', {
                  */
                 filteredPinCoordinates: (state) => {
                         const propertyStore = usePropertyStore();
-                        // PropertyStore의 filteredAssets를 기반으로 지도에 표시할 핀 데이터 생성
                         return propertyStore.filteredAssets.map(asset => ({
                                 id: asset.id,
                                 name: asset.name,
                                 latitude: asset.location?.latitude || 0,
                                 longitude: asset.location?.longitude || 0,
-                        })).filter(pin => pin.latitude !== 0 && pin.longitude !== 0); // 유효한 좌표만 반환
+                        })).filter(pin => pin.latitude !== 0 && pin.longitude !== 0);
                 },
         },
 
@@ -110,17 +71,15 @@ export const useMapStore = defineStore('map', {
                 },
 
                 /**
-                 * @description 지도에서 특정 핀을 클릭했을 때, 해당 자산의 상세 정보를 Property Store에 요청합니다.
+                 * @description 지도에서 특정 자산 핀을 클릭했을 때 상세 정보를 로드합니다.
                  */
                 async selectAssetPin(assetId: string) {
                         const propertyStore = usePropertyStore();
-                        // Property Store 액션을 호출하여 상세 정보 로드 위임
                         await propertyStore.fetchPropertyDetail(assetId);
-                        // [TODO]: 상세 화면을 새 창으로 띄우는 컴포넌트 이벤트 발생 로직 추가
                 },
 
                 /**
-                 * @description 지도 검색 결과 마커를 추가하거나 제거합니다.
+                 * @description 검색 결과 마커를 지도에 추가하거나 제거합니다.
                  */
                 toggleSearchedMarker(lng: number, lat: number) {
                         const coordinate: Coordinate = { longitude: lng, latitude: lat };
@@ -133,8 +92,15 @@ export const useMapStore = defineStore('map', {
                         } else {
                                 this.searchedMarkers.push(coordinate);
                         }
-                        // UI 갱신을 위해 타임스탬프 업데이트
                         this.searchedMarkersChanged = Date.now();
                 },
+
+                /**
+                 * @description 검색 마커 전체 초기화
+                 */
+                clearSearchedMarkers() {
+                        this.searchedMarkers = [];
+                        this.searchedMarkersChanged = Date.now();
+                }
         },
 });

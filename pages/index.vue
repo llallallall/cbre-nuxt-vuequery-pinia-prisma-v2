@@ -1,18 +1,3 @@
-`pages/index.vue` 파일을 최신 아키텍처(`usePropertyStore`, `useUiStore` 등)에 맞게 수정하고, `Map`과 `List` 컴포넌트가 올바르게 상호작용하도록 개선했습니다.
-
-### 🛠️ 주요 수정 사항
-
-1. **Store 교체:** `useMenuStore` 등의 구버전 스토어를 `useUiStore`, `usePropertyStore`, `useMapStore`로 교체했습니다.
-2. **API 호출 방식 변경:** `propertyStore.getAllAssets()` 대신 \*\*`propertyStore.fetchInitialData()`\*\*를 사용하여 초기 데이터를 로드합니다.
-(Store 정의에 따름)
-3. **컴포넌트 경로 및 이름 정리:** `MapContainer`, `ListCard`, `ListLoading` 등의 컴포넌트 이름과 임포트 경로를 명확히 했습니다.
-4. **UI 로직 개선:** `isListHidden`과 `isGridView` 상태를 `uiStore`에서 관리하도록 하여 전역 반응성을 확보했습니다.
-
------
-
-### ✅ 수정된 코드: `pages/index.vue`
-
-```vue
 <template>
     <div class="w-screen h-screen overflow-hidden">
         <div ref="wrapperElement" class="relative flex w-full pt-[80px] h-full">
@@ -21,7 +6,14 @@
                 'h-full overflow-hidden transition-all duration-300',
                 uiStore.isHiddenList ? 'w-full' : 'flex-1'
             ]">
+                <button v-if="uiStore.isHiddenList" @click="uiStore.isHiddenList = false"
+                    class="absolute top-[90px] right-[80px] z-10 bg-white p-2 rounded-md shadow-md border border-gray-300 hover:bg-gray-50 flex items-center gap-2 text-sm font-medium text-gray-700 transition-all duration-300 animate-fade-in">
+                    <Icon name="ph:sidebar-simple" size="20" />
+                    <span>Show List</span>
+                </button>
                 <MapContainer />
+
+
             </div>
 
             <div v-show="!uiStore.isHiddenList" :class="[
@@ -74,18 +66,21 @@ import { useMapStore } from '~/stores/map'; // 필요 시 사용
 
 // 2. 컴포넌트 임포트 (동적 임포트 또는 일반 임포트)
 // Nuxt는 components 폴더를 자동 스캔하므로, 파일명과 일치한다면 import가 없어도 되지만 명시적으로 작성합니다.
-import ListCard from '~/components/list/Card.vue';
-import MapContainer from '~/components/map/Container.vue';
+// import ListCard from '~/components/list/Card.vue';
+// import MapContainer from '~/components/map/Container.vue';
 
 // 3. Store 인스턴스
 const propertyStore = usePropertyStore();
 const uiStore = useUiStore();
+const mapStore = useMapStore();
 
 // 4. 반응형 상태 (Store)
 const { filteredAssets } = storeToRefs(propertyStore);
 // isFabOpen, isHiddenList, isGridView 등 UI 상태는 uiStore에서 관리한다고 가정 (없으면 로컬로 구현하거나 추가)
 // 만약 uiStore에 없다면 로컬 ref로 구현합니다.
 const isFabOpen = ref(false);
+const { mapStyleOptions } = storeToRefs(mapStore);
+
 
 // 5. DOM 참조
 const wrapperElement = ref<HTMLElement | null>(null);
@@ -110,12 +105,25 @@ const toggleListVisibility = () => {
     // uiStore에 액션이 있다면 호출, 없다면 직접 상태 변경
     // 예: uiStore.isHiddenList = !uiStore.isHiddenList;
     // 여기서는 가상의 액션 호출
-    if (uiStore.toggleListHidden) {
-        uiStore.toggleListHidden();
-    } else {
-        uiStore.isHiddenList = !uiStore.isHiddenList;
-    }
+    // if (uiStore.toggleListHidden) {
+    //     uiStore.toggleListHidden();
+    // } else {
+    //     uiStore.isHiddenList = !uiStore.isHiddenList;
+    // }
 };
+
+const listWidthClass = computed(() => {
+    if (uiStore.isHiddenList) {
+        // 리스트가 숨겨지면 맵이 전체 너비(w-full)를 차지합니다.
+        return 'w-0 hidden';
+    }
+    // 리스트가 열려 있을 때: mapStyleOptions.MapRatio를 사용하여 비율을 계산합니다.
+    const mapRatio = mapStyleOptions.value.MapRatio || 60; // 기본값 60% 가정
+    const listRatio = 100 - mapRatio;
+
+    // Tailwind CSS의 동적 클래스 바인딩을 위해 문자열로 반환
+    return `w-[${listRatio}%] min-w-[40%]`;
+});
 
 </script>
 
@@ -212,4 +220,3 @@ const toggleListVisibility = () => {
     height: 20px;
 }
 </style>
-```

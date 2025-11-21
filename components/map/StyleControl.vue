@@ -35,7 +35,7 @@
                                 </div>
                                 <div class="flex flex-col gap-2">
                                         <label class="text-sm font-medium">Pitch ({{ mapStore.mapStyleOptions.MapPitch
-                                        }})</label>
+                                                }})</label>
                                         <Slider v-model="mapStore.mapStyleOptions.MapPitch" :min="0" :max="85" />
                                 </div>
                                 <div class="flex flex-col gap-2">
@@ -53,7 +53,7 @@ import { ref, onMounted } from 'vue';
 import { defineMapboxControl, useMapbox } from '#imports';
 import { storeToRefs } from "pinia";
 import { useMapStore } from '~/stores/map';
-import { MapStyle, MapLang, MapDefaultOptions, mapCenter, mapZoom, maxZoom, minZoom, mapPitch, mapBearing } from '~/context/data';
+import { MapStyle, MapLang, MapDefaultOptions, mapCenter, mapZoom, maxZoom, minZoom, mapPitch, mapBearing } from '~/context/mapData';
 // @ts-ignore
 import Slider from '@vueform/slider';
 import "@vueform/slider/themes/default.css";

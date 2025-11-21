@@ -13,7 +13,7 @@ declare global {
         // Google Maps API 로드 완료 시 호출될 전역 콜백 함수
         initGoogle: (() => void) | undefined;
         // Google Maps API 객체
-        google: typeof google | undefined; 
+        google: typeof google | undefined;
     }
 }
 
@@ -45,10 +45,10 @@ export default function useGoogleMapsApi(): Promise<typeof google.maps> {
     // 2. 새로운 로딩 Promise를 생성하고 저장합니다.
     googleMapsPromise = new Promise((resolve, reject) => {
         const apiKey = config.public.googleApiToken;
-        
+
         // API 키가 없는 경우 바로 에러 처리
         if (!apiKey) {
-             return reject(new Error("Google Maps API Key (googleApiToken) is missing in runtime config."));
+            return reject(new Error("Google Maps API Key (googleApiToken) is missing in runtime config."));
         }
 
         // 1. API가 이미 로드되었는지 확인 (콜백 없이 로딩 완료된 경우 포함)
@@ -58,10 +58,10 @@ export default function useGoogleMapsApi(): Promise<typeof google.maps> {
 
         // 2. SSR 환경 확인
         if (typeof window === 'undefined') {
-             // SSR 환경에서는 스크립트 로딩을 시도하지 않고 에러 처리
-             // Promise를 null로 초기화하여 클라이언트 측에서 재시도할 수 있도록 합니다.
-             googleMapsPromise = null; 
-             return reject(new Error("Cannot load Google Maps API on the server side (SSR)."));
+            // SSR 환경에서는 스크립트 로딩을 시도하지 않고 에러 처리
+            // Promise를 null로 초기화하여 클라이언트 측에서 재시도할 수 있도록 합니다.
+            googleMapsPromise = null;
+            return reject(new Error("Cannot load Google Maps API on the server side (SSR)."));
         }
 
         // 3. Google Maps API 로드 완료 시 호출될 전역 콜백 함수 정의
@@ -73,14 +73,15 @@ export default function useGoogleMapsApi(): Promise<typeof google.maps> {
                 // 콜백이 호출되었는데 google.maps가 정의되지 않은 예외 상황
                 reject(new Error("Google Maps API callback executed, but google.maps object is missing."));
             }
-            
+
             // 한 번 호출된 후에는 전역 함수를 정리합니다.
             delete window.initGoogle;
         };
-        
+
         const link =
             'https://maps.googleapis.com/maps/api/js?key=' +
             apiKey +
+            '&loading=async' +
             '&callback=initGoogle' + // 콜백 파라미터 사용
             '&region=KR' +
             '&language=en' +
@@ -95,19 +96,19 @@ export default function useGoogleMapsApi(): Promise<typeof google.maps> {
         if (!googleScript) {
             // [TypeScript 수정]: document.createElement('script')의 결과를 HTMLScriptElement로 명시적 캐스팅
             const newScript = document.createElement('script') as HTMLScriptElement;
-            
+
             newScript.src = link;
             newScript.async = true; // 비동기 로드 설정
-            
+
             document.head.append(newScript);
 
             // 5. 로드 실패 시 에러 처리
             newScript.addEventListener('error', (e) => {
                 // Promise를 null로 초기화하여 재시도 가능하게 합니다.
-                googleMapsPromise = null; 
+                googleMapsPromise = null;
                 reject(new Error(`Google Maps API failed to load: ${e}`));
             });
-        } 
+        }
         // Note: 스크립트가 이미 존재한다면, 정의된 window.initGoogle 콜백이 호출될 때까지 기다립니다.
     });
 

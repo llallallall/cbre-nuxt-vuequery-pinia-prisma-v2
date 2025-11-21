@@ -4,7 +4,7 @@
                 <div v-if="totalCount > 0"
                         class="sticky top-0 z-20 bg-white/95 backdrop-blur-sm py-2 border-b mb-4 flex justify-between items-center">
                         <div class="text-sm">
-                                <span class="font-bold text-lg">{{ totalCount }}</span> Properties found
+                                <span class="font-bold text-lg pl-3">{{ totalCount }}</span> Properties found
                         </div>
 
                         <div class="flex items-center gap-2">
@@ -24,9 +24,9 @@
 
                                 <button @click="uiStore.isHiddenList = !uiStore.isHiddenList"
                                         class="h-[32px] px-3 border border-gray-300 rounded-lg text-xs font-medium flex items-center gap-1 hover:bg-gray-50">
-                                        <Icon :name="uiStore.isHiddenList ? 'ph:map-trifold' : 'ph:arrows-out-simple'"
+                                        <Icon :name="!uiStore.isHiddenList ? 'ph:map-trifold' : 'ph:arrows-out-simple'"
                                                 size="16" />
-                                        {{ uiStore.isHiddenList ? 'Show Map' : 'Expand' }}
+                                        {{ uiStore.isHiddenList ? 'Show List' : 'Expand Map' }}
                                 </button>
                         </div>
                 </div>

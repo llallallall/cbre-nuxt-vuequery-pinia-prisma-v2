@@ -195,34 +195,40 @@ export const useFormat = () => {
         };
 
         /**
-         * 💡 [신규] 원본 이미지 URL을 썸네일 URL로 변환
-         * 예: "https://minio.../abc.jpg" -> "https://minio.../thumb_abc.jpg"
+         * 💡 [수정] 썸네일 URL 반환 함수 (Client-Side Calculation)
+         * - API를 통하지 않고, URL 규칙(thumb_ 접두어)을 이용해 직접 썸네일 주소를 만듭니다.
+         * - 이렇게 하면 Node.js 서버 부하가 사라지고 로딩이 매우 빨라집니다.
          */
-        const getThumbnailUrl = (url: string | null | undefined, key?: string | null): string => {
-                if (!url) return '/images/placeholder.jpg';
+        const getThumbnailUrl = (originalUrl: string | null | undefined): string => {
+                if (!originalUrl) return '/images/placeholder.jpg';
 
-                // 1. 이미 썸네일 API URL이거나, 로컬/Placeholder 이미지인 경우 그대로 반환
-                if (url.startsWith('/api/file/thumbnail') || url.startsWith('/images/')) {
-                return url;
+                // 1. 이미 썸네일이거나 로컬 이미지면 그대로 반환
+                if (originalUrl.includes('/thumb_') || originalUrl.startsWith('/images/')) {
+                        return originalUrl;
                 }
 
-                // 2. 파일 Key 추출 (key 인자가 없으면 url에서 파싱)
-                let targetKey = key;
-                if (!targetKey) {
+                // 2. URL 확장자 검사 (이미지가 아니면 원본 반환)
+                const ext = originalUrl.split('.').pop()?.toLowerCase();
+                if (!['jpg', 'jpeg', 'png', 'gif', 'webp'].includes(ext || '')) {
+                        return originalUrl;
+                }
+
+                // 3. URL 경로 파싱 및 "thumb_" 주입
                 try {
-                        const parts = url.split('/');
-                        // URL의 마지막 부분이 key라고 가정 (간단한 파싱)
-                        targetKey = parts.pop(); 
+                        // 예: https://minio.com/bucket/2023/image.jpg
+                        const parts = originalUrl.split('/');
+                        const fileName = parts.pop(); // image.jpg
+
+                        if (!fileName) return originalUrl;
+
+                        const thumbName = `thumb_${fileName}`; // thumb_image.jpg
+
+                        // https://minio.com/bucket/2023/thumb_image.jpg
+                        return [...parts, thumbName].join('/');
+
                 } catch (e) {
-                        return url; // 파싱 실패 시 원본 반환
+                        return originalUrl;
                 }
-                }
-
-                if (!targetKey) return url;
-
-                // 3. 썸네일 처리 API 주소 반환
-                // 브라우저가 이 URL(`src`)을 요청하면 -> 서버가 확인/생성 후 -> 진짜 이미지 주소로 토스해줍니다.
-                return `/api/file/thumbnail?key=${targetKey}`;
         };
 
         return {

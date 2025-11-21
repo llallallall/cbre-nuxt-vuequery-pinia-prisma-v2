@@ -7,9 +7,9 @@
                         <div class="overflow-hidden relative cursor-pointer bg-gray-100"
                                 :class="isGridView ? 'w-full h-[260px]' : 'flex h-full w-1/2'" @click="openDetail">
 
-                                <img :src="displayImageUrl"
+                                <img :src="currentImage"
                                         class="object-cover w-full h-full group-hover:scale-105 transition-transform duration-500"
-                                        loading="lazy" alt="Property Image" />
+                                        loading="lazy" alt="Property Image" @error="handleImageError" />
 
                         </div>
 
@@ -104,15 +104,55 @@ const { getThumbnailUrl } = useFormat(); // 💡 썸네일 변환 함수 사용
 
 const { isGridView } = storeToRefs(uiStore);
 
-// 💡 [핵심 수정] 원본 URL을 썸네일 URL로 변환하는 Computed 속성
-const displayImageUrl = computed(() => {
-        // 1. Store의 Raw Data (원본 URL) 가져오기
+// 이미지 관리 로직
+// 1. 초기값은 썸네일 URL로 설정
+const getInitialImage = () => {
         const mainImage = props.item.propertyImageFile?.find(img => img.main);
         const originalUrl = mainImage?.fileUrl;
-
-        // 2. 썸네일 URL로 변환 (없으면 Placeholder)
+        // thumb_가 붙은 URL을 우선 시도
         return getThumbnailUrl(originalUrl);
+};
+
+const currentImage = ref(getInitialImage());
+
+// props.item이 바뀌면 이미지도 초기화 (재사용 컴포넌트 대비)
+watch(() => props.item, () => {
+        currentImage.value = getInitialImage();
 });
+
+// 이미지 로드 실패 핸들러 (단계별 복구 전략)
+/**
+ * 1. 썸네일(MinIO) 404 -> API 호출 (생성 요청)
+ * 2. API 실패 -> 원본 이미지
+ * 3. 원본 실패 -> Placeholder
+ */
+const handleImageError = () => {
+        const mainImage = props.item.propertyImageFile?.find(img => img.main);
+        const originalUrl = mainImage?.fileUrl;
+        const originalKey = mainImage?.fileKey;
+
+        // [Step 1] 현재 URL이 "직접 접근 썸네일"인 경우 -> "생성 API"로 변경하여 재시도
+        // (API는 썸네일을 생성하고 307 리다이렉트로 이미지를 보여줌)
+        if (currentImage.value.includes('thumb_') && !currentImage.value.includes('/api/file/thumbnail')) {
+                if (originalKey) {
+                        // console.log('썸네일 생성 시도:', originalKey);
+                        currentImage.value = `/api/file/thumbnail?key=${originalKey}`;
+                        return;
+                }
+        }
+
+        // [Step 2] "생성 API"도 실패했거나, 키가 없는 경우 -> "원본 이미지"로 변경
+        if (originalUrl && currentImage.value !== originalUrl) {
+                // console.warn('썸네일 로드 실패, 원본 사용:', originalUrl);
+                currentImage.value = originalUrl;
+                return;
+        }
+
+        // [Step 3] 원본도 실패 -> "Placeholder"
+        if (currentImage.value !== '/images/placeholder.jpg') {
+                currentImage.value = '/images/placeholder.jpg';
+        }
+};
 
 const hasSale = computed(() => props.item.transaction?.some(t => t.type === 'SALE'));
 const hasLease = computed(() => props.item.transaction?.some(t => t.type === 'LEASE'));

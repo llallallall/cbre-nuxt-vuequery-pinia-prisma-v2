@@ -184,7 +184,7 @@ export const usePropertyStore = defineStore('property', {
                         statusStore.setGlobalLoading(true, 'fetchInitialData');
 
                         try {
-                                const allAssets = await $fetch<PropertyType[]>('/api/property/list/all');
+                                const allAssets = await $fetch<PropertyType[]>('/api/property/list');
                                 // 💡 리스트의 각 항목에 대해 날짜 변환 적용
                                 const transformedAssets = allAssets.map(asset => transformPropertyResponse(asset));
 

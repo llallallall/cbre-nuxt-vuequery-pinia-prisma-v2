@@ -8,7 +8,7 @@ import { createToast, type ToastOptions } from 'mosha-vue-toastify';
  */
 export default defineNuxtPlugin((nuxtApp) => {
 
-        console.log('mosha-vue-toastify 플러그인을 $toast로 등록했습니다.');
+        // console.log('mosha-vue-toastify 플러그인을 $toast로 등록했습니다.');
 
         // 래핑 함수 정의
         const showToast = (message: string, type: 'info' | 'success' | 'warning' | 'danger' = 'info', options: ToastOptions = {}) => {

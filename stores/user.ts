@@ -172,9 +172,9 @@ export const useUserStore = defineStore('user', {
                 /**
                  * @description 모든 사용자 목록을 가져와 allUsers 상태를 갱신합니다.
                  */
-                async getAllUsers() {
+                async fetchUsers() {
                         try {
-                                let res = await useFetch<UserType[]>("/api/auth/allusers", {
+                                let res = await useFetch<UserType[]>("/api/user/allusers", {
                                         method: "GET"
                                 })
 

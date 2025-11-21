@@ -11,10 +11,11 @@
                                 </p>
                         </div>
 
-                        <video width="100%" height="100%" poster="/images/points-on-the-map.png" autoplay loop muted
-                                playsinline class="absolute top-0 left-0 w-full h-full object-cover z-0 opacity-60">
-                                <source type="video/webm" src="/assets/videos/points-on-the-map.webm">
-                                <source type="video/mp4" src="/assets/videos/points-on-the-map.mp4">
+                        <video width="100%" height="100%" poster="~/assets/images/points-on-the-map.png" autoplay loop
+                                muted playsinline
+                                class="absolute top-0 left-0 w-full h-full object-cover z-0 opacity-60">
+                                <source type="video/webm" src="~/assets/videos/points-on-the-map.webm">
+                                <source type="video/mp4" src="~/assets/videos/points-on-the-map.mp4">
                         </video>
                 </div>
 

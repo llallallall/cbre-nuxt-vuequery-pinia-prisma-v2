@@ -1,5 +1,6 @@
 <template>
         <div ref="printArea" class="relative flex w-full h-full">
+
                 <MapboxMap map-id="cbre-map" style="position: relative; width: 100%; height : calc(100vh - 80px);"
                         :options="{
                                 style: 'mapbox://styles/mapbox/' + mapStyleId,
@@ -78,6 +79,119 @@
                                 attributionControl: false,
                                 hash: false
                         }">
+                        <MapboxLayer :layer="{
+                                source: 'cbre-minimap-points',
+                                id: 'cbre-minimap-points-layer',
+                                type: 'circle',
+                                paint: {
+                                        'circle-radius': [
+                                                'interpolate',
+                                                ['linear'],
+                                                ['zoom'],
+                                                7,
+                                                ['interpolate', ['linear'], ['get', 'mag'], 1, 1, 6, 4],
+                                                16,
+                                                ['interpolate', ['linear'], ['get', 'mag'], 1, 5, 6, 50]
+                                        ],
+                                        'circle-color': [
+                                                'interpolate',
+                                                ['linear'],
+                                                ['get', 'mag'],
+                                                1,
+                                                'rgba(0,63,45, 0.0)',
+                                                2,
+                                                'rgba(0,63,45, 0.4)',
+                                                3,
+                                                'rgba(0,63,45, 0.5)',
+                                                4,
+                                                'rgba(0,63,45, 0.6)',
+                                                5,
+                                                'rgba(0,63,45, 0.7)',
+                                                6,
+                                                'rgba(0,63,45, 0.8)'
+                                        ],
+                                        'circle-stroke-color': 'white',
+                                        'circle-stroke-width': 1,
+                                        'circle-opacity': [
+                                                'interpolate',
+                                                ['linear'],
+                                                ['zoom'],
+                                                7,
+                                                0,
+                                                8,
+                                                1
+                                        ]
+                                }
+                        }" />
+
+                        <MapboxLayer :layer="{
+                                source: 'cbre-minimap-points',
+                                id: 'cbre-minimap-heat-layer',
+                                type: 'heatmap',
+                                paint: {
+                                        // Increase the heatmap weight based on frequency and property magnitude
+                                        'heatmap-weight': [
+                                                'interpolate',
+                                                ['linear'],
+                                                ['get', 'mag'],
+                                                0,
+                                                0,
+                                                6,
+                                                1
+                                        ],
+                                        // Increase the heatmap color weight weight by zoom level
+                                        // heatmap-intensity is a multiplier on top of heatmap-weight
+                                        'heatmap-intensity': [
+                                                'interpolate',
+                                                ['linear'],
+                                                ['zoom'],
+                                                0,
+                                                1,
+                                                9,
+                                                3
+                                        ],
+                                        // Color ramp for heatmap.  Domain is 0 (low) to 1 (high).
+                                        // Begin color ramp at 0-stop with a 0-transparancy color
+                                        // to create a blur-like effect.
+                                        'heatmap-color': [
+                                                'interpolate',
+                                                ['linear'],
+                                                ['heatmap-density'],
+                                                0,
+                                                'rgba(0,63,45, 0.0)',
+                                                0.2,
+                                                'rgba(0,63,45, 0.1)',
+                                                0.4,
+                                                'rgba(0,63,45, 0.2)',
+                                                0.6,
+                                                'rgba(0,63,45, 0.4)',
+                                                0.8,
+                                                'rgba(0,63,45, 0.6)',
+                                                1,
+                                                'rgba(0,63,45, 0.8)'
+                                        ],
+                                        // Adjust the heatmap radius by zoom level
+                                        'heatmap-radius': [
+                                                'interpolate',
+                                                ['linear'],
+                                                ['zoom'],
+                                                0,
+                                                2,
+                                                9,
+                                                20
+                                        ],
+                                        // Transition from heatmap to circle layer by zoom level
+                                        'heatmap-opacity': [
+                                                'interpolate',
+                                                ['linear'],
+                                                ['zoom'],
+                                                7,
+                                                1,
+                                                9,
+                                                0
+                                        ]
+                                }
+                        }" />
                         <MapboxSource source-id="cbre-minimap-points" :source="(cbreDataSource as any)" />
                 </MapboxMap>
         </div>
@@ -91,7 +205,7 @@ import { usePropertyStore } from '~/stores/property';
 import { useFormat } from '~/composables/useFormat';
 import mapboxgl from "mapbox-gl";
 import MapboxLanguage from "@mapbox/mapbox-gl-language";
-import { mapCenter, mapZoom, maxZoom, minZoom, mapStyleId, LAYER_3D_BUILDINGS, LAYER_CLUSTERS, LAYER_CLUSTER_COUNT, LAYER_UNCLUSTERED_POINT } from '~/context/data';
+import { mapCenter, mapZoom, maxZoom, minZoom, mapStyleId, LAYER_3D_BUILDINGS, LAYER_CLUSTERS, LAYER_CLUSTER_COUNT, LAYER_UNCLUSTERED_POINT } from '~/context/mapData';
 
 const mapStore = useMapStore();
 const propertyStore = usePropertyStore();

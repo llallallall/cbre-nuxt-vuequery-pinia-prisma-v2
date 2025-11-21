@@ -2,10 +2,12 @@
   <NuxtLayout>
     <NuxtLoadingIndicator color="#003F2D" />
 
-    <div v-if="statusStore.isGlobalLoading"
+    <GlobalLoader />
+
+    <!-- <div v-if="statusStore.isGlobalLoading"
       class="fixed inset-0 z-[9999] flex items-center justify-center bg-black/50 backdrop-blur-sm">
       <div class="w-16 h-16 border-4 border-white border-t-transparent rounded-full animate-spin"></div>
-    </div>
+      </div> -->
 
     <ConfirmModal v-if="isConfirmModalOpen" :title="confirmModalTitle" :message="confirmModalMessage"
       @confirm="statusStore.closeConfirmModal(true)" @cancel="statusStore.closeConfirmModal(false)" />
