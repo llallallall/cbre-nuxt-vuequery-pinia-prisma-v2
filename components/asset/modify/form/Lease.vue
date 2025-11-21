@@ -85,11 +85,23 @@ const leaseTransactions = computed(() => {
         return currentProperty.value?.transaction?.filter(t => t.type === 'LEASE') || [];
 });
 
+// openModal 함수 수정
 const openModal = (mode: 'create' | 'edit', transaction?: TransactionType) => {
-        modalMode.value = mode;
-        // 💡 수정: Transaction 객체에서 Lease 객체만 추출하여 전달
-        selectedLeaseData.value = (mode === 'edit' && transaction?.lease) ? transaction.lease : null;
         isModalOpen.value = true;
+        modalMode.value = mode;
+
+        if (mode === 'edit' && transaction && transaction.lease) {
+                // 💡 [수정] Transaction의 날짜 정보를 Lease 데이터에 병합하여 전달
+                selectedLeaseData.value = {
+                        ...transaction.lease,
+                        // Transaction 레벨의 정보 주입
+                        executionDate: transaction.executionDate,
+                        year: transaction.year,
+                        quarter: transaction.quarter,
+                } as any; // LeaseType에는 없는 필드이므로 any 캐스팅 필요
+        } else {
+                selectedLeaseData.value = null;
+        }
 };
 
 const closeModal = () => {

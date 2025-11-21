@@ -1,88 +1,100 @@
 <template>
-        <div class="relative sm:px-0 px-10">
-                <TabGroup manual :selectedIndex="selectedTab" @change="changeTab">
-                        <TabList
-                                class="fixed top-[80px] left-0 w-full space-x-6 bg-[#e6eaea] bg-opacity-75 py-2.5 px-10 backdrop-blur-sm z-10">
-                                <Tab v-for="(category, index) in categories" as="template" :key="index"
-                                        v-slot="{ selected }">
-                                        <button :class="[
-                                                'text-sm leading-5 text-primary',
-                                                'focus:outline-none focus:ring-0 ',
-                                                (selectedTab === index)
-                                                        ? 'border-b-2 border-primary '
-                                                        : 'border-b-2 hover:border-primary',
-                                        ]">
-                                                {{ category.name }}
-                                        </button>
-                                </Tab>
-                        </TabList>
+        <div class="flex justify-center items-center h-[calc(100vh-80px)] bg-gray-50">
+                <div class="bg-white p-8 rounded-xl shadow-lg w-full max-w-md border border-gray-200">
 
-                        <TabPanels class="w-screen mt-10">
-                                <TabPanel class='w-screen p-10'>
-                                        <AssetRegisterGeneral :tabIndex="selectedTab" @next="changeTab" />
-                                </TabPanel>
-                                <TabPanel class='w-full p-10'>
-                                        <AssetRegisterHistory :tabIndex="selectedTab" @next="changeTab" />
-                                </TabPanel>
-                                <TabPanel class='w-full p-10'>
-                                        <AssetRegisterProfitability :tabIndex="selectedTab" @next="changeTab" />
-                                </TabPanel>
-                                <TabPanel class='w-full p-10'>
-                                        <AssetRegisterLocation :tabIndex="selectedTab" @next="changeTab" />
-                                </TabPanel>
-                                <TabPanel class='w-full p-10'>
-                                        <AssetRegisterAcccessibility :tabIndex="selectedTab" @next="changeTab" />
-                                </TabPanel>
-                                <TabPanel class='w-full p-10'>
-                                        <AssetRegisterSizes :tabIndex="selectedTab" @next="changeTab" />
-                                </TabPanel>
-                                <TabPanel class='w-full p-10'>
-                                        <AssetRegisterFacility :tabIndex="selectedTab" @next="changeTab" />
-                                </TabPanel>
-                                <TabPanel class='w-full p-10'>
-                                        <AssetRegisterFloor :tabIndex="selectedTab" @next="changeTab" />
-                                </TabPanel>
-                                <TabPanel class='w-full p-10'>
-                                        <AssetRegisterPhoto :tabIndex="selectedTab" @next="changeTab" />
-                                </TabPanel>
-                                <TabPanel class='w-full p-10'>
-                                        <AssetRegisterFile :tabIndex="selectedTab" @next="changeTab" />
-                                </TabPanel>
-                        </TabPanels>
-                </TabGroup>
+                        <h2 class="text-2xl font-financier text-primary mb-6 text-center">Register New Asset</h2>
+
+                        <form @submit.prevent="handleCreate" class="space-y-6">
+
+                                <div>
+                                        <label class="block text-sm font-bold text-gray-700 mb-1">Property Name <span
+                                                        class="text-red-500">*</span></label>
+                                        <input v-model="form.name" type="text" placeholder="Enter asset name"
+                                                class="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-cbre_primary_1" />
+                                </div>
+
+                                <div>
+                                        <label class="block text-sm font-bold text-gray-700 mb-1">Sector <span
+                                                        class="text-red-500">*</span></label>
+                                        <select v-model="form.sectorId"
+                                                class="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-cbre_primary_1 bg-white">
+                                                <option value="" disabled>Select Sector</option>
+                                                <option v-for="sector in uiStore.sectorList" :key="sector.id"
+                                                        :value="sector.id">
+                                                        {{ sector.name }}
+                                                </option>
+                                        </select>
+                                </div>
+
+                                <button type="submit" :disabled="isLoading || !isValid"
+                                        class="w-full bg-cbre_primary_1 text-white font-bold py-3 rounded-lg hover:bg-cbre_primary_2 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex justify-center items-center">
+                                        <svg v-if="isLoading" class="animate-spin -ml-1 mr-3 h-5 w-5 text-white"
+                                                xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor"
+                                                        stroke-width="4"></circle>
+                                                <path class="opacity-75" fill="currentColor"
+                                                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
+                                                </path>
+                                        </svg>
+                                        {{ isLoading ? 'Creating...' : 'Start Registration' }}
+                                </button>
+
+                        </form>
+                </div>
         </div>
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue';
-import { TabGroup, TabList, Tab, TabPanels, TabPanel } from '@headlessui/vue';
-import { adminAssetMenuCategory } from '~/context/menu'; // ⚠️ 만약 context/menu 파일도 삭제했다면 이 부분 수정 필요
-// 💡 새로운 Store Import (하위 컴포넌트들과 상태 공유)
-import { usePropertyStore } from '~/stores/property';
+import { reactive, computed, onMounted } from 'vue';
+import { useRouter } from 'vue-router';
+import { useUiStore } from '~/stores/ui';
+import { useStatusStore } from '~/stores/status'; // useAppStore -> useStatusStore
+import { createToast } from 'mosha-vue-toastify';
 
 definePageMeta({
         middleware: "auth",
         layout: 'admin-layout',
 });
 
-const propertyStore = usePropertyStore();
+const router = useRouter();
+const uiStore = useUiStore();
+const statusStore = useStatusStore();
 
-const selectedTab = ref(0);
-const categories = ref(adminAssetMenuCategory);
+const form = reactive({
+        name: '',
+        sectorId: ''
+});
 
-const changeTab = (index: number) => {
-        selectedTab.value = index;
-}
+const isLoading = computed(() => statusStore.isGlobalLoading);
+const isValid = computed(() => form.name.length > 2 && form.sectorId);
 
-const handleClick = (index: number) => {
-        categories.value.forEach((el) => el.active = false);
-        const found = categories.value.find((el) => el.index === index);
-        if (found) found.active = true;
-}
+// 마스터 데이터 로드 (Sector 목록이 없을 경우 대비)
+onMounted(() => {
+        if (uiStore.sectorList.length === 0) {
+                // fetchMasterData 액션 호출 (ui.ts에 구현 필요) 또는 직접 fetch
+                // 여기서는 간단히 예시
+        }
+});
+
+const handleCreate = async () => {
+        statusStore.setGlobalLoading(true);
+        try {
+                const { id } = await $fetch<{ id: string }>('/api/property/create', {
+                        method: 'POST',
+                        body: form
+                });
+
+                createToast({ title: 'Asset initialized!', description: 'Redirecting to edit mode...' }, { type: 'success' });
+
+                // 🚀 생성된 ID를 가지고 수정 페이지(Modify)로 이동
+                // 이 페이지는 AssetPreviewsContainer를 보여주고, 사용자는 여기서 'Edit' 버튼을 눌러 채워넣게 됩니다.
+                router.push(`/asset/modify/${id}`);
+
+        } catch (error) {
+                console.error(error);
+                createToast({ title: 'Failed to create asset.' }, { type: 'danger' });
+        } finally {
+                statusStore.setGlobalLoading(false);
+        }
+};
 </script>
-
-<style>
-.formkit-outer[data-type='multi-step']>.formkit-wrapper {
-        max-width: 100%
-}
-</style>

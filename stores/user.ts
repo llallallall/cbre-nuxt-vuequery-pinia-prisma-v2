@@ -18,7 +18,7 @@ export const useUserStore = defineStore('user', {
 
                 // id
                 userId: '' as string,
-
+                userName: '' as string | null, // 💡 [추가] 사용자 이름
                 // detail
                 userImage: '' as string, // 프론트엔드 표시용 이미지 URL
 
@@ -53,6 +53,7 @@ export const useUserStore = defineStore('user', {
 
                 // ID 및 비밀번호
                 getUserId: (state) => state.userId,
+                getUserName: (state) => state.userName,
                 getUserPassword: (state) => state.userPassword,
 
                 // 이미지 URL
@@ -85,6 +86,10 @@ export const useUserStore = defineStore('user', {
                         this.userId = id
                 },
 
+                setUserName(name: string) {
+                        this.userName = name;
+                },
+
                 /**
                  * @description Profile 정보 업데이트
                  */
@@ -110,6 +115,7 @@ export const useUserStore = defineStore('user', {
                         if (authStatus.value !== 'authenticated' || !sessionData.value?.user) {
                                 this.isLogin = false
                                 this.userId = ''
+                                this.userName = ''
                                 return false
                         }
 
@@ -130,6 +136,7 @@ export const useUserStore = defineStore('user', {
 
                                         // 🎯 API 응답에서 userId를 가져와 설정 (최고의 안정성)
                                         this.userId = fullUser.id ?? ''
+                                        this.userName = fullUser.name ?? ''
 
                                         // Profile 상태 갱신
                                         if (newProfile) {

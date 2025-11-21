@@ -12,9 +12,9 @@ export default defineNuxtConfig({
         ],
         //css: ['vue-final-modal/style.css'],
         auth: {
-                origin: 'https://cbre-korea.onrender.com/',
+                origin: process.env.AUTH_ORIGIN,
                 //origin: 'http://localhost:3000',
-                url: 'https://cbre-korea.onrender.com/',
+                url: process.env.AUTH_URL,
                 baseURL: '/api/auth',
                 provider: {
                         type: 'authjs',

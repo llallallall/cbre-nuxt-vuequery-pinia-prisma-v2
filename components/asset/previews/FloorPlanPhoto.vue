@@ -67,7 +67,7 @@ import { storeToRefs } from 'pinia';
 import { usePropertyStore } from '~/stores/property';
 import { useUiStore } from '~/stores/ui';
 import { useModal } from 'vue-final-modal';
-import ModalFullscreen from '~/components/modal/Fullscreen.vue';
+import ModalFullscreen from '~/components/modal/FullscreenModal.vue';
 
 // 💡 Enum 런타임 객체 정의
 const FloorFlanTypeEnum = {

@@ -1,72 +1,44 @@
-import prisma from '@/prisma/cbredb'
+// server/api/user/allusers.ts
+
+import { defineEventHandler, createError } from 'h3';
+import prisma from '@/prisma/cbredb';
+import type { UserType } from '~/types/user.type';
 
 export default defineEventHandler(async (event) => {
-       
-            let usersArray = new Array() as any
-            await prisma.user.findMany({
-                select: {
-                        id: true,
-                        name: true,
-                        email: true,
-                        image: true,
-                        role: true
-                        
-                    }
-            }).then(async (allusers : any)=>{
+        try {
+                const users = await prisma.user.findMany({
+                        include: {
+                                profile: true
+                        },
+                        orderBy: {
+                                name: 'asc'
+                        }
+                });
 
-                // console.log('prisma.user.findMany')
-                // console.log(allusers)
-        
-                for(let i=0; i< allusers.length; i++) {
+                // 💡 리스트 매핑
+                const mappedUsers: UserType[] = users.map(user => ({
+                        id: user.id,
+                        name: user.name,
+                        email: user.email,
+                        image: user.image,
+                        role: user.role,
 
-                        let user = allusers[i]
+                        profile: user.profile ? {
+                                id: user.profile.id,
+                                userId: user.profile.userId,
+                                imageUrl: user.profile.image_url,
+                                company: user.profile.company,
+                                branch: user.profile.branch,
+                                department: user.profile.department,
+                                title: user.profile.title,
+                                useProfileImage: user.profile.use_profile_image
+                        } : null
+                }));
 
-                        let userObj = new Object() as any
-                        userObj.id      = user.id as string 
-                        userObj.name    = user.name as string  
-                        userObj.email   = user.email as string  
-                        userObj.image   = user.image as string  
-                        userObj.role    = user.role as string  
+                return mappedUsers;
 
-                        let profileResult = await prisma.profile.findUnique({
-                                select : {
-                                        image_url         : true,
-                                        company           : true,
-                                        branch            : true,
-                                        department        : true,
-                                        title             : true,
-                                        use_profile_image : true,
-                                },
-                                where : {
-                                        userId : user.id
-                                }
-                        
-                        }) as any
-                        
-                        let profileObj = new Object() as any 
-                        profileObj.company      = profileResult.company as string
-                        profileObj.branch       = profileResult.branch as string
-                        profileObj.department   = profileResult.department as string
-                        profileObj.title        = profileResult.title as string
-                        profileObj.photo        = profileResult.image_url as string
-                        profileObj.usePhoto     = profileResult.use_profile_image as boolean
-
-
-                        userObj.profile = profileObj
-
-                        usersArray.push(userObj)
-                
-                }
-
-
-                
-
-
-        })
-
-        //console.log(usersArray)
-        return usersArray
-
-            
-       
-})
+        } catch (error) {
+                console.error('Get All Users Error:', error);
+                throw createError({ statusCode: 500, statusMessage: 'Failed to fetch users' });
+        }
+});

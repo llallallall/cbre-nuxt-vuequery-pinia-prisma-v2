@@ -1,275 +1,147 @@
 <template>
-        <div id="container" ref="ListContainer" :class="`${containerClasses}`"
-                class="w-[calc(100%-4px)] max-h-[calc(100vh-80px)] overflow-y-scroll ">
-                <div v-if="items && items.length > 0" class="relative">
-                        <div class="summary 
-                        absolute top-0 
-                        flex items-center z-10">
-                                <div class="flex-1 flex flex-row justify-start whitespace-nowrap">
-                                        <span class="flex"><b> {{ totalCount }}</b></span><span
-                                                class="hidden sm:flex">&nbsp;<b>Properties</b></span>
-                                        <span class="flex">&nbsp;founded</span>
-                                </div>
+        <div id="container" :class="containerClasses" class="w-full h-full overflow-y-auto pr-1">
 
-                                <div class="w-[60px] flex justify-center items-center relative p-0 gap-0">
-                                        <div class="relative flex-1 flex justify-center items-center h-[28px]
-                                                border-2 rounded-tl-xl rounded-bl-xl
-                                                p-1 pl-2"
-                                                :class="menuStore.isGrid ? 'border-[#767676] border-r-0 bg-white' : 'border-primary bg-[#e6eaea]'"
-                                                @click="menuStore.isGrid = false">
-                                                <IconList class=" w-[13px] h-[13px] "
-                                                        :class="menuStore.isGrid ? 'text-[#767676]' : 'text-primary'" />
-                                        </div>
-                                        <div class="relative flex-1 flex justify-center items-center h-[28px]
-                                                border-2 rounded-tr-xl rounded-br-xl
-                                                p-1 pr-2"
-                                                :class="menuStore.isGrid ? 'border-primary bg-[#e6eaea]' : 'border-[#767676] border-l-0 bg-white'"
-                                                @click="menuStore.isGrid = true">
-                                                <IconGrid class="w-[12px] h-[12px] translate-x-0"
-                                                        :class="menuStore.isGrid ? 'text-primary' : ' text-[#767676]'" />
-                                        </div>
-
-                                </div>
-                                <div class="max-w-[160px] h-full flex justify-end items-center ml-2">
-
-                                        <Listbox v-model="selectedOrder">
-                                                <div class="relative w-full h-full flex justify-end items-center">
-                                                        <ListboxButton class="relative 
-                                                        flex    w-full
-                                                                h-[28px]
-                                                                cursor-default 
-                                                                rounded-xl 
-                                                                bg-[#d1dbd9] py-1 pl-3 pr-10 
-                                                                text-left shadow-0 
-                                                                focus:outline-none 
-                                                                focus-visible:border-indigo-500 
-                                                                focus-visible:ring-2 focus-visible:ring-white 
-                                                                focus-visible:ring-opacity-75 
-                                                                focus-visible:ring-offset-2 
-                                                                focus-visible:ring-offset-orange-300 
-                                                                sm:text-sm
-                                                                font-calibre
-                                                                ">
-                                                                <span class="block truncate">{{ selectedOrder.name
-                                                                }}</span>
-                                                                <span
-                                                                        class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2">
-                                                                        <Icon name="ph:caret-up-down" size="14"
-                                                                                class="text-gray-400" />
-                                                                </span>
-                                                        </ListboxButton>
-                                                        <transition leave-active-class="transition duration-100 ease-in"
-                                                                leave-from-class="opacity-100" leave-to-class="opacity-0">
-                                                                <ListboxOptions
-                                                                        class="absolute top-8 max-h-60 w-full min-w-[160px]
-                                                                        overflow-auto rounded-md 
-                                                                        bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm">
-                                                                        <ListboxOption v-slot="{ active, selected }"
-                                                                                v-for="order in orderMethod" :key="order.name"
-                                                                                :value="order" as="template">
-                                                                                <li :class="[
-                                                                                        active ? 'bg-darkgreen text-white' : 'text-gray-900',
-                                                                                        'relative cursor-default select-none py-2 pl-10 pr-4',
-                                                                                ]">
-                                                                                        <span :class="[
-                                                                                                selected ? 'font-medium' : 'font-normal',
-                                                                                                'block truncate',
-                                                                                        ]">{{ order.name
-}}</span>
-                                                                                        <span v-if="selected"
-                                                                                                class="absolute inset-y-0 left-0 flex items-center pl-3 text-accent">
-                                                                                                <Icon name="ic:round-check"
-                                                                                                        color="inherite"
-                                                                                                        size="25" />
-                                                                                        </span>
-                                                                                </li>
-                                                                        </ListboxOption>
-                                                                </ListboxOptions>
-                                                        </transition>
-                                                </div>
-                                        </Listbox>
-
-                                </div>
-
-                                <div class="max-w-[130px] flex justify-center items-center relative p-0 gap-0 ml-2">
-                                        <div class="relative flex-1 flex justify-center items-center h-[28px]
-                                                border-2 rounded-xl 
-                                                py-1 px-2"
-                                                :class="menuStore.isHidden ? 'border-[#767676] bg-white' : 'border-primary bg-[#e6eaea]'"
-                                                @click="menuStore.isHidden = !menuStore.isHidden">
-                                                <IconMap class=" w-[20px] h-[20px] "
-                                                        :class="menuStore.isHidden ? 'text-[#767676]' : 'text-primary'" />
-                                                <span class="font-calibreLight text-sm">Hide Map</span>
-                                        </div>
-
-
-                                </div>
-
+                <div v-if="totalCount > 0"
+                        class="sticky top-0 z-20 bg-white/95 backdrop-blur-sm py-2 border-b mb-4 flex justify-between items-center">
+                        <div class="text-sm">
+                                <span class="font-bold text-lg">{{ totalCount }}</span> Properties found
                         </div>
 
-                        <div class="relative pt-[60px] "
-                                :class="menuStore.isHidden ? 'grid grid-cols-4 gap-4' : menuStore.isGrid ? 'grid grid-cols-2 3xl:grid-cols-3 gap-4' : 'block '">
-                                <template v-for="(item, index) in itemsToDisplay">
-                                        <div class="backdrop-blur overflow-hidden mb-4">
-                                                <ListItem :item="item" :idx="(data.length - Number(index))" class="relative" />
-                                        </div>
+                        <div class="flex items-center gap-2">
+                                <div class="flex border border-gray-300 rounded-lg overflow-hidden h-[32px]">
+                                        <button @click="uiStore.isGridView = false"
+                                                class="px-3 flex items-center justify-center transition-colors"
+                                                :class="!uiStore.isGridView ? 'bg-gray-100 text-cbre_primary_1' : 'bg-white text-gray-400 hover:bg-gray-50'">
+                                                <Icon name="ph:list-bullets" size="18" />
+                                        </button>
+                                        <div class="w-[1px] bg-gray-300"></div>
+                                        <button @click="uiStore.isGridView = true"
+                                                class="px-3 flex items-center justify-center transition-colors"
+                                                :class="uiStore.isGridView ? 'bg-gray-100 text-cbre_primary_1' : 'bg-white text-gray-400 hover:bg-gray-50'">
+                                                <Icon name="ph:squares-four" size="18" />
+                                        </button>
+                                </div>
 
-                                </template>
-
-                                <template v-if="loading">
-                                        <!-- Loading component -->
-                                        <div v-if="defaultLoading" id="loading-wrapper">
-                                                <ListLoading :color="defaultLoadingColor" />
-                                        </div>
-                                        <div v-else id="loading-wrapper">
-                                                <ListLoading />
-                                        </div>
-                                </template>
-
-                                <!-- list footer -->
-                                <div v-show="((page !== items.length - 1) || !loading)" id="end-of-list" ref="end_of_list" />
+                                <button @click="uiStore.isHiddenList = !uiStore.isHiddenList"
+                                        class="h-[32px] px-3 border border-gray-300 rounded-lg text-xs font-medium flex items-center gap-1 hover:bg-gray-50">
+                                        <Icon :name="uiStore.isHiddenList ? 'ph:map-trifold' : 'ph:arrows-out-simple'"
+                                                size="16" />
+                                        {{ uiStore.isHiddenList ? 'Show Map' : 'Expand' }}
+                                </button>
                         </div>
                 </div>
-                <div v-else class="max-h-[calc(100vh-80px)] w-full overflow-hidden">
-                        <div class="summary text-center font-light text-primary/25">
-                                Properties Not Founded
+
+                <div v-if="itemsToDisplay.length > 0" class="relative pb-10"
+                        :class="uiStore.isGridView ? 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-4' : 'flex flex-col gap-4'">
+
+                        <template v-for="(item, index) in itemsToDisplay" :key="item.id">
+                                <ListItem :item="item" :idx="totalCount - index" />
+                        </template>
+
+                        <div v-if="isLoadingMore" class="col-span-full flex justify-center py-4">
+                                <ListLoading color="#003F2D" />
                         </div>
 
+                        <div ref="loadMoreTrigger" class="h-4 w-full -mt-10 pointer-events-none opacity-0"></div>
+
                 </div>
+
+                <div v-else class="h-full flex flex-col items-center justify-center text-gray-400">
+                        <Icon name="ph:buildings" size="48" class="mb-2 opacity-50" />
+                        <p>No properties found.</p>
+                </div>
+
         </div>
 </template>
 
 <script setup lang="ts">
+import { ref, computed, watch, onMounted, onUnmounted } from 'vue';
+import { storeToRefs } from 'pinia';
+import { usePropertyStore } from '~/stores/property';
+import { useUiStore } from '~/stores/ui';
+import type { PropertyType } from '~/types/property.type';
+import ListItem from './Item.vue';
+import ListLoading from './Loading.vue';
 
-import { storeToRefs } from "pinia";
-import { useMenuStore } from '~/stores/menu';
-import { useDataStore } from '~/stores/data';
-const menuStore = useMenuStore()
-const dataStore = useDataStore()
-const { isHidden, isGrid } = storeToRefs(useMenuStore());
-const { initialDataLoaded } = storeToRefs(useDataStore());
-import {
-        Listbox,
-        ListboxButton,
-        ListboxOptions,
-        ListboxOption,
-} from '@headlessui/vue'
+const props = defineProps({
+        data: { type: Array as () => PropertyType[], default: () => [] }, // 전체 데이터 (필터링된)
+        totalCount: { type: Number, default: 0 },
+        itemsPerRender: { type: Number, default: 10 }, // 한 번에 렌더링할 개수 증가 (성능 고려)
+        containerClasses: { type: String, default: '' },
+});
 
-const orderMethod = [
-        { name: 'Name' },
-        { name: 'Area(High to Low)' },
-        { name: 'Area(Low to High)' },
-        { name: 'Closet' },
-        { name: 'Last Updated' },
-]
-const selectedOrder = ref(orderMethod[0])
+const propertyStore = usePropertyStore();
+const uiStore = useUiStore();
+const { filteredAssets } = storeToRefs(propertyStore);
 
-const { data, totalCount, itemsPerRender, containerClasses, defaultLoading, defaultLoadingColor } = defineProps({
-        data: {
-                type: Array,
-                default: () => [],
-        },
-        totalCount: {
-                type: Number,
-                required: true,
-                default: 0,
+// Local State
+const itemsToDisplay = ref<PropertyType[]>([]);
+const page = ref(1);
+const isLoadingMore = ref(false);
+const loadMoreTrigger = ref<HTMLElement | null>(null);
+let observer: IntersectionObserver | null = null;
 
-        },
-        itemsPerRender: {
-                type: Number,
-                default: 3,
-        },
-        containerClasses: {
-                type: String,
-                default: '',
-        },
-        defaultLoading: {
-                type: Boolean,
-                default: true,
-        },
-        defaultLoadingColor: {
-                type: String,
-                default: '#18191A',
-        },
-})
+// --- Infinite Scroll Logic ---
 
-const assets = ref(data) as any
-const items = ref([]) as any
-const itemsToDisplay = ref([]) as any
-const loading = ref(false)
-const page = ref(0)
+// 1. 초기화 함수
+const resetList = () => {
+        page.value = 1;
+        itemsToDisplay.value = props.data.slice(0, props.itemsPerRender);
 
-
-
-function chunkArray(arr: any, size: number) {
-        return Array.from({ length: Math.ceil(arr.length / size) },
-                (_v, i) => arr.slice(i * size, i * size + size));
-}
-
-// set the list and update it when data changes
-function updateList() {
-        let chunckedArray = chunkArray(assets.value, itemsPerRender) // chunkArray(data,itemsPerRender) to get array of small arrays
-        // console.log('chunckedArray')
-        // console.log(chunckedArray)
-        items.value = chunckedArray
-        itemsToDisplay.value = chunckedArray[0]
-}
-const ListContainer = ref(null) as any
-const end_of_list = ref(null) as any
-
-
-// load more items when scrolling to the end of the list
-function loadItems() {
-        if (page.value === items.value.length - 1) return
-
-        const element = end_of_list.value //this.endOfList;
-        if (!element) return
-        const position = element.getBoundingClientRect();
-
-        // checking whether fully visible
-        if ((position.top >= 0 && position.bottom <= window.innerHeight) && !loading.value) {
-                // console.log('reloading')
-                loading.value = true
-                page.value++
-                setTimeout(() => {
-                        itemsToDisplay.value = [...itemsToDisplay.value, ...items.value[page.value]]
-                        loading.value = false
-                        loadItems()
-                }, 500);
+        // 데이터가 변경되면 Observer 재연결 시도
+        if (loadMoreTrigger.value) {
+                setupObserver();
         }
-}
+};
 
-const { filteredAssets } = storeToRefs(dataStore)
+// 2. 더 불러오기 함수
+const loadMore = () => {
+        if (itemsToDisplay.value.length >= props.data.length || isLoadingMore.value) return;
 
-watch(filteredAssets, (nv, ov) => {
-        assets.value = dataStore.filteredAssets
-        updateList()
-        loadItems()
+        isLoadingMore.value = true;
 
-})
+        // 약간의 지연을 주어 UX 개선 (너무 빠르면 깜빡임처럼 보일 수 있음)
+        setTimeout(() => {
+                const nextBatch = props.data.slice(
+                        itemsToDisplay.value.length,
+                        itemsToDisplay.value.length + props.itemsPerRender
+                );
+                itemsToDisplay.value = [...itemsToDisplay.value, ...nextBatch];
+                isLoadingMore.value = false;
+        }, 300);
+};
 
+// 3. Intersection Observer 설정
+const setupObserver = () => {
+        if (observer) observer.disconnect();
+
+        observer = new IntersectionObserver((entries) => {
+                if (entries[0].isIntersecting) {
+                        loadMore();
+                }
+        }, {
+                root: null, // viewport 기준
+                rootMargin: '100px', // 바닥에 닿기 100px 전에 미리 로드
+                threshold: 0.1
+        });
+
+        if (loadMoreTrigger.value) {
+                observer.observe(loadMoreTrigger.value);
+        }
+};
+
+// Watchers
+// 데이터 원본(props.data)이 바뀌면 리스트 초기화
+watch(() => props.data, () => {
+        resetList();
+}, { immediate: true });
+
+// Lifecycle
 onMounted(() => {
+        setupObserver();
+});
 
-        if (dataStore.initialDataLoaded) {
-                assets.value = dataStore.filteredAssets
-                updateList()
-                loadItems()
-        }
-        ListContainer.value.addEventListener('scroll', loadItems)
-})
-
-onBeforeUnmount(() => {
-
-        ListContainer.value.removeEventListener('scroll', loadItems)
-})
+onUnmounted(() => {
+        if (observer) observer.disconnect();
+});
 </script>
-
-<style scoped>
-.summary {
-        width: 100%;
-        padding-bottom: 20px;
-        font-size: 20px;
-
-        font-family: 'calibre';
-}
-</style>

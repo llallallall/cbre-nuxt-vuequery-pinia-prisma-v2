@@ -1,159 +1,138 @@
-// /server/api/property/[id]/sizes.put.ts
+// server/api/property/admin/[id]/sizes.put.ts
 
-import { PrismaClient, Scale } from '@prisma/client'; // 💡 Scale 모델 타입은 유지
-import { defineEventHandler, readBody, getRouterParam, createError } from 'h3';
+import { defineEventHandler, readBody, getRouterParams, createError } from 'h3';
+import prisma from '@/prisma/cbredb';
+import { Prisma, LevelType } from '@prisma/client';
+import type { ScaleType } from '~/types/property.type';
 
-const prisma = new PrismaClient();
-
-// 💡 수정된 부분: Prisma.ScaleUpdateInput, Prisma.ScaleCreateInput 타입을 로컬에서 재정의
-// Omit: DB에서 자동 관리되는 필드(id, created_at, updated_at)와 외래 키(property_id)를 제외합니다.
-
-// 1. UPDATE 타입 정의: 모든 필드는 선택 사항(Partial)이어야 합니다.
-type LocalScaleUpdateInput = Partial<Omit<Scale, 
-    'id' | 'property_id' | 'created_at' | 'updated_at' | 'property'
->>;
-
-// 2. CREATE 타입 정의: 필수 외래 키(property_id)를 제외한 나머지 필수 필드는 남기고,
-//    자동 생성 필드는 제외합니다. (Payload가 필수 필드를 포함한다고 가정)
-type LocalScaleCreateInput = Omit<Scale, 
-    'id' | 'created_at' | 'updated_at' | 'property'
->;
-
-// Prisma 모델 필드명 (snake_case)과 페이로드 타입 정의
-interface ScalePayload {
-    no_of_buildings?: number;
-    upper_levels?: number;
-    basement_levels?: number;
-    gfa_sqm?: number | null;
-    gfa_py?: number | null;
-    nfa_sqm?: number | null;
-    nfa_py?: number | null;
-    site_area_sqm?: number | null;
-    site_area_py?: number | null;
-    gross_leasable_area_sqm?: number | null;
-    gross_leasable_area_py?: number | null;
-    net_leasable_area_sqm?: number | null;
-    net_leasable_area_py?: number | null;
-    floor_area_ratio_existing?: number | null;
-    floor_area_ratio_permitted?: number | null;
-    building_coverage_ratio_existing?: number | null;
-    building_coverage_ratio_permitted?: number | null;
-    floor_plate_sqm?: number | null;
-    floor_plate_py?: number | null;
+// Payload 타입 (ScaleType의 부분 집합 또는 전체)
+// 프론트엔드 Sizes.vue에서 보내는 데이터 구조와 일치
+interface SizesPayload {
+    noOfBuildings?: number;
+    upperLevels?: number;
+    basementLevels?: number;
+    gfaSqm?: number | null;
+    gfaPy?: number | null;
+    nfaSqm?: number | null;
+    nfaPy?: number | null;
+    siteAreaSqm?: number | null;
+    siteAreaPy?: number | null;
+    grossLeasableAreaSqm?: number | null;
+    grossLeasableAreaPy?: number | null;
+    netLeasableAreaSqm?: number | null;
+    netLeasableAreaPy?: number | null;
+    floorAreaRatioExisting?: number | null;
+    floorAreaRatioPermitted?: number | null;
+    buildingCoverageRatioExisting?: number | null;
+    buildingCoverageRatioPermitted?: number | null;
+    floorPlateSqm?: number | null;
+    floorPlatePy?: number | null;
 }
-
-// 응답 타입 정의 (Pinia store가 예상하는 camelCase)
-interface SizesResponseType {
-    noOfBuildings: number;
-    upperLevels: number;
-    basementLevels: number;
-    gfaSqm: number | null;
-    gfaPy: number | null;
-    nfaSqm: number | null;
-    nfaPy: number | null;
-    siteAreaSqm: number | null;
-    siteAreaPy: number | null;
-    grossLeasableAreaSqm: number | null;
-    grossLeasableAreaPy: number | null;
-    netLeasableAreaSqm: number | null;
-    netLeasableAreaPy: number | null;
-    floorAreaRatioExisting: number | null;
-    floorAreaRatioPermitted: number | null;
-    buildingCoverageRatioExisting: number | null;
-    buildingCoverageRatioPermitted: number | null;
-    floorPlateSqm: number | null;
-    floorPlatePy: number | null;
-}
-
-// DB Scale 모델 객체를 SizesType으로 변환하는 헬퍼 함수
-const transformScaleToSizes = (scale: Scale): SizesResponseType => ({
-    noOfBuildings: scale.no_of_buildings,
-    upperLevels: scale.upper_levels,
-    basementLevels: scale.basement_levels,
-    gfaSqm: scale.gfa_sqm,
-    gfaPy: scale.gfa_py,
-    nfaSqm: scale.nfa_sqm,
-    nfaPy: scale.nfa_py,
-    siteAreaSqm: scale.site_area_sqm,
-    siteAreaPy: scale.site_area_py,
-    grossLeasableAreaSqm: scale.gross_leasable_area_sqm,
-    grossLeasableAreaPy: scale.gross_leasable_area_py,
-    netLeasableAreaSqm: scale.net_leasable_area_sqm,
-    netLeasableAreaPy: scale.net_leasable_area_py,
-    floorAreaRatioExisting: scale.floor_area_ratio_existing,
-    floorAreaRatioPermitted: scale.floor_area_ratio_permitted,
-    buildingCoverageRatioExisting: scale.building_coverage_ratio_existing,
-    buildingCoverageRatioPermitted: scale.building_coverage_ratio_permitted,
-    floorPlateSqm: scale.floor_plate_sqm,
-    floorPlatePy: scale.floor_plate_py,
-});
 
 export default defineEventHandler(async (event) => {
-    const propertyId = getRouterParam(event, 'id');
-    const body = await readBody<ScalePayload>(event);
+    const { id: propertyId } = getRouterParams(event);
+    const body = await readBody<SizesPayload>(event);
 
     if (!propertyId) {
         throw createError({ statusCode: 400, statusMessage: 'Property ID is required.' });
     }
 
-    // 새 층수를 확인합니다. (미전달 시 DB 기본값에 따라 1층, 지하 0층으로 가정)
-    const newUpperLevels = body.upper_levels ?? 1; 
-    const newBasementLevels = body.basement_levels ?? 0;
-
     try {
-        // 1. 트랜잭션 시작: Scale 업데이트와 Floor 정리를 원자적으로 처리
         const result = await prisma.$transaction(async (tx) => {
-            
-            // 1.1. Scale 레코드 Upsert (생성 또는 업데이트)
+
+            // 1. Scale 데이터 매핑 및 Upsert
+            const dataInput = {
+                no_of_buildings: body.noOfBuildings ?? 0,
+                upper_levels: body.upperLevels ?? 0,
+                basement_levels: body.basementLevels ?? 0,
+                gfa_sqm: body.gfaSqm,
+                gfa_py: body.gfaPy,
+                nfa_sqm: body.nfaSqm,
+                nfa_py: body.nfaPy,
+                site_area_sqm: body.siteAreaSqm,
+                site_area_py: body.siteAreaPy,
+                gross_leasable_area_sqm: body.grossLeasableAreaSqm,
+                gross_leasable_area_py: body.grossLeasableAreaPy,
+                net_leasable_area_sqm: body.netLeasableAreaSqm,
+                net_leasable_area_py: body.netLeasableAreaPy,
+                floor_area_ratio_existing: body.floorAreaRatioExisting,
+                floor_area_ratio_permitted: body.floorAreaRatioPermitted,
+                building_coverage_ratio_existing: body.buildingCoverageRatioExisting,
+                building_coverage_ratio_permitted: body.buildingCoverageRatioPermitted,
+                floor_plate_sqm: body.floorPlateSqm,
+                floor_plate_py: body.floorPlatePy,
+            };
+
             const updatedScale = await tx.scale.upsert({
                 where: { property_id: propertyId },
-                // 💡 updated_at: new Date() 제거 및 타입 단언 적용
-                update: { ...body } as LocalScaleUpdateInput,
-                create: {
-                    property_id: propertyId,
-                    ...body,
-                } as LocalScaleCreateInput,
+                update: dataInput,
+                create: { property_id: propertyId, ...dataInput },
             });
 
-            // 1.2. Floor 레코드 정리 (Delete Obsolete Floors)
-            
-            // 🚀 상층부 (UPPER) 정리: upper_levels보다 큰 층 삭제 (예: 3층 -> 2층으로 변경 시, floor 3 이상 삭제)
-            await tx.floor.deleteMany({
-                where: {
-                    property_id: propertyId,
-                    type: 'UPPER',
-                    floor: {
-                        gt: newUpperLevels, // 새로운 upper_levels보다 큰 층 번호 삭제
-                    },
-                },
-            });
-            
-            // 🚀 지하층 (BASEMENT) 정리: basement_levels보다 더 깊은 지하층 삭제 (예: 지하 2층 -> 지하 1층으로 변경 시, floor -2 이하 삭제)
-            // 주의: floor 1이 지하 1층, floor 2가 지하 2층이므로, 
-            // newBasementLevels보다 큰 층(더 깊은 층)을 삭제합니다.
-            await tx.floor.deleteMany({
-                where: {
-                    property_id: propertyId,
-                    type: 'BASEMENT',
-                    floor: {
-                        gt: newBasementLevels, 
-                    },
-                },
-            });
-            
-            // Floor 레코드가 삭제되면, FloorPartial은 Cascade 설정에 의해 자동으로 정리됩니다.
-            
-            return updatedScale;
+            // 2. 층수 변경에 따른 Floor 데이터 정리 (선택 사항이지만 데이터 무결성을 위해 권장)
+            // 설정된 층수보다 높은 번호의 층이 있다면 삭제합니다.
+
+            const newUpper = body.upperLevels ?? 0;
+            const newBasement = body.basementLevels ?? 0;
+
+            // 지상층 정리: 설정된 층수보다 큰 층 삭제
+            if (newUpper > 0) {
+                await tx.floor.deleteMany({
+                    where: {
+                        property_id: propertyId,
+                        type: LevelType.UPPER,
+                        floor: { gt: newUpper }
+                    }
+                });
+            }
+
+            // 지하층 정리: 설정된 층수보다 깊은 층(숫자로는 더 작은 값 -3 < -2) 삭제
+            // Floor 모델의 floor 값이 지하층인 경우 음수(-1, -2...)로 저장된다면 'lt: -newBasement'
+            // 만약 양수(1, 2...)로 저장하고 type으로 구분한다면 'gt: newBasement'
+            // 현재 로직은 Floor.vue에서 지하층을 -1, -2로 처리하므로, 절대값 비교가 필요하거나 
+            // Floor.vue의 생성 로직(floor: -i)을 따름.
+            // Prisma에서 -3 (B3) 은 -2 (B2) 보다 작음 (lt). 
+            // newBasement가 2이면, -3 미만인 층을 삭제해야 함? 아니, 지하 2층까지니까 -1, -2 유지. -3 삭제.
+            // 즉 floor < -2 인 것 삭제.
+
+            if (newBasement > 0) {
+                await tx.floor.deleteMany({
+                    where: {
+                        property_id: propertyId,
+                        type: LevelType.BASEMENT,
+                        floor: { lt: -newBasement }
+                    }
+                });
+            }
+
+            // 3. 응답 매핑
+            return {
+                noOfBuildings: updatedScale.no_of_buildings,
+                upperLevels: updatedScale.upper_levels,
+                basementLevels: updatedScale.basement_levels,
+                gfaSqm: updatedScale.gfa_sqm,
+                gfaPy: updatedScale.gfa_py,
+                nfaSqm: updatedScale.nfa_sqm,
+                nfaPy: updatedScale.nfa_py,
+                siteAreaSqm: updatedScale.site_area_sqm,
+                siteAreaPy: updatedScale.site_area_py,
+                grossLeasableAreaSqm: updatedScale.gross_leasable_area_sqm,
+                grossLeasableAreaPy: updatedScale.gross_leasable_area_py,
+                netLeasableAreaSqm: updatedScale.net_leasable_area_sqm,
+                netLeasableAreaPy: updatedScale.net_leasable_area_py,
+                floorAreaRatioExisting: updatedScale.floor_area_ratio_existing,
+                floorAreaRatioPermitted: updatedScale.floor_area_ratio_permitted,
+                buildingCoverageRatioExisting: updatedScale.building_coverage_ratio_existing,
+                buildingCoverageRatioPermitted: updatedScale.building_coverage_ratio_permitted,
+                floorPlateSqm: updatedScale.floor_plate_sqm,
+                floorPlatePy: updatedScale.floor_plate_py,
+            };
         });
 
-        // 2. 응답 시 Pinia 스토어의 `sizes` 타입(camelCase)에 맞게 변환하여 반환
-        return transformScaleToSizes(result);
+        return result;
 
-    } catch (error) {
-        console.error("Scale Update Error:", error);
-        throw createError({ 
-            statusCode: 500, 
-            statusMessage: '층수 변경 및 데이터 정리에 실패했습니다.' 
-        });
+    } catch (e: any) {
+        console.error('Sizes(Scale) Update Error:', e);
+        throw createError({ statusCode: 500, statusMessage: 'Failed to update sizes info.', data: e.message });
     }
 });

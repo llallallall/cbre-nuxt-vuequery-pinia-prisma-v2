@@ -1,50 +1,21 @@
 <template>
         <div class="dots">
-                <div :style="`background-color: ${color}`"></div>
-                <div :style="`background-color: ${color}`"></div>
-                <div :style="`background-color: ${color}`"></div>
+                <div :style="{ backgroundColor: color }"></div>
+                <div :style="{ backgroundColor: color }"></div>
+                <div :style="{ backgroundColor: color }"></div>
         </div>
 </template>
 
 <script setup lang="ts">
-const { color } = defineProps({
+defineProps({
         color: {
-                required: false,
                 type: String,
                 default: '#18191A',
         }
-})
+});
 </script>
 
 <style scoped>
-.hidden {
-        display: none;
-}
-
-/* List container style */
-#container {
-        width: 100%;
-        height: 100%;
-        overflow-y: auto;
-        overflow-x: hidden;
-        scroll-behavior: smooth;
-        scrollbar-width: thin;
-}
-
-#end-of-list {
-        height: 32px;
-        width: 100%;
-}
-
-#loading-wrapper {
-        width: 100%;
-        height: 32px;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-}
-
-/* Loading style */
 .dots {
         width: 3.5em;
         display: flex;
@@ -75,13 +46,6 @@ const { color } = defineProps({
 
         to {
                 opacity: 0;
-        }
-}
-
-@media(max-width: 480px) {
-        .dots div {
-                width: 0.7em;
-                height: 0.7em;
         }
 }
 </style>

@@ -28,7 +28,7 @@ import { storeToRefs } from 'pinia';
 import { usePropertyStore } from '~/stores/property';
 import { useUiStore } from '~/stores/ui';
 import { useModal } from 'vue-final-modal';
-import ModalFullscreen from '~/components/modal/Fullscreen.vue';
+import ModalFullscreen from '~/components/modal/FullscreenModal.vue';
 
 const propertyStore = usePropertyStore();
 const uiStore = useUiStore();

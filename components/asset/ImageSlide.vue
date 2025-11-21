@@ -1,7 +1,7 @@
 <template>
         <div class="image-slide w-full h-[500px] select-none">
                 <img ref="slide"
-                        :src="images.length < 1 ? '/images/placeholder.jpg' : images[images.length-1]?.remoteFileUrl ? images[images.length-1]?.remoteFileUrl : images[images.length-1]?.fileUrl ? images[images.length-1]?.fileUrl : '/images/placeholder.jpg' "
+                        :src="images.length < 1 ? '/images/placeholder.jpg' : images[images.length - 1]?.remoteFileUrl ? images[images.length - 1]?.remoteFileUrl : images[images.length - 1]?.fileUrl ? images[images.length - 1]?.fileUrl : '/images/placeholder.jpg'"
                         class="object-cover w-full max-h-[500px] relative " />
                 <div class="small-previews w-full h-[100px] flex justify-center items-end gap-3 z-10 ">
                         <div v-for="preview in images"
@@ -9,12 +9,12 @@
                                 <img :src="(preview?.remoteFileUrl ? preview?.remoteFileUrl : preview?.fileUrl as string)"
                                         @click="setImageSrc(preview?.remoteFileUrl as string)"
                                         class="object-cover w-full  border-white/25 border-2 " />
-                                
+
                         </div>
                 </div>
-                
+
                 <div class="expand-icon text-primary hover:text-white backdrop-blur-sm bg-white/25 hover:bg-primary/75"
-                        @click="()=> open()">
+                        @click="() => open()">
                         <IconExpand />
                 </div>
         </div>
@@ -23,7 +23,7 @@
 <script setup lang="ts">
 
 import { useModal } from 'vue-final-modal'
-import ModalFullscreen from '@/components/modal/Fullscreen.vue'
+import ModalFullscreen from '@/components/modal/FullscreenModal.vue'
 
 const { images } = defineProps({
         images: {
@@ -37,21 +37,21 @@ const setImageSrc = (src: string) => {
         slide.value.src = src
 }
 
-const currentImgUrl = ref(images[images.length-1]?.remoteFileUrl ? images[images.length-1]?.remoteFileUrl : images[images.length-1]?.fileUrl)
+const currentImgUrl = ref(images[images.length - 1]?.remoteFileUrl ? images[images.length - 1]?.remoteFileUrl : images[images.length - 1]?.fileUrl)
 
 
 const { open, close } = useModal({
-    component: ModalFullscreen,
-    attrs: {
-      imgUrl : currentImgUrl,
-      onClose() {
-        close()
-      },
-      clickToClose: true,
-      escToClose: true,
-    } as any,
-    
-  })
+        component: ModalFullscreen,
+        attrs: {
+                imgUrl: currentImgUrl,
+                onClose() {
+                        close()
+                },
+                clickToClose: true,
+                escToClose: true,
+        } as any,
+
+})
 
 </script>
 

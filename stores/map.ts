@@ -34,7 +34,7 @@ interface MapState {
         pinCoordinate: Coordinate; // 지도 이동 대상 좌표
 
         // 3. 지도 스타일/설정
-        mapLanguage: string; // 지도 언어 설정 (i18n 적용 시)
+        mapLanguage: any; // 지도 언어 설정 (MapboxLanguage 플러그인 인스턴스를 저장)
         mapStyleOptions: Record<string, any>; // 지도 스타일 옵션
 
         // 4. 검색 결과 (Kakao, Google Geocoder)

@@ -37,8 +37,10 @@
 <script setup lang="ts">
 import { ref, watch, computed } from 'vue';
 import { VueFinalModal } from 'vue-final-modal'
-import 'vue3-pdf-app/dist/icons/main.css';
-import Vue3PdfApp from 'vue3-pdf-app';
+// 💡 [수정] 정적 import 제거
+// import Vue3PdfApp from 'vue3-pdf-app';
+// import 'vue3-pdf-app/dist/icons/main.css';
+
 
 import { useStatusStore } from '~/stores/status'; // status Store 임포트
 import { storeToRefs } from 'pinia';

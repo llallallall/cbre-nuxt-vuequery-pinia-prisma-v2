@@ -2,54 +2,63 @@
         <main>
                 <div class="header min-w-[360px]">
                         <div class="logo">
-                                <!-- <IconCBRELogo width="80px" height="25px" class="text-white" /> -->
                         </div>
                         <div class="language">
                                 <img src="/images/icons/world-globe-line-icon.svg" class="globe" />
-                                <!-- <select v-model="selectedLanguage" class="select font-notoSans font-light text-sm focus:ring-0 focus:border-white">
-        <option v-for="option in options" :value="option.value" class="option">
-          {{ option.text }}
-        </option>
-      </select> -->
                         </div>
                 </div>
+
                 <div class="login-form-title font-calibre text-white text-center min-w-[40vh]">
-                        <div class="text-4xl ">CBRE Korea
-                        </div>
-                        <div class="text-xl">Asset Management System
-                        </div>
+                        <div class="text-4xl ">CBRE Korea</div>
+                        <div class="text-xl">Asset Management System</div>
                 </div>
+
                 <div class="login-form-wrapper shadow-xl min-w-[40vh] w-full">
                         <div class="login-form-bg"></div>
                         <div class="login-form p-8 ">
 
-                                <VeeForm :validation-schema="validationSchema" @submit="handleSubmit"
-                                        class="flex-1 overflow-hidden  space-y-0" v-slot="{ meta }">
+                                <form @submit.prevent="handleLogin" class="flex-1 overflow-hidden space-y-4">
                                         <div class="title font-spaceMono px-0">Log In</div>
 
-                                        <VeeTextInput type="email" name="email" label="Email" placeholder="Email"
-                                                leftIcon="fa-user" />
+                                        <div class="flex flex-col">
+                                                <label class="text-sm font-medium text-gray-300 mb-1">Email</label>
+                                                <input v-model="email" type="email" placeholder="Enter your email"
+                                                        class="w-full px-4 py-2 rounded-lg bg-white/10 border border-gray-400 text-white focus:outline-none focus:border-white placeholder-gray-400"
+                                                        required />
+                                        </div>
 
-                                        <VeeTextInput type="password" name="password" label="Password" placeholder="Password"
-                                                leftIcon="fa-lock" />
-                                                
-                                        <button class="button" type="submit" :disabled="!meta.valid || isLoading"
-                                                :class="meta.valid || isLoading ? 'bg-cbre_primary_2 text-white' : 'bg-cbre_primary_1/60 text-cbre_primary_5/50'">Log
-                                                In</button>
-                                        <div class="register">
-                                                <span class="text-gray-300">New to System? </span><a href="/signup"
-                                                        class="hover:underline cursor-pointer">Request
+                                        <div class="flex flex-col">
+                                                <label class="text-sm font-medium text-gray-300 mb-1">Password</label>
+                                                <input v-model="password" type="password"
+                                                        placeholder="Enter your password"
+                                                        class="w-full px-4 py-2 rounded-lg bg-white/10 border border-gray-400 text-white focus:outline-none focus:border-white placeholder-gray-400"
+                                                        required />
+                                        </div>
+
+                                        <div v-if="errorMessage" class="text-red-400 text-sm text-center">
+                                                {{ errorMessage }}
+                                        </div>
+
+                                        <button class="button font-bold" type="submit" :disabled="!isValid || isLoading"
+                                                :class="isValid && !isLoading ? 'bg-cbre_primary_2 text-white hover:bg-cbre_primary_1' : 'bg-cbre_primary_1/60 text-cbre_primary_5/50 cursor-not-allowed'">
+                                                <span v-if="isLoading">Logging in...</span>
+                                                <span v-else>Log In</span>
+                                        </button>
+
+                                        <div class="register text-center mt-4">
+                                                <span class="text-gray-300">New to System? </span>
+                                                <a href="/signup"
+                                                        class="hover:underline cursor-pointer text-white font-bold">Request
                                                         Access</a>
                                         </div>
-                                        <div class="eula font-calibre break-all text-gray-300">
-                                                EULA – You acknowledge and agree to use this system for your sole and exclusive
-                                                benefit only
-                                                while you are employed in CBRE Korea. You do not own or have any ownership to
-                                                any of the data in
-                                                the system and the data may not be assigned and /or transferred.
-                                        </div>
 
-                                </VeeForm>
+                                        <div class="eula font-calibre break-all text-gray-300 text-xs mt-6 opacity-70">
+                                                EULA – You acknowledge and agree to use this system for your sole and
+                                                exclusive benefit only while you are employed in CBRE Korea. You do not
+                                                own or have any ownership to any of the data in the system and the data
+                                                may not be assigned and /or transferred.
+                                        </div>
+                                </form>
 
                         </div>
                 </div>
@@ -57,6 +66,9 @@
 </template>
 
 <script setup lang="ts">
+import { ref, computed } from 'vue';
+import { useAuth } from '#imports';
+
 definePageMeta({
         layout: 'auth-layout',
         middleware: 'auth',
@@ -66,62 +78,48 @@ definePageMeta({
         },
 });
 
-import { object, string } from "yup";
-import { toTypedSchema } from '@vee-validate/yup';
-import { configure } from "vee-validate"
-
-configure({
-        validateOnBlur: false, // controls if `blur` events should trigger validation with `handleChange` handler
-        validateOnChange: false, // controls if `change` events should trigger validation with `handleChange` handler
-        validateOnInput: true, // controls if `input` events should trigger validation with `handleChange` handler
-        validateOnModelUpdate: false, // controls if `update:modelValue` events should trigger validation with `handleChange` handler
-})
 const { signIn } = useAuth();
-const isLoading = ref(false)
-const initialized = ref(false)
+const router = useRouter();
 
-onMounted(() => {
-        initialized.value = true
-})
-const validationSchema = toTypedSchema(object(
-        {
-                email: string().required().email().test("email-is-taken", "Email does not exist", async (value) => {
-                        if (initialized.value) { return await existingEmail(value) } return false
-                }
-                ),
-                password: string().required().min(1).label("Your Password"),
-        }
-));
+const email = ref('');
+const password = ref('');
+const isLoading = ref(false);
+const errorMessage = ref('');
 
-const existingEmail = async (value: string) => {
-        //console.log('existingEmail ' + value)
-        let result = await $fetch("/api/auth/checkemail?email=" + value)
-        return result ? true : false;
-}
+// 간단한 유효성 검사
+const isValid = computed(() => {
+        return email.value.trim().length > 0 && password.value.trim().length > 0;
+});
 
-const handleSubmit = async (values: any, actions: any) => {
-        let email = values.email 
-        let password = values.password 
-        isLoading.value = true
+const handleLogin = async () => {
+        if (!isValid.value) return;
+
+        isLoading.value = true;
+        errorMessage.value = '';
+
         try {
-                await signIn('credentials', { email: email, password: password, callbackUrl: '/' } )
+                const res = await signIn('credentials', {
+                        email: email.value,
+                        password: password.value,
+                        redirect: false, // 리다이렉트 수동 처리
+                });
 
-                useRouter().push({
-                        name: "index"
-                })
-
+                if (res?.error) {
+                        errorMessage.value = 'Invalid email or password. Please try again.';
+                } else {
+                        router.push({ name: "index" });
+                }
         } catch (error: any) {
-                console.log(error)
-
+                console.error('Login error:', error);
+                errorMessage.value = 'An unexpected error occurred.';
         } finally {
-                isLoading.value = false
-                actions.resetForm();
+                isLoading.value = false;
         }
 }
-
 </script>
 
 <style scoped>
+/* 기존 스타일 유지 */
 .header {
         position: absolute;
         top: 0;
@@ -152,36 +150,13 @@ const handleSubmit = async (values: any, actions: any) => {
         margin-top: 7px;
         margin-left: 11px;
         color: white;
-
-
-}
-
-.select {
-        background-color: transparent;
-        border-width: 2px;
-        border-color: rgba(255, 255, 255, 0.4);
-        border-radius: 5px;
-        padding: 2px 20px 2px 25px;
-        color: rgba(255, 255, 255, 0.6);
-        /* font-style: normal;
-        font-weight: normal; */
-        width: 130px;
-        height: 30px;
-        text-align: center;
-
-}
-
-.option {
-        background-color: transparent;
-        color: white;
 }
 
 .login-form-wrapper {
         position: relative;
         width: 40vh;
-        height: 45vh;
-        /* background-color: white; */
-
+        height: 55vh;
+        /* 높이 조정 */
 }
 
 .login-form-title {
@@ -213,37 +188,16 @@ const handleSubmit = async (values: any, actions: any) => {
         font-weight: 800;
         padding-left: 0px;
         margin-bottom: 1.5vh;
+        font-size: 1.5rem;
 }
-
 
 .login-form .button {
         width: 100%;
-        height: 40px;
+        height: 45px;
         outline: none;
         border-radius: 8px;
-        margin: 20px 0;
+        margin-top: 20px;
         font-size: 16px;
-
-}
-
-.login-form .button:focus {
-        outline: none;
-}
-
-.login-form span {
-        font-size: 12px;
-        font-weight: 200;
-
-}
-
-.login-form a {
-        font-size: 12px;
-        font-weight: 400;
-}
-
-.login-form .eula {
-        margin-top: 10px;
-        font-size: 10px;
+        transition: background-color 0.3s;
 }
 </style>
-

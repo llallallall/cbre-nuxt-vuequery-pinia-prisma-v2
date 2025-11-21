@@ -64,7 +64,7 @@
 <script setup lang="ts">
 import { ref, computed, inject } from 'vue';
 import { useModal } from 'vue-final-modal';
-import ModalFullscreen from '@/components/modal/Fullscreen.vue';
+import ModalFullscreen from '@/components/modal/FullscreenModal.vue';
 import { useRuntimeConfig } from '#app';
 
 // Props 정의

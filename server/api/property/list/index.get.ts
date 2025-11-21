@@ -1,269 +1,127 @@
-import prisma from '@/prisma/cbredb'
-import { 
-    CbreAsset, GeneralType, WarehouseType, AccessibilityType, FacilityType, LocationType, ProfitabilityType, SizesType, 
-    SectorType, SubSectorType, FloorType, HistoryType, AssetPhotoType, FloorPlanPhotoListType, EachFloorPhotoType, 
-    FloorPlanPhotoType, FileType, ElevatorsType, ParkingType, MaterialsType 
-} from '~/types/asset.type' 
-// 모든 필요한 타입을 명시적으로 임포트합니다.
+// server/api/property/list/index.get.ts
+
+import { defineEventHandler, createError } from 'h3';
+import prisma from '@/prisma/cbredb';
+// PropertyType 전체를 반환하기엔 너무 무거우므로, 리스트용 경량 타입을 사용하거나
+// 필요한 필드만 매핑하여 반환합니다. (여기서는 AdminListType 재활용 또는 유사 구조 사용)
+import type { PropertyType } from '~/types/property.type';
 
 export default defineEventHandler(async (event) => {
+    try {
+        // 1. DB 조회 (공개된 자산만 필터링하는 로직이 필요하다면 where 절 추가)
+        const assetsList = await prisma.property.findMany({
+            select: {
+                id: true,
+                name: true,
+                updated_at: true,
 
-    // 1. 메인 데이터 쿼리: Raw 쿼리 대신 Prisma의 Include를 사용하여 1:1 관계를 안전하게 처리합니다.
-    const allPropertiesData = await prisma.property.findMany({
-        orderBy: {
-            created_at: 'desc'
-        },
-        // 1:1 관계 모델을 Include 합니다.
-        include: {
-            sector: { select: { id: true, name: true } },
-            subsector: { select: { id: true, sector_id: true, name: true } },
-            location: true, // Location 모델 전체를 가져옴
-            scale: true,    // Scale 모델 전체를 가져옴
-            facility: true, // Facility 모델 전체를 가져옴
-            accessibility: true, // Accessibility 모델 전체를 가져옴
-            profitability: true, // Profitability 모델 전체를 가져옴
-            warehouse: { // 1:N 관계 (온도 타입별 비율)
-                select: {
-                    temperature_type: true,
-                    ratio: true,
+                location: {
+                    select: {
+                        address_full: true,
+                        address_province: true,
+                        address_city: true,
+                        latitude: true,
+                        longitude: true,
+                    }
+                },
+                sector: { select: { name: true } },
+                subsector: { select: { name: true } },
+                scale: {
+                    select: {
+                        gfa_sqm: true,
+                        gfa_py: true,
+                        // 필요한 다른 Scale 정보 추가
+                    }
+                },
+                profitability: { select: { grade: true, effective_ratio: true } },
+
+                propertyImageFile: {
+                    select: { file_url: true },
+                    orderBy: [{ main: 'desc' }, { updated_at: 'desc' }],
+                    take: 1
+                },
+
+                // 사용자 화면 필터링을 위한 추가 정보 (예: Transaction 유무 등)
+                transaction: {
+                    select: { type: true },
+                    take: 1 // 존재 여부 확인용
                 }
             },
-        }
-    });
-
-    // 2. 나머지 1:N 관계 데이터를 별도로 가져옵니다 (기존 방식 유지)
-    // 이 쿼리들은 이미 안전하므로 유지하되, Floor는 floorPartial을 포함하도록 명시합니다.
-    const allFloors = await prisma.floor.findMany({ include: { floorPartial: true } });
-    const allHistories = await prisma.history.findMany({ select: { property_id: true, year: true, type: true } });
-    const allImages = await prisma.propertyImageFile.findMany({ select: { property_id: true, main: true, file_url: true, file_uuid: true, file_name: true, file_key: true, file_content_type: true } });
-    const allFloorPlanImages = await prisma.floorPlanFile.findMany({ select: { property_id: true, type: true, floor: true, file_uuid: true, file_name: true, file_key: true, file_url: true, file_content_type: true } });
-    const allBrochureFiles = await prisma.propertyBrochureFile.findMany({ select: { property_id: true, file_uuid: true, file_name: true, file_key: true, file_url: true, file_content_type: true } });
-
-    let result = [] as CbreAsset[]
-
-    // 3. 데이터 매핑 (1:1 관계는 Direct Access로 변경)
-    for (const property of allPropertiesData) {
-        // 1:1 관계는 null일 수 있으므로 안전하게 접근합니다.
-        const location = property.location;
-        const scale = property.scale;
-        const facility = property.facility;
-        const accessibility = property.accessibility;
-        const profitability = property.profitability;
-        
-        let propertyObj = {} as CbreAsset;
-
-        // 메인 정보
-        propertyObj.propertyId = property.id;
-        propertyObj.propertyName = property.name;
-        
-        // 메인 이미지 URL (별도로 가져온 allImages에서 필터링)
-        const mainImage = allImages.find(img => img.property_id === property.id && img.main === true);
-        propertyObj.mainImageUrl = mainImage?.file_url || ''; // CbreAsset 요구사항에 따라 빈 문자열 처리
-
-        // general
-        let generalObj: GeneralType = {} as GeneralType;
-        generalObj.sector = property.sector as SectorType || { id: '', name: '' };
-
-        let subSectorObj: SubSectorType | null = null; // 타입을 명시적으로 지정
-
-        if (property.subsector) {
-            // 🌟 핵심 수정: 스네이크 케이스 필드(sector_id)를 카멜 케이스(sectorId)로 변환하여 할당합니다.
-            subSectorObj = {
-                id: property.subsector.id,
-                // 👇 DB 컬럼명(sector_id)을 타입 필드명(sectorId)에 매핑
-                sectorId: property.subsector.sector_id, 
-                name: property.subsector.name,
-            }; // 이제 별도의 'as SubSectorType' 캐스팅 없이도 타입이 안전하게 추론됩니다.
-        }
-
-        generalObj.subSector = subSectorObj;
-        
-        // Warehouse (Array to Object 변환)
-        let warehouseObj: WarehouseType = { room: null, low: null, constant: null };
-        property.warehouse.forEach(w => {
-            if (w.temperature_type === 'ROOM') warehouseObj.room = w.ratio;
-            else if (w.temperature_type === 'LOW') warehouseObj.low = w.ratio;
-            else if (w.temperature_type === 'CONSTANT') warehouseObj.constant = w.ratio;
+            orderBy: [
+                { updated_at: 'desc' }
+            ]
         });
-        generalObj.warehouse = warehouseObj;
-        propertyObj.general = generalObj;
 
-        // accessibility (1:1 관계 Direct Mapping)
-        let accessibilityObj: AccessibilityType = {} as AccessibilityType;
-        accessibilityObj.distanceToIc = accessibility?.distance_to_ic || null;
-        accessibilityObj.timeTakenToCityHall = accessibility?.time_taken_to_city_hall || null;
-        accessibilityObj.timeTakenToSubway = accessibility?.time_taken_to_subway || null;
-        accessibilityObj.nearbyFacilities = accessibility?.nearby_facilities || null;
-        accessibilityObj.nearbyAttractions = accessibility?.nearby_attractions || null;
-        accessibilityObj.nearbyPlaces = accessibility?.nearby_places || null;
-        propertyObj.accessibility = accessibilityObj;
-        
-        // facility (1:1 관계 Direct Mapping)
-        let facilityObj: FacilityType = {} as FacilityType;
-        
-        let elevatorsObj: ElevatorsType = {} as ElevatorsType;
-        elevatorsObj.total = facility?.elevators_total || null;
-        elevatorsObj.passenger = facility?.elevators_passenger || null;
-        elevatorsObj.service = facility?.elevators_service || null;
-        elevatorsObj.shuttle = facility?.elevators_freight || null;
-        facilityObj.elevators = elevatorsObj;
+        // 2. 매핑 (PropertyType의 부분 집합 또는 리스트 전용 타입으로 반환)
+        // 여기서는 PropertyStore의 'initialAllAssets'에 들어갈 데이터 구조로 변환합니다.
+        // PropertyType 전체 구조를 맞추되, 로드되지 않은 데이터는 null/빈 배열로 처리합니다.
 
-        let parkingObj: ParkingType = {} as ParkingType;
-        parkingObj.cpsExisting = facility?.cps_existing || null;
-        parkingObj.cpsRequired = facility?.cps_required || null;
-        parkingObj.freeCpsSqm = facility?.free_cps_sqm || null;
-        parkingObj.freeCpsPy = facility?.free_cps_py || null;
-        parkingObj.paidParkingFee = facility?.paid_parking_fee || null;
-        facilityObj.parking = parkingObj;
+        const mappedData: Partial<PropertyType>[] = assetsList.map((asset) => {
+            return {
+                id: asset.id,
+                name: asset.name,
 
-        let materialsObj: MaterialsType = {} as MaterialsType;
-        materialsObj.roofMaterial = facility?.roof_material || null;
-        materialsObj.facade = facility?.facade || null;
-        materialsObj.mechanicalElectrical = facility?.mechanical_electrical || null;
-        materialsObj.lighting = facility?.lighting || null;
-        materialsObj.fireFighting = facility?.fire_fighting || null;
-        facilityObj.materials = materialsObj;
-        
-        propertyObj.facility = facilityObj;
+                // 1:1 Relations (존재하는 데이터만 매핑)
+                sector: asset.sector ? { id: '', name: asset.sector.name } : null,
+                subsector: asset.subsector ? { id: '', sectorId: '', name: asset.subsector.name } : null,
 
-        // location (1:1 관계 Direct Mapping)
-        let locationObj: LocationType = {} as LocationType;
-        locationObj.addressFull = location?.address_full || '';
-        locationObj.addressFullJibun = location?.address_full_jibun || '';
-        locationObj.addressProvince = location?.address_province || '';
-        locationObj.addressCity = location?.address_city || '';
-        locationObj.latitude = location?.latitude || null;
-        locationObj.longitude = location?.longitude || null;
-        propertyObj.location = locationObj;
+                location: asset.location ? {
+                    id: '', propertyId: asset.id,
+                    addressFull: asset.location.address_full,
+                    addressFullJibun: null, // select 안함
+                    addressProvince: asset.location.address_province,
+                    addressCity: asset.location.address_city,
+                    latitude: asset.location.latitude,
+                    longitude: asset.location.longitude,
+                    createdAt: new Date(), updatedAt: new Date() // Dummy
+                } : null,
 
-        // profitability (1:1 관계 Direct Mapping)
-        let profitabilityObj: ProfitabilityType = {} as ProfitabilityType;
-        profitabilityObj.grade = profitability?.grade || '';
-        profitabilityObj.effRatio = profitability?.effective_ratio || null;
-        propertyObj.profitability = profitabilityObj;
+                scale: asset.scale ? {
+                    // ... Scale 타입의 필수 필드들을 채워야 함 (null 허용 시 생략 가능)
+                    // 여기서는 UI 필터링에 주로 쓰이는 면적 정보만 매핑
+                    id: '', propertyId: asset.id,
+                    gfaSqm: asset.scale.gfa_sqm,
+                    gfaPy: asset.scale.gfa_py,
+                    // 나머지 필수 필드는 Type Assertion이나 Default 값 처리 필요
+                } as any : null,
 
-        // sizes (Scale 1:1 관계 Direct Mapping)
-        let sizesObj: SizesType = {} as SizesType;
-        sizesObj.noOfBuildings = scale?.no_of_buildings || null;
-        sizesObj.upperLevels = scale?.upper_levels || null;
-        sizesObj.basementLevels = scale?.basement_levels || null;
+                profitability: asset.profitability ? {
+                    id: '', propertyId: asset.id,
+                    grade: asset.profitability.grade,
+                    effectiveRatio: asset.profitability.effective_ratio,
+                    createdAt: new Date(), updatedAt: new Date()
+                } : null,
 
-        sizesObj.gfaSqm = scale?.gfa_sqm || null;
-        sizesObj.gfaPy = scale?.gfa_py || null;
-        sizesObj.nfaSqm = scale?.nfa_sqm || null;
-        sizesObj.nfaPy = scale?.nfa_py || null;
-        sizesObj.siteAreaSqm = scale?.site_area_sqm || null;
-        sizesObj.siteAreaPy = scale?.site_area_py || null;
-        sizesObj.grossLeasableAreaSqm = scale?.gross_leasable_area_sqm || null;
-        sizesObj.grossLeasableAreaPy = scale?.gross_leasable_area_py || null;
-        sizesObj.netLeasableAreaSqm = scale?.net_leasable_area_sqm || null;
-        sizesObj.netLeasableAreaPy = scale?.net_leasable_area_py || null;
-        sizesObj.floorAreaRatioExisting = scale?.floor_area_ratio_existing || null;
-        sizesObj.floorAreaRatioPermitted = scale?.floor_area_ratio_permitted || null;
-        sizesObj.buildingCoverageRatioExisting = scale?.building_coverage_ratio_existing || null;
-        sizesObj.buildingCoverageRatioPermitted = scale?.building_coverage_ratio_permitted || null;
-        sizesObj.floorPlateSqm = scale?.floor_plate_sqm || null;
-        sizesObj.floorPlatePy = scale?.floor_plate_py || null;
-        propertyObj.sizes = sizesObj;
+                // Files
+                propertyImageFile: asset.propertyImageFile.map(img => ({
+                    id: '', propertyId: asset.id, main: true,
+                    fileUrl: img.file_url,
+                    fileUuid: null, fileName: null, fileKey: null, fileContentType: null,
+                    createdAt: new Date(), updatedAt: new Date()
+                })),
 
-        // historyList
-        propertyObj.historyList = allHistories
-            .filter((el: any) => el.property_id === property.id)
-            .map((item: any) => ({ propertyId: item.property_id, type: item.type, year: item.year }) as HistoryType);
+                // 1:N Relations (빈 배열)
+                warehouse: [],
+                history: [],
+                propertyBrochureFile: [],
+                floor: [],
+                floorPlanFile: [],
 
-        // floorList (Floor.id를 floorId에 매핑)
-        propertyObj.floorList = allFloors
-            .filter((el: any) => el.property_id === property.id)
-            .map((item: any) => ({
-                floorId: item.id, // 🌟 Floor.id를 FloorType.floorId에 매핑합니다.
-                propertyId: item.property_id,
-                type: item.type,
-                floor: item.floor,
-                ceilingHeight: item.ceiling_height,
-                ceilingHeightUnit: item.ceiling_height_unit,
-                floorLoad: item.floor_load,
-                floorLoadUnit: item.floor_load_unit,
-                truckBerths: item.truck_berths,
-                use: item.use,
-                totalAreaSqm: item.total_area_sqm,
-                totalAreaPy: item.total_area_py,
-                grossLeasableAreaSqm: item.gross_leasable_area_sqm,
-                grossLeasableAreaPy: item.gross_leasable_area_py,
-                netLeasableAreaSqm: item.net_leasable_area_sqm,
-                netLeasableAreaPy: item.net_leasable_area_py,
-                floorPartial: item.floorPartial,
-            }) as FloorType);
-
-        // photoList, brochureList, floorPlanPhotoList는 기존 로직을 타입만 정리하여 그대로 유지합니다.
-        // ... (나머지 1:N 관계 매핑 로직) ...
-        
-        // floorPlanPhotoList
-        const floorPlanPhotoObj = allFloorPlanImages.filter((el: any) => el.property_id === property.id);
-        let floorPlanPhotoListObj: FloorPlanPhotoListType = { logitudinal: [], cross: [], eachFloor: { uppers: [], basements: [] } };
-        
-        for (const item of floorPlanPhotoObj) {
-            const floorPlanObj: FloorPlanPhotoType = {
-                propertyId: item.property_id,
-                type: item.type,
-                floor: item.floor,
-                fileUuid: item.file_uuid,
-                fileName: item.file_name,
-                fileKey: item.file_key,
-                fileUrl: item.file_url,
-                fileContentType: item.file_content_type,
+                // 필터링용 Transaction 정보 (간소화)
+                transaction: asset.transaction.map(t => ({
+                    id: '', propertyId: asset.id,
+                    type: t.type,
+                    year: '', quarter: '', executionDate: new Date(),
+                    createdAt: new Date(), updatedAt: new Date(),
+                    sale: null, lease: null
+                }))
             };
+        });
 
-            if (item.type === 'LOGITUDINALSECTION') {
-                floorPlanPhotoListObj.logitudinal.push(floorPlanObj);
-            } else if (item.type === 'CROSSSECTION') {
-                floorPlanPhotoListObj.cross.push(floorPlanObj);
-            } else if (item.type === 'UPPERSECTION') {
-                floorPlanPhotoListObj.eachFloor.uppers.push(floorPlanObj);
-            } else if (item.type === 'BASEMENTSECTION') {
-                floorPlanPhotoListObj.eachFloor.basements.push(floorPlanObj);
-            }
-        }
-        propertyObj.floorPlanPhotoList = floorPlanPhotoListObj;
+        return mappedData;
 
-        // photoList
-        propertyObj.photoList = allImages
-            .filter((el: any) => el.property_id === property.id)
-            .map((item: any) => ({
-                propertyId: item.property_id,
-                main: item.main,
-                fileUuid: item.file_uuid,
-                fileName: item.file_name,
-                fileKey: item.file_key,
-                fileUrl: item.file_url,
-                fileContentType: item.file_content_type,
-            }) as AssetPhotoType);
-        
-        // brochureList
-        propertyObj.brochureList = allBrochureFiles
-            .filter((el: any) => el.property_id === property.id)
-            .map((item: any) => ({
-                propertyId: item.property_id,
-                fileUuid: item.file_uuid,
-                fileName: item.file_name,
-                fileKey: item.file_key,
-                fileUrl: item.file_url,
-                fileContentType: item.file_content_type,
-            }) as FileType);
-
-
-        // transactionInfo / leaseInfo (기존 빈 객체 할당 유지)
-        propertyObj.transactionInfo = { totalTransactions: 0, transactionsList: [] };
-        propertyObj.leaseInfo = { 
-            totalLeasesAsking: 0, 
-            totalLeasesActual: 0, 
-            leasesAskingList: [], 
-            leasesActualList: [], 
-            leasesList: [] 
-        };
-        
-        result.push(propertyObj);
+    } catch (error) {
+        console.error('Main List 조회 실패:', error);
+        throw createError({ statusCode: 500, statusMessage: 'Failed to retrieve property list' });
     }
-
-    return result
-      
-})
+});

@@ -103,7 +103,7 @@
 import { ref, computed } from 'vue';
 import { Disclosure, DisclosureButton, DisclosurePanel } from '@headlessui/vue';
 import { useModal } from 'vue-final-modal';
-import ModalFullscreen from '~/components/modal/Fullscreen.vue'; // 💡 경로 수정
+import ModalFullscreen from '~/components/modal/FullscreenModal.vue'; // 💡 경로 수정
 import type { FloorFlanTypeEnum as FloorTypeDefinition } from '~/types/property.type';
 
 const FloorFlanTypeEnum = {

@@ -426,6 +426,84 @@ export interface FloorPayload {
         floorPartial?: FloorPartialPayload[];
 }
 
+
+/**
+ * @description Lease 생성/수정 시 클라이언트에서 보내는 데이터 구조 (camelCase)
+ */
+export interface LeaseCreatePayload {
+        // Transaction 기본 정보
+        year: string;
+        quarter: string;
+        executionDate: string | Date; // 날짜 문자열
+
+        // Lease 상세 정보 (LeaseType에서 id, dates 등을 제외하거나 재정의)
+        leaseType: LeaseTypeEnum; // 'ASKING' | 'ACTUAL'
+        floor: string | null;
+        unit: string | null;
+
+        leaseStartDate: string | Date | null;
+        leaseEndDate: string | Date | null;
+
+        gfaSqm: number | null;
+        gfaPy: number | null;
+        nfaSqm: number | null;
+        nfaPy: number | null;
+        effRatio: number | null;
+
+        monthlyRent: number | null;
+        monthlyCamf: number | null;
+        deposit: number | null;
+
+        rentMonthlyPy: number | null;
+        camfMonthlyPy: number | null;
+        depositPy: number | null;
+
+        iod: number | null;
+        gdm: number | null;
+        noc: number | null;
+
+        leaseTermYear: number | null;
+        rentFreeType: RentFreeTypeEnum | null; // 'PerYear' | 'PerTerm'
+        rentFreeMonth: number | null;
+        effectiveNoc: number | null;
+        fitOut: number | null;
+
+        tiAmountKrw: number | null;
+        tiAmountNfaPy: number | null;
+
+        totalFreeRentPeriodMonth: number | null;
+        totalOccupyingPeriodYear: number | null;
+        totalFreeRentOccupyingYear: number | null;
+
+        monthlyCashSupportGfa: number | null;
+        allInEffectiveRentMonthlyPy: number | null;
+        allInNoc: number | null;
+}
+
+
+/**
+ * @description Sale 생성/수정 시 클라이언트에서 보내는 데이터 구조 (camelCase)
+ */
+export interface SaleCreatePayload {
+        // Transaction 기본 정보
+        year: string;
+        quarter: string;
+        executionDate: string | Date;
+
+        // Sale 상세 정보
+        saleType: SaleTypeEnum; // 'ENBLOC' | 'PARTIAL'
+        gfaSqm: number | null;
+        nfaSqm: number | null;
+        priceKrw: number | null;
+        pricePerGfa: number | null;
+        pricePerNfa: number | null;
+        estCapRate: number | null;
+        estDiscountRate: number | null;
+        buyer: string | null;
+        seller: string | null;
+        remarks: string | null;
+}
+
 // ----------------------------------------------------------------------
 // --- 5. Admin 목록 표시용 타입 (Property Store에서 사용)
 // ----------------------------------------------------------------------

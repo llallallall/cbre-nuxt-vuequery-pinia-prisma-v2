@@ -1,53 +1,67 @@
-
 <template>
         <main>
                 <div class="header min-w-[40vh]">
-                        <div class="logo">
-                                <!-- <IconCBRELogo width="80px" height="25px" class="text-white" /> -->
-                        </div>
-                        <!-- <div class="language">
-                                <img src="/images/icons/world-globe-line-icon.svg" class="globe" />
-                                <select v-model="selectedLanguage" class="select font-notoSans font-light text-sm focus:ring-0 focus:border-white">
-        <option v-for="option in options" :value="option.value" class="option">
-          {{ option.text }}
-        </option>
-      </select>
-                        </div> -->
+                        <div class="logo"></div>
                 </div>
                 <div class="login-form-title font-calibre text-white text-center min-w-[40vh]">
-                        <div class="text-4xl ">CBRE Korea
-                        </div>
-                        <div class="text-xl">Asset Management System
-                        </div>
+                        <div class="text-4xl ">CBRE Korea</div>
+                        <div class="text-xl">Asset Management System</div>
                 </div>
+
                 <div class="login-form-wrapper shadow-xl min-w-[40vh]">
                         <div class="login-form-bg"></div>
                         <div class="login-form">
 
-                                <VeeForm :validation-schema="schema" :initial-values="initialValues"
-                                        v-slot="{ meta: formMeta, errors: formErrors }" @submit="handleSubmit"
-                                        class="flex-1 shadow-lg bg-ct-dark-200 rounded-2xl px-8 py-4 space-y-0">
-                                        <div class="title font-spaceMono px-0">Sign Up</div>
+                                <form @submit.prevent="handleSignup"
+                                        class="flex-1 shadow-lg bg-ct-dark-200 rounded-2xl px-8 py-6 space-y-4 flex flex-col justify-center">
+                                        <div class="title font-spaceMono px-0 text-2xl font-bold mb-4">Sign Up</div>
 
-                                        <VeeTextInput type="text" name="name" label="Name" placeholder="Name"
-                                                leftIcon="fa-user" />
-
-                                        <VeeTextInput type="email" name="email" label="Email" placeholder="Email"
-                                                leftIcon="fa-envelope" />
-                                        <VeeTextInput type="password" name="password" label="Password" placeholder="Password"
-                                                leftIcon="fa-lock" />
-                                        <VeeTextInput type="password" name="confirmed" label="Confirmed Password"
-                                                placeholder="Confirm Password" leftIcon="fa-lock" />
-                                        <button class="button" type="submit" :disabled="!formMeta.valid || isLoading"
-                                                :class="formMeta.valid || isLoading ? 'bg-cbre_primary_2 text-white' : 'bg-cbre_primary_1/60 text-cbre_primary_5/50'">Request
-                                                Account</button>
-                                        <div class="register">
-                                                <span class="text-gray-300">Have a account? </span><a href="/signup"
-                                                        class="hover:underline cursor-pointer">Log in</a>
+                                        <div class="flex flex-col">
+                                                <label class="text-sm font-medium text-gray-300 mb-1">Name</label>
+                                                <input v-model="form.name" type="text" placeholder="Your Name"
+                                                        class="w-full px-4 py-2 rounded-lg bg-white/10 border border-gray-400 text-white focus:outline-none focus:border-white placeholder-gray-400" />
                                         </div>
 
+                                        <div class="flex flex-col">
+                                                <label class="text-sm font-medium text-gray-300 mb-1">Email</label>
+                                                <input v-model="form.email" type="email" placeholder="Your Email"
+                                                        class="w-full px-4 py-2 rounded-lg bg-white/10 border border-gray-400 text-white focus:outline-none focus:border-white placeholder-gray-400" />
+                                        </div>
 
-                                </VeeForm>
+                                        <div class="flex flex-col">
+                                                <label class="text-sm font-medium text-gray-300 mb-1">Password</label>
+                                                <input v-model="form.password" type="password"
+                                                        placeholder="Create Password"
+                                                        class="w-full px-4 py-2 rounded-lg bg-white/10 border border-gray-400 text-white focus:outline-none focus:border-white placeholder-gray-400" />
+                                        </div>
+
+                                        <div class="flex flex-col">
+                                                <label class="text-sm font-medium text-gray-300 mb-1">Confirm
+                                                        Password</label>
+                                                <input v-model="form.confirmed" type="password"
+                                                        placeholder="Confirm Password"
+                                                        class="w-full px-4 py-2 rounded-lg bg-white/10 border border-gray-400 text-white focus:outline-none focus:border-white placeholder-gray-400" />
+                                        </div>
+
+                                        <div v-if="errorMessage" class="text-red-400 text-sm text-center mt-2">
+                                                {{ errorMessage }}
+                                        </div>
+
+                                        <button class="button font-bold" type="submit"
+                                                :disabled="!isFormValid || isLoading"
+                                                :class="isFormValid && !isLoading ? 'bg-cbre_primary_2 text-white hover:bg-cbre_primary_1' : 'bg-cbre_primary_1/60 text-cbre_primary_5/50 cursor-not-allowed'">
+                                                <span v-if="isLoading">Processing...</span>
+                                                <span v-else>Request Account</span>
+                                        </button>
+
+                                        <div class="register text-center mt-4">
+                                                <span class="text-gray-300">Have an account? </span>
+                                                <a href="/login"
+                                                        class="hover:underline cursor-pointer text-white font-bold">Log
+                                                        in</a>
+                                        </div>
+
+                                </form>
 
                         </div>
                 </div>
@@ -55,6 +69,9 @@
 </template>
 
 <script setup lang="ts">
+import { ref, reactive, computed } from 'vue';
+import { useRouter } from 'vue-router';
+
 definePageMeta({
         layout: 'auth-layout',
         middleware: 'auth',
@@ -64,59 +81,86 @@ definePageMeta({
         },
 });
 
+const router = useRouter();
+const isLoading = ref(false);
+const errorMessage = ref('');
 
+const form = reactive({
+        name: '',
+        email: '',
+        password: '',
+        confirmed: ''
+});
 
-import { configure } from "vee-validate"
-import { object, string, ref as yupRef } from "yup";
-import { toTypedSchema } from '@vee-validate/yup';
-configure({
-        validateOnBlur: true, // controls if `blur` events should trigger validation with `handleChange` handler
-        validateOnChange: true, // controls if `change` events should trigger validation with `handleChange` handler
-        validateOnInput: true, // controls if `input` events should trigger validation with `handleChange` handler
-        validateOnModelUpdate: false, // controls if `update:modelValue` events should trigger validation with `handleChange` handler
-})
+// 이메일 형식 검사
+const isValidEmail = (email: string) => {
+        const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        return re.test(email);
+};
 
-const initialValues = { email: "", password: "", confirmed: "" }
-const schema = toTypedSchema(
-        object(
-                {
-                        name: string().required().min(1),
-                        email: string().required().email().test("email-is-taken", "Email is already taken", async (value) => !(await existingEmail(value))),
-                        password: string().required().min(1).label("Your Password"),
-                        confirmed: string().required().label("Your Confirmation Password").oneOf([yupRef("password")], "Passwords do not match"), //Cross-Field Validation
-                }
-        ));
+// 폼 유효성 검사
+const isFormValid = computed(() => {
+        return (
+                form.name.trim().length > 0 &&
+                isValidEmail(form.email) &&
+                form.password.length >= 4 && // 최소 길이 예시
+                form.password === form.confirmed
+        );
+});
 
-const isLoading = ref(false)
-
-const existingEmail = async (value: string) => {
-        const result = await $fetch("/api/auth/checkemail?email=" + value)
-        return result ? true : false;
-}
-
-const handleSubmit = async (values: any, actions: any) => {
-        isLoading.value = true
+// 이메일 중복 체크 API
+const checkEmailExists = async (email: string) => {
         try {
-                await useFetch("/api/auth/register", {
-                        method: "POST",
-                        body: values
-                });
-                useRouter().push({ name: "login" })
-        } catch (error: any) {
-                console.log(error)
+                const result = await $fetch<boolean>(`/api/auth/checkemail?email=${email}`);
+                return result; // true면 중복
+        } catch (e) {
+                return false;
+        }
+};
 
-        } finally {
-                isLoading.value = false
-                actions.resetForm();
+const handleSignup = async () => {
+        if (!isFormValid.value) {
+                if (form.password !== form.confirmed) errorMessage.value = "Passwords do not match.";
+                else if (!isValidEmail(form.email)) errorMessage.value = "Invalid email format.";
+                return;
         }
 
+        isLoading.value = true;
+        errorMessage.value = '';
+
+        try {
+                // 1. 이메일 중복 체크
+                const isTaken = await checkEmailExists(form.email);
+                if (isTaken) {
+                        errorMessage.value = "Email is already taken.";
+                        isLoading.value = false;
+                        return;
+                }
+
+                // 2. 회원가입 요청
+                await $fetch("/api/auth/register", {
+                        method: "POST",
+                        body: {
+                                name: form.name,
+                                email: form.email,
+                                password: form.password
+                        }
+                });
+
+                // 성공 시 로그인 페이지로 이동
+                router.push({ name: "login" });
+
+        } catch (error: any) {
+                console.error("Signup error:", error);
+                errorMessage.value = error.data?.message || "Failed to create account.";
+        } finally {
+                isLoading.value = false;
+        }
 }
-
-
 </script>
 
-
 <style scoped>
+/* 기존 스타일 유지 + 일부 조정 */
 .header {
         position: absolute;
         top: 0;
@@ -128,55 +172,11 @@ const handleSubmit = async (values: any, actions: any) => {
         justify-content: space-between;
 }
 
-.logo {
-        position: relative;
-        padding-top: 30px;
-        padding-left: 40px;
-}
-
-.language {
-        position: relative;
-        padding-top: 30px;
-        padding-right: 40px;
-}
-
-.globe {
-        position: absolute;
-        width: 16px;
-        height: 16px;
-        margin-top: 7px;
-        margin-left: 11px;
-        color: white;
-
-
-}
-
-.select {
-        background-color: transparent;
-        border-width: 2px;
-        border-color: rgba(255, 255, 255, 0.4);
-        border-radius: 5px;
-        padding: 2px 20px 2px 25px;
-        color: rgba(255, 255, 255, 0.6);
-        /* font-style: normal;
-        font-weight: normal; */
-        width: 130px;
-        height: 30px;
-        text-align: center;
-
-}
-
-.option {
-        background-color: transparent;
-        color: white;
-}
-
 .login-form-wrapper {
         position: relative;
         width: 100%;
-        height: 45vh;
-        /* background-color: white; */
-
+        height: 60vh;
+        /* 폼이 길어졌으므로 높이 조정 */
 }
 
 .login-form-title {
@@ -200,45 +200,18 @@ const handleSubmit = async (values: any, actions: any) => {
         height: 100%;
         z-index: 60;
         color: white;
-        padding: 30px 40px;
+        padding: 20px 40px;
         display: flex;
         flex-direction: column;
 }
 
-.login-form .title {
-        font-weight: 800;
-        padding-left: 0px;
-        margin-bottom: 1.5vh;
-}
-
-
 .login-form .button {
         width: 100%;
-        height: 40px;
+        height: 45px;
         outline: none;
         border-radius: 8px;
         margin: 20px 0;
         font-size: 16px;
-
-}
-
-.login-form .button:focus {
-        outline: none;
-}
-
-.login-form span {
-        font-size: 12px;
-        font-weight: 200;
-
-}
-
-.login-form a {
-        font-size: 12px;
-        font-weight: 400;
-}
-
-.login-form .eula {
-        margin-top: 10px;
-        font-size: 10px;
+        transition: background-color 0.3s;
 }
 </style>
