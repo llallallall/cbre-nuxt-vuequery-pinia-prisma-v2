@@ -100,6 +100,120 @@ export const LAYER_UNCLUSTERED_POINT = {
         paint: {},
 };
 
+export const LAYER_MINIMAP_POINTS = {
+        source: 'cbre-minimap-points',
+        id: 'cbre-minimap-points-layer',
+        type: 'circle',
+        paint: {
+                'circle-radius': [
+                        'interpolate',
+                        ['linear'],
+                        ['zoom'],
+                        7,
+                        ['interpolate', ['linear'], ['coalesce', ['get', 'mag'], 1], 1, 1, 6, 4],
+                        16,
+                        ['interpolate', ['linear'], ['coalesce', ['get', 'mag'], 1], 1, 5, 6, 50]
+                ],
+                'circle-color': [
+                        'interpolate',
+                        ['linear'],
+                        ['coalesce', ['get', 'mag'], 1],
+                        1,
+                        'rgba(0,63,45, 0.8)',
+                        2,
+                        'rgba(0,63,45, 0.8)',
+                        3,
+                        'rgba(0,63,45, 0.8)',
+                        4,
+                        'rgba(0,63,45, 0.8)',
+                        5,
+                        'rgba(0,63,45, 0.8)',
+                        6,
+                        'rgba(0,63,45, 0.8)'
+                ],
+                'circle-stroke-color': 'white',
+                'circle-stroke-width': 1,
+                'circle-opacity': [
+                        'interpolate',
+                        ['linear'],
+                        ['zoom'],
+                        4,
+                        1,
+                        8,
+                        1
+                ]
+        }
+};
+
+export const LAYER_MINIMAP_HEAT = {
+        source: 'cbre-minimap-points',
+        id: 'cbre-minimap-heat-layer',
+        type: 'heatmap',
+        paint: {
+                // Increase the heatmap weight based on frequency and property magnitude
+                'heatmap-weight': [
+                        'interpolate',
+                        ['linear'],
+                        ['coalesce', ['get', 'mag'], 1],
+                        0,
+                        0,
+                        6,
+                        1
+                ],
+                // Increase the heatmap color weight weight by zoom level
+                // heatmap-intensity is a multiplier on top of heatmap-weight
+                'heatmap-intensity': [
+                        'interpolate',
+                        ['linear'],
+                        ['zoom'],
+                        0,
+                        1,
+                        9,
+                        3
+                ],
+                // Color ramp for heatmap.  Domain is 0 (low) to 1 (high).
+                // Begin color ramp at 0-stop with a 0-transparancy color
+                // to create a blur-like effect.
+                'heatmap-color': [
+                        'interpolate',
+                        ['linear'],
+                        ['heatmap-density'],
+                        0,
+                        'rgba(0,63,45, 0.0)',
+                        0.2,
+                        'rgba(0,63,45, 0.1)',
+                        0.4,
+                        'rgba(0,63,45, 0.2)',
+                        0.6,
+                        'rgba(0,63,45, 0.4)',
+                        0.8,
+                        'rgba(0,63,45, 0.6)',
+                        1,
+                        'rgba(0,63,45, 0.8)'
+                ],
+                // Adjust the heatmap radius by zoom level
+                'heatmap-radius': [
+                        'interpolate',
+                        ['linear'],
+                        ['zoom'],
+                        0,
+                        2,
+                        9,
+                        20
+                ],
+                // Transition from heatmap to circle layer by zoom level
+                'heatmap-opacity': [
+                        'interpolate',
+                        ['linear'],
+                        ['zoom'],
+                        7,
+                        1,
+                        9,
+                        0
+                ]
+        }
+};
+
 // Map Style Options
 export const MapStyle = [
         { name: 'Light', value: 'mapbox://styles/mapbox/light-v11' },

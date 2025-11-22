@@ -7,7 +7,7 @@
                                 <MenuButton class="inline-flex w-full justify-center items-center focus:outline-none">
                                         <div
                                                 class="w-[30px] h-[30px] rounded-full bg-gray-200 relative overflow-hidden object-cover border border-gray-300">
-                                                <img :src="userStore.getUserImage" class="w-full h-full object-cover"
+                                                <img :src="userStore.getUserImage || '/images/avatar/avatar-placeholder.png'" class="w-full h-full object-cover"
                                                         alt="User Avatar" />
                                         </div>
                                         <Icon name="ph:caret-up-down" size="14" class="text-gray-400 ml-1" />

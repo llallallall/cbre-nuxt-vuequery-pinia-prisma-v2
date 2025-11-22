@@ -88,6 +88,7 @@ import { useRouter } from 'vue-router';
 import { storeToRefs } from 'pinia';
 import { useUiStore } from '~/stores/ui';
 import { useMapStore } from '~/stores/map';
+import { usePropertyStore } from '~/stores/property'; // 💡 Property Store 임포트
 import { useFormat } from '~/composables/useFormat'; // 💡 useFormat 임포트
 import type { PropertyType } from '~/types/property.type';
 import ListItemInfo from './ItemInfo.vue';
@@ -100,6 +101,7 @@ const props = defineProps<{
 const router = useRouter();
 const uiStore = useUiStore();
 const mapStore = useMapStore();
+const propertyStore = usePropertyStore(); // 💡 Property Store 초기화
 const { getThumbnailUrl } = useFormat(); // 💡 썸네일 변환 함수 사용
 
 const { isGridView } = storeToRefs(uiStore);
@@ -146,10 +148,10 @@ const handleImageError = () => {
 const hasSale = computed(() => props.item.transaction?.some(t => t.type === 'SALE'));
 const hasLease = computed(() => props.item.transaction?.some(t => t.type === 'LEASE'));
 
-// Keep Logic (Local Mock)
-const isKept = ref(false);
+// Keep Logic
+const isKept = computed(() => propertyStore.isKept(props.item.id));
 const toggleKeep = () => {
-        isKept.value = !isKept.value;
+        propertyStore.toggleKeep(props.item.id);
 };
 
 // Actions

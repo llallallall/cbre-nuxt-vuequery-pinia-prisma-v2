@@ -56,7 +56,7 @@
 
                         <MapboxSource source-id="cbre-assets" :source="(cbreDataSource as any)" />
 
-                        <MapboxGeolocateControl position="top-left" />
+                        <MapboxGeolocateControl position="top-left" @error="onGeolocateError" />
                         <MapboxNavigationControl position="top-left" />
                         <MapboxFullscreenControl position="top-right" />
 
@@ -73,125 +73,15 @@
                                 style: 'mapbox://styles/mapbox/' + mapStyleId,
                                 center: [128, 36],
                                 zoom: 5,
-                                maxZoom: 9,
+                                maxZoom: 5,
                                 minZoom: 5,
                                 antialias: true,
                                 attributionControl: false,
                                 hash: false
                         }">
-                        <MapboxLayer :layer="{
-                                source: 'cbre-minimap-points',
-                                id: 'cbre-minimap-points-layer',
-                                type: 'circle',
-                                paint: {
-                                        'circle-radius': [
-                                                'interpolate',
-                                                ['linear'],
-                                                ['zoom'],
-                                                7,
-                                                ['interpolate', ['linear'], ['get', 'mag'], 1, 1, 6, 4],
-                                                16,
-                                                ['interpolate', ['linear'], ['get', 'mag'], 1, 5, 6, 50]
-                                        ],
-                                        'circle-color': [
-                                                'interpolate',
-                                                ['linear'],
-                                                ['get', 'mag'],
-                                                1,
-                                                'rgba(0,63,45, 0.0)',
-                                                2,
-                                                'rgba(0,63,45, 0.4)',
-                                                3,
-                                                'rgba(0,63,45, 0.5)',
-                                                4,
-                                                'rgba(0,63,45, 0.6)',
-                                                5,
-                                                'rgba(0,63,45, 0.7)',
-                                                6,
-                                                'rgba(0,63,45, 0.8)'
-                                        ],
-                                        'circle-stroke-color': 'white',
-                                        'circle-stroke-width': 1,
-                                        'circle-opacity': [
-                                                'interpolate',
-                                                ['linear'],
-                                                ['zoom'],
-                                                7,
-                                                0,
-                                                8,
-                                                1
-                                        ]
-                                }
-                        }" />
+                        <MapboxLayer :layer="(LAYER_MINIMAP_POINTS as any)" />
 
-                        <MapboxLayer :layer="{
-                                source: 'cbre-minimap-points',
-                                id: 'cbre-minimap-heat-layer',
-                                type: 'heatmap',
-                                paint: {
-                                        // Increase the heatmap weight based on frequency and property magnitude
-                                        'heatmap-weight': [
-                                                'interpolate',
-                                                ['linear'],
-                                                ['get', 'mag'],
-                                                0,
-                                                0,
-                                                6,
-                                                1
-                                        ],
-                                        // Increase the heatmap color weight weight by zoom level
-                                        // heatmap-intensity is a multiplier on top of heatmap-weight
-                                        'heatmap-intensity': [
-                                                'interpolate',
-                                                ['linear'],
-                                                ['zoom'],
-                                                0,
-                                                1,
-                                                9,
-                                                3
-                                        ],
-                                        // Color ramp for heatmap.  Domain is 0 (low) to 1 (high).
-                                        // Begin color ramp at 0-stop with a 0-transparancy color
-                                        // to create a blur-like effect.
-                                        'heatmap-color': [
-                                                'interpolate',
-                                                ['linear'],
-                                                ['heatmap-density'],
-                                                0,
-                                                'rgba(0,63,45, 0.0)',
-                                                0.2,
-                                                'rgba(0,63,45, 0.1)',
-                                                0.4,
-                                                'rgba(0,63,45, 0.2)',
-                                                0.6,
-                                                'rgba(0,63,45, 0.4)',
-                                                0.8,
-                                                'rgba(0,63,45, 0.6)',
-                                                1,
-                                                'rgba(0,63,45, 0.8)'
-                                        ],
-                                        // Adjust the heatmap radius by zoom level
-                                        'heatmap-radius': [
-                                                'interpolate',
-                                                ['linear'],
-                                                ['zoom'],
-                                                0,
-                                                2,
-                                                9,
-                                                20
-                                        ],
-                                        // Transition from heatmap to circle layer by zoom level
-                                        'heatmap-opacity': [
-                                                'interpolate',
-                                                ['linear'],
-                                                ['zoom'],
-                                                7,
-                                                1,
-                                                9,
-                                                0
-                                        ]
-                                }
-                        }" />
+                        <MapboxLayer :layer="(LAYER_MINIMAP_HEAT as any)" />
                         <MapboxSource source-id="cbre-minimap-points" :source="(cbreDataSource as any)" />
                 </MapboxMap>
         </div>
@@ -205,7 +95,8 @@ import { usePropertyStore } from '~/stores/property';
 import { useFormat } from '~/composables/useFormat';
 import mapboxgl from "mapbox-gl";
 import MapboxLanguage from "@mapbox/mapbox-gl-language";
-import { mapCenter, mapZoom, maxZoom, minZoom, mapStyleId, LAYER_3D_BUILDINGS, LAYER_CLUSTERS, LAYER_CLUSTER_COUNT, LAYER_UNCLUSTERED_POINT } from '~/context/mapData';
+import { mapCenter, mapZoom, maxZoom, minZoom, mapStyleId, LAYER_3D_BUILDINGS, LAYER_CLUSTERS, LAYER_CLUSTER_COUNT, LAYER_UNCLUSTERED_POINT, LAYER_MINIMAP_POINTS, LAYER_MINIMAP_HEAT } from '~/context/mapData';
+import { createToast } from 'mosha-vue-toastify';
 
 const mapStore = useMapStore();
 const propertyStore = usePropertyStore();
@@ -220,7 +111,14 @@ const printArea = ref(null);
 
 // 💡 GeoJSON 데이터 소스 생성 (Getter 활용)
 const cbreDataSource = computed(() => {
-        const features = propertyStore.getFilteredMapData.map(asset => ({
+        let assets = propertyStore.getFilteredMapData;
+
+        // 💡 [추가] Keep(Star) 필터링 적용
+        if (mapStore.filterMapPins) {
+                assets = assets.filter(asset => propertyStore.keptAssetIds.includes(asset.id));
+        }
+
+        const features = assets.map(asset => ({
                 type: 'Feature',
                 geometry: {
                         type: 'Point',
@@ -232,6 +130,7 @@ const cbreDataSource = computed(() => {
                         mainImageUrl: getThumbnailUrl(asset.mainImageUrl), // 썸네일 URL 변환
                         sector: asset.sector || '',
                         subSector: asset.subSector || '',
+                        mag: 1,
                         // 필요한 추가 속성들...
                         // grade: asset.grade,
                         // effRatio: asset.effRatio
@@ -252,6 +151,24 @@ const cbreDataSource = computed(() => {
 
 const onMapLoad = () => {
         propertyStore.initialDataLoaded = true;
+};
+
+const onGeolocateError = (e: any) => {
+        console.error('Geolocate error event:', e);
+        // MapboxGeolocateControl의 error 이벤트는 { type: 'error', error: PositionError, target: GeolocateControl } 형태일 수 있음
+        // 또는 Vue 컴포넌트가 이벤트를 어떻게 emit 하느냐에 따라 다름.
+        // 일단 로그를 확인하여 정확한 에러 객체 위치를 파악하고자 함.
+
+        const errorMessage = e?.error?.message || e?.message || 'Failed to retrieve your location.';
+
+        createToast({
+                title: 'Geolocation Error',
+                description: errorMessage + ' Please check your browser settings.'
+        }, {
+                type: 'danger',
+                showIcon: true,
+                hideProgressBar: true,
+        });
 };
 
 // Watchers

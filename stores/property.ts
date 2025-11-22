@@ -52,6 +52,8 @@ interface PropertyState {
         filterSectorTypes: string[];
         filterSubSectorTypes: string[];
         moreFilters: MoreFiltersType;
+
+        keptAssetIds: string[];
 }
 
 // ----------------------------------------------------------------------
@@ -88,6 +90,8 @@ const getInitialState = (): PropertyState => ({
                 elevator: 0, parking: 0,
                 iod: 0, gdm: 0, noc: 0, effRatio: 0,
         },
+
+        keptAssetIds: [],
 });
 
 // ----------------------------------------------------------------------
@@ -170,7 +174,9 @@ export const usePropertyStore = defineStore('property', {
                                 leasesActualList: actual.map(t => t.lease),
                                 leasesAskingList: asking.map(t => t.lease)
                         };
-                }
+                },
+
+                isKept: (state) => (id: string) => state.keptAssetIds.includes(id),
         },
 
         actions: {
@@ -562,6 +568,14 @@ export const usePropertyStore = defineStore('property', {
                 removeTransaction(transactionId: string) {
                         if (this.currentProperty?.transaction) {
                                 this.currentProperty.transaction = this.currentProperty.transaction.filter(t => t.id !== transactionId);
+                        }
+                },
+
+                toggleKeep(id: string) {
+                        if (this.keptAssetIds.includes(id)) {
+                                this.keptAssetIds = this.keptAssetIds.filter(assetId => assetId !== id);
+                        } else {
+                                this.keptAssetIds.push(id);
                         }
                 }
         }
