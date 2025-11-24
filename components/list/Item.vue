@@ -156,7 +156,7 @@ const toggleKeep = () => {
 
 // Actions
 const openDetail = () => {
-        const routeData = router.resolve({ path: `/asset/${props.item.id}` });
+        const routeData = router.resolve({ path: `/property/${props.item.id}` });
         window.open(routeData.href, '_blank');
 };
 

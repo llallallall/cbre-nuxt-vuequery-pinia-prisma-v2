@@ -88,7 +88,7 @@ const handleCreate = async () => {
 
                 // 🚀 생성된 ID를 가지고 수정 페이지(Modify)로 이동
                 // 이 페이지는 AssetPreviewsContainer를 보여주고, 사용자는 여기서 'Edit' 버튼을 눌러 채워넣게 됩니다.
-                router.push(`/asset/modify/${id}`);
+                router.push(`/property/modify/${id}`);
 
         } catch (error) {
                 console.error(error);

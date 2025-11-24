@@ -35,7 +35,6 @@
     "@nuxt/kit-edge": "^3.8.0-28284309.b3d3d7f4",
     "@pinia/nuxt": "^0.5.1",
     "@prisma/client": "^6.18.0",
-    "@tanstack/vue-query": "^4.37.1",
     "@types/formidable": "^3.4.5",
     "@types/minio": "^7.1.1",
     "@types/xlsx": "^0.0.36",
@@ -43,7 +42,6 @@
     "@watergis/mapbox-gl-export": "^2.0.1",
     "bcrypt": "^5.1.1",
     "browser-image-compression": "^2.0.2",
-    "echarts": "^5.4.3",
     "exceljs": "^4.4.0",
     "file-saver": "^2.0.5",
     "formidable": "^3.5.1",
@@ -53,13 +51,11 @@
     "next-auth": "^4.21.1",
     "nuxt-icon": "^0.6.1",
     "pinia": "^2.1.7",
-    "tslib": "^2.6.2",
     "uuid": "^9.0.1",
     "vue-echarts": "^6.6.1",
     "vue3-easy-data-table": "^1.5.47",
     "vue3-google-map": "^0.18.0",
     "vue3-pdf-app": "^1.0.3",
-    "vue3-table-lite": "^1.4.0",
     "xlsx": "https://cdn.sheetjs.com/xlsx-0.20.3/xlsx-0.20.3.tgz"
   }
 }

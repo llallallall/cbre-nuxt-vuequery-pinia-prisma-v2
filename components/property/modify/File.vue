@@ -26,7 +26,7 @@
                                                 Brochure Files
                                         </label>
 
-                                        <AssetModifyFormBrochure @close="handleClose" />
+                                        <PropertyModifyFormBrochure @close="handleClose" />
                                 </div>
 
                                 <div v-if="currentPdfUrl" class="mt-4 border rounded overflow-hidden">

@@ -2,19 +2,19 @@
         <div class="w-full flex flex-col sm:flex-row items-center justify-between">
 
                 <div class="addresses w-full sm:w-1/2 mb-2 flex flex-col text-base relative">
-                        <div v-if="item.location && item.location.addressProvince"
+                        <div v-if="location && location.addressProvince"
                                 class="address font-barlow text-gray-400 w-full flex items-center px-2">
                                 <div class="truncate overflow-hidden relative">
-                                        {{ item.location.addressProvince }}
-                                        <span v-if="item.location && item.location.addressCity"> / {{
-                                                item.location.addressCity }}</span>
+                                        {{ location.addressProvince }}
+                                        <span v-if="location && location.addressCity"> / {{
+                                                location.addressCity }}</span>
                                 </div>
                         </div>
 
-                        <div v-if="item.location && item.location.addressFull"
+                        <div v-if="location && location.addressFull"
                                 class="address font-barlow text-gray-600 w-full flex items-center px-2">
                                 <div class="truncate overflow-hidden relative">
-                                        {{ item.location.addressFull }}
+                                        {{ location.addressFull }}
                                 </div>
                         </div>
                 </div>
@@ -45,11 +45,11 @@
         <div class="image-slide w-full h-[500px] select-none mt-2">
                 <img :src="mainImageUrl" class="object-cover w-full h-full relative" />
 
-                <div v-if="item.propertyImageFile && item.propertyImageFile.length > 0"
+                <div v-if="validImages.length > 0"
                         class="small-previews w-full h-[100px] flex justify-center items-end gap-3 z-10">
                         <div v-for="preview in validImages" :key="preview.id"
                                 class="preview overflow-hidden w-[50px] h-[50px] border-white/25 border-4 shadow-xl hover:scale-125 transition-all cursor-pointer">
-                                <img :src="preview.fileUrl" @click="setImageSrc(preview.fileUrl)"
+                                <img v-if="preview.fileUrl" :src="preview.fileUrl" @click="setImageSrc(preview.fileUrl)"
                                         class="object-cover w-full h-full border-white/25 border-2" />
                         </div>
                 </div>
@@ -62,25 +62,25 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, inject } from 'vue';
+import { ref, computed } from 'vue';
 import { useModal } from 'vue-final-modal';
 import ModalFullscreen from '@/components/modal/FullscreenModal.vue';
-import { useRuntimeConfig } from '#app';
+import { useFormat } from '~/composables/useFormat';
+import type { LocationType, PropertyImageFileType, PropertyBrochureFileType } from '~/types/property.type';
 
 // Props 정의
-const props = defineProps({
-        item: {
-                required: true,
-                type: Object // PropertyType
-        }
-});
+const props = defineProps<{
+        location: LocationType | null | undefined;
+        images: PropertyImageFileType[] | null | undefined;
+        brochure: PropertyBrochureFileType[] | null | undefined;
+}>();
 
-const runtimeConfig = useRuntimeConfig();
+const { getThumbnailUrl } = useFormat();
 
-// 💡 이미지 데이터 처리 (photoList -> propertyImageFile)
+// 💡 이미지 데이터 처리
 const validImages = computed(() => {
-        if (!props.item.propertyImageFile) return [];
-        return props.item.propertyImageFile.filter((el: any) => el.fileUrl && (el.fileUrl + '').trim().length > 0);
+        if (!props.images) return [];
+        return props.images.filter((el: any) => el.fileUrl && (el.fileUrl + '').trim().length > 0);
 });
 
 // 현재 표시할 이미지 URL
@@ -88,7 +88,7 @@ const currentImgUrl = ref('');
 
 // 초기 이미지 설정
 if (validImages.value.length > 0) {
-        currentImgUrl.value = validImages.value[0].fileUrl;
+        currentImgUrl.value = validImages.value[0].fileUrl || '';
 } else {
         currentImgUrl.value = '/images/placeholder.jpg';
 }
@@ -100,13 +100,12 @@ const setImageSrc = (src: string | null) => {
 };
 
 const downloadAsPdf = () => {
-        // Brochure 파일이 있다면 그것을 열도록 수정 가능
-        const brochure = props.item.propertyBrochureFile?.[0];
-        const pdfUrl = brochure?.fileUrl || '/sample/files/sample.pdf';
+        const brochureFile = props.brochure?.[0];
+        const pdfUrl = brochureFile?.fileUrl || '/sample/files/sample.pdf';
         window.open(pdfUrl, '_blank');
 };
 
-// 💡 스크롤 이동 함수 (Store 의존성 제거 -> ID 기반 이동)
+// 💡 스크롤 이동 함수
 const scrollToSection = (elementId: string) => {
         const el = document.getElementById(elementId);
         if (el) {

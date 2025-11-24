@@ -14,8 +14,8 @@
                                         <sub class="text-[14px] font-calibreBold translate-y-1 ml-1">Map</sub>
                                 </div>
                                 <div class="ml-[10px] h-[30px] pt-[8px] font-calibre ">
-                                        <span class="hidden md:flex whitespace-nowrap">Asset Management System</span>
-                                        <span class="flex md:hidden whitespace-nowrap">AMS</span>
+                                        <span class="hidden md:flex whitespace-nowrap">Property Management System</span>
+                                        <span class="flex md:hidden whitespace-nowrap">PMS</span>
                                 </div>
 
                         </div>
@@ -33,8 +33,8 @@
 
                                 <div @click="goPrevious()"
                                         class="group flex items-center justify-center h-full px-2 md:px-4 cursor-pointer transition-colors hover:bg-gray-100"
-                                        :class="!previousAssetId ? 'opacity-50 cursor-not-allowed' : ''"
-                                        :title="previousAssetId ? 'Previous Asset' : 'No Previous Asset'">
+                                        :class="!previousPropertyId ? 'opacity-50 cursor-not-allowed' : ''"
+                                        :title="previousPropertyId ? 'Previous Property' : 'No Previous Property'">
                                         <div
                                                 class="flex items-center text-sm font-calibreMedium text-gray-700 group-hover:text-darkgreen whitespace-nowrap">
                                                 <Icon name="ion:chevron-back-outline" class="w-5 h-5" />
@@ -44,8 +44,8 @@
 
                                 <div @click="goNext()"
                                         class="group flex items-center justify-center h-full px-2 md:px-4 cursor-pointer transition-colors hover:bg-gray-100"
-                                        :class="!nextAssetId ? 'opacity-50 cursor-not-allowed' : ''"
-                                        :title="nextAssetId ? 'Next Asset' : 'No Next Asset'">
+                                        :class="!nextPropertyId ? 'opacity-50 cursor-not-allowed' : ''"
+                                        :title="nextPropertyId ? 'Next Property' : 'No Next Property'">
                                         <div
                                                 class="flex items-center text-sm font-calibreMedium text-gray-700 group-hover:text-darkgreen whitespace-nowrap">
                                                 <span class="hidden md:block">Next</span>
@@ -80,7 +80,7 @@
                         </div>
 
                 </div>
-                <main class="relative pt-[80px]">
+                <main class="fixed top-[80px]">
                         <slot />
                 </main>
         </div>
@@ -111,7 +111,7 @@ const userStore = useUserStore();
 const uiStore = useUiStore();
 const auth = useAuth(); // 인증 정보
 
-const { previousAssetId, nextAssetId } = storeToRefs(propertyStore);
+const { previousPropertyId, nextPropertyId } = storeToRefs(propertyStore);
 
 // 💡 로그인 상태 및 사용자 정보 계산
 const isAuthenticated = computed(() => auth.status.value === 'authenticated');
@@ -120,12 +120,12 @@ const userImage = computed(() => userStore.userImage); // User Store에서 이�
 
 const goPrevious = () => {
         // setAssetNav이 true를 반환하면 이동
-        if (propertyStore.setAssetNav(previousAssetId.value)) router.push({ path: "/asset/" + previousAssetId.value });
+        if (propertyStore.setAssetNav(previousPropertyId.value)) router.push({ path: "/property/" + previousPropertyId.value });
 }
 
 const goNext = () => {
         // setAssetNav이 true를 반환하면 이동
-        if (propertyStore.setAssetNav(nextAssetId.value)) router.push({ path: "/asset/" + nextAssetId.value });
+        if (propertyStore.setAssetNav(nextPropertyId.value)) router.push({ path: "/property/" + nextPropertyId.value });
 }
 
 /**

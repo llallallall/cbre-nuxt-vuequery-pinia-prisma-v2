@@ -249,8 +249,13 @@ export const usePropertyStore = defineStore('property', {
                                 const response = await $fetch<PropertyType>(`/api/property/${propertyId}`);
                                 // 💡 단일 자산 상세 정보 변환
                                 this.currentProperty = transformPropertyResponse(response);
+
                                 return true;
                         } catch (e: any) {
+                                if (e.response?.status === 401) {
+                                        showError({ statusCode: 401, statusMessage: 'Unauthorized', fatal: true });
+                                        return false;
+                                }
                                 statusStore.setGlobalError('Failed to load property details.', 'fetchPropertyDetail');
                                 console.error(e);
                                 this.currentProperty = null;
@@ -258,11 +263,6 @@ export const usePropertyStore = defineStore('property', {
                         } finally {
                                 statusStore.setGlobalLoading(false);
                         }
-                },
-
-                // 💡 [호환성] getProperty (구버전 이름 유지)
-                async getProperty(propertyId: string) {
-                        return await this.fetchPropertyDetail(propertyId);
                 },
 
                 // ------------------------------------------------------------------

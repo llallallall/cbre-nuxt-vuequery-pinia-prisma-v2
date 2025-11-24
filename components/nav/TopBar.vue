@@ -220,10 +220,9 @@
                         </div>
 
                         <!-- web search  -->
-                        <div
-                                class="inline-flex items-center px-[10px]  lg:px-[14px] h-full hover:bg-gray-200/20 hover:underline hover:decoration-primary/50">
-                                <div class="relative mt-1 select-none font-calibre ">
-                                        <div class="relative cursor-default rounded-lg py-2 translate-y-[2px]"
+                        <div class="hidden sm:inline-flex items-center px-[10px] -translate-y-1 lg:px-[14px] h-full hover:bg-gray-200/20 hover:underline hover:decoration-primary/50">
+                                <div class="relative mt-1 select-none font-calibre">
+                                        <div class="relative cursor-default rounded-lg py-2"
                                                 @click="openMenu('webSearchPannel')">
                                                 <div class="absolute top-0 right-1 font-calibreLight text-xs -translate-y-2 whitespace-nowrap"
                                                         :class="uiStore.isMenuOverlay ? 'text-primary/50' : 'text-white/50'">

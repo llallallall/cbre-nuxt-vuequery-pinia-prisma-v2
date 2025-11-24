@@ -2,7 +2,7 @@
         <div class="font-financier text-2xl text-primary mb-2">History</div>
 
         <ul v-if="hasHistory" class="cbre_bulletList font-calibreLight text-lg text-primary grid grid-cols-1 gap-y-1">
-                <li class="flex items-center" v-for="(h, index) in item.history" :key="h.id || index">
+                <li class="flex items-center" v-for="(h, index) in history" :key="h.id || index">
                         <div v-if="h.type === 'COMPLETION'" class="w-full flex items-center">
                                 <IconMinus class="w-[18px] mr-1" />
                                 <div class="min-w-[130px] whitespace-nowrap text-right mr-4 font-calibre">
@@ -28,17 +28,15 @@
 
 <script setup lang="ts">
 import { computed } from 'vue';
+import type { HistoryType } from '~/types/property.type';
 
-const props = defineProps({
-        item: {
-                required: true,
-                type: Object
-        }
-});
+const props = defineProps<{
+        history: HistoryType[] | null | undefined;
+}>();
 
 // 데이터 존재 여부 확인
 const hasHistory = computed(() => {
-        return props.item.history && props.item.history.length > 0 && props.item.history[0].year;
+        return props.history && props.history.length > 0 && props.history[0].year;
 });
 </script>
 

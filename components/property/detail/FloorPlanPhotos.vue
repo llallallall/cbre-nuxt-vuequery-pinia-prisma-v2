@@ -13,7 +13,7 @@
                                 </div>
 
                                 <div v-if="longitudinalPhotos.length > 0" class="flex-1 flex flex-col mt-[30px]">
-                                        <AssetImageSlide :images="(longitudinalPhotos as any[])" />
+                                        <PropertyImageSlide :images="(longitudinalPhotos as any[])" />
                                 </div>
                                 <div v-else class="mt-[50px] text-gray-400 text-sm italic">
                                         No image available
@@ -29,7 +29,7 @@
                                 </div>
 
                                 <div v-if="crossPhotos.length > 0" class="mt-[30px] flex-1 flex flex-col">
-                                        <AssetImageSlide :images="(crossPhotos as any[])" />
+                                        <PropertyImageSlide :images="(crossPhotos as any[])" />
                                 </div>
                                 <div v-else class="mt-[50px] text-gray-400 text-sm italic">
                                         No image available
@@ -103,8 +103,8 @@
 import { ref, computed } from 'vue';
 import { Disclosure, DisclosureButton, DisclosurePanel } from '@headlessui/vue';
 import { useModal } from 'vue-final-modal';
-import ModalFullscreen from '~/components/modal/FullscreenModal.vue'; // 💡 경로 수정
-import type { FloorFlanTypeEnum as FloorTypeDefinition } from '~/types/property.type';
+import ModalFullscreen from '~/components/modal/FullscreenModal.vue';
+import type { FloorFlanTypeEnum as FloorTypeDefinition, FloorPlanFileType } from '~/types/property.type';
 
 const FloorFlanTypeEnum = {
         LOGITUDINALSECTION: 'LOGITUDINALSECTION',
@@ -113,16 +113,13 @@ const FloorFlanTypeEnum = {
         BASEMENTSECTION: 'BASEMENTSECTION',
 } as const;
 
-const props = defineProps({
-        item: {
-                required: true,
-                type: Object // PropertyType
-        }
-});
+const props = defineProps<{
+        floorPlanFile: FloorPlanFileType[] | null | undefined
+}>();
 
 // 💡 1. 원본 파일 리스트 (Flat Array)
 // DB에서 property.floorPlanFile은 배열로 옵니다.
-const files = computed(() => props.item.floorPlanFile || []);
+const files = computed(() => props.floorPlanFile || []);
 
 // 💡 2. Enum을 사용하여 그룹별로 필터링 (Computed)
 const longitudinalPhotos = computed(() => files.value.filter((f: any) => f.type === FloorFlanTypeEnum.LOGITUDINALSECTION));

@@ -5,7 +5,7 @@
     </div>
 
     <div v-else-if="asset?.id" :key="propertyId" class="relative w-full flex overflow-hidden">
-      <AssetPreviewsContainer :floorDataKey="floorDataKey" />
+      <PropertyPreviewsContainer :floorDataKey="floorDataKey" />
     </div>
 
     <div v-else class="flex items-center justify-center h-screen">

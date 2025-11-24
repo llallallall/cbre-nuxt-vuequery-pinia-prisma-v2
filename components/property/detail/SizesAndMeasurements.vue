@@ -3,62 +3,62 @@
         <ul
                 class="cbre_bulletList font-calibreLight text-lg text-primary grid grid-cols-1 lg:grid-cols-2 3xl:grid-cols-3 gap-y-2">
 
-                <li class="flex items-center" v-if="item.scale?.gfaSqm > 0">
+                <li class="flex items-center" v-if="scale?.gfaSqm > 0">
                         <IconMinus class="w-[18px] mr-1" />
                         <div class="min-w-[130px] whitespace-nowrap text-right mr-4 font-calibre">GFA :</div>
                         <div class="flex-1">
-                                {{ formatDecimal(item.scale.gfaSqm) }} ㎡ ({{ formatDecimal(item.scale.gfaPy) }} py)
+                                {{ formatDecimal(scale?.gfaSqm) }} ㎡ ({{ formatDecimal(scale?.gfaPy) }} py)
                         </div>
                 </li>
 
-                <li class="flex items-center" v-if="item.scale?.nfaSqm > 0">
+                <li class="flex items-center" v-if="scale?.nfaSqm > 0">
                         <IconMinus class="w-[18px] mr-1" />
                         <div class="min-w-[130px] whitespace-nowrap text-right mr-4 font-calibre">NFA :</div>
                         <div class="flex-1">
-                                {{ formatDecimal(item.scale.nfaSqm) }} ㎡ ({{ formatDecimal(item.scale.nfaPy) }} py)
+                                {{ formatDecimal(scale?.nfaSqm) }} ㎡ ({{ formatDecimal(scale?.nfaPy) }} py)
                         </div>
                 </li>
 
-                <li class="flex items-center" v-if="item.scale?.siteAreaSqm > 0">
+                <li class="flex items-center" v-if="scale?.siteAreaSqm > 0">
                         <IconMinus class="w-[18px] mr-1" />
                         <div class="min-w-[130px] whitespace-nowrap text-right mr-4 font-calibre">Land Area :</div>
                         <div class="flex-1">
-                                {{ formatDecimal(item.scale.siteAreaSqm) }} ㎡ ({{ formatDecimal(item.scale.siteAreaPy)
+                                {{ formatDecimal(scale?.siteAreaSqm) }} ㎡ ({{ formatDecimal(scale?.siteAreaPy)
                                 }} py)
                         </div>
                 </li>
 
-                <li class="flex items-center" v-if="item.scale?.floorPlateSqm > 0">
+                <li class="flex items-center" v-if="scale?.floorPlateSqm > 0">
                         <IconMinus class="w-[18px] mr-1" />
                         <div class="min-w-[130px] whitespace-nowrap text-right mr-4 font-calibre">Floor Plate :</div>
                         <div class="flex-1">
-                                {{ formatDecimal(item.scale.floorPlateSqm) }} ㎡ ({{
-                                        formatDecimal(item.scale.floorPlatePy) }} py)
+                                {{ formatDecimal(scale?.floorPlateSqm) }} ㎡ ({{
+                                        formatDecimal(scale?.floorPlatePy) }} py)
                         </div>
                 </li>
 
         </ul>
 
         <ul class="cbre_bulletList font-calibreLight text-lg text-primary grid grid-cols-1 mt-2 gap-y-2">
-                <li class="flex items-center" v-if="item.scale?.floorAreaRatioExisting > 0">
+                <li class="flex items-center" v-if="scale?.floorAreaRatioExisting > 0">
                         <IconMinus class="w-[18px] mr-1" />
                         <div class="min-w-[130px] whitespace-nowrap text-right mr-4 font-calibre">Floor Area Ratio :
                         </div>
                         <div class="flex-1">
-                                Existing {{ formatDecimal(item.scale.floorAreaRatioExisting) }}%
-                                <span v-if="item.scale.floorAreaRatioPermitted"> (Permitted: {{
-                                        formatDecimal(item.scale.floorAreaRatioPermitted) }}%)</span>
+                                Existing {{ formatDecimal(scale?.floorAreaRatioExisting) }}%
+                                <span v-if="scale?.floorAreaRatioPermitted"> (Permitted: {{
+                                        formatDecimal(scale?.floorAreaRatioPermitted) }}%)</span>
                         </div>
                 </li>
 
-                <li class="flex items-center" v-if="item.scale?.buildingCoverageRatioExisting > 0">
+                <li class="flex items-center" v-if="scale?.buildingCoverageRatioExisting > 0">
                         <IconMinus class="w-[18px] mr-1" />
                         <div class="min-w-[130px] whitespace-nowrap text-right mr-4 font-calibre">Building Coverage :
                         </div>
                         <div class="flex-1">
-                                Existing {{ formatDecimal(item.scale.buildingCoverageRatioExisting) }}%
-                                <span v-if="item.scale.buildingCoverageRatioPermitted"> (Permitted: {{
-                                        formatDecimal(item.scale.buildingCoverageRatioPermitted) }}%)</span>
+                                Existing {{ formatDecimal(scale?.buildingCoverageRatioExisting) }}%
+                                <span v-if="scale?.buildingCoverageRatioPermitted"> (Permitted: {{
+                                        formatDecimal(scale?.buildingCoverageRatioPermitted) }}%)</span>
                         </div>
                 </li>
         </ul>
@@ -66,13 +66,11 @@
 
 <script setup lang="ts">
 import { useFormat } from '~/composables/useFormat';
+import type { ScaleType } from '~/types/property.type';
 
-const props = defineProps({
-        item: {
-                required: true,
-                type: Object
-        }
-});
+const props = defineProps<{
+        scale: ScaleType | null | undefined
+}>();
 
 const { numberFormat } = useFormat();
 const formatDecimal = (val: any) => numberFormat(val, 2);

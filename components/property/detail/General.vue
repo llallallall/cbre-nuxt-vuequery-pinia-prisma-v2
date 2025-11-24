@@ -6,51 +6,51 @@
         <ul
                 class="relative cbre_bulletList font-calibreLight text-lg text-primary grid grid-cols-1 md:grid-cols-2 gap-4">
 
-                <li v-if="item.profitability?.grade" class="flex items-center">
+                <li v-if="profitability?.grade" class="flex items-center">
                         <IconMinus class="w-[18px] mr-1" />
                         <div class="w-[130px] whitespace-nowrap text-right mr-4 font-calibre">
                                 Grade :
                         </div>
                         <div class="flex-1">
                                 {{
-                                        item.profitability.grade
+                                        profitability?.grade
                                 }}
                         </div>
                 </li>
-                <li v-if="item.profitability?.effectiveRatio" class="flex items-center">
+                <li v-if="profitability?.effectiveRatio" class="flex items-center">
                         <IconMinus class="w-[18px] mr-1" />
                         <div class="w-[130px] whitespace-nowrap text-right mr-4 font-calibre">
                                 Effective Ratio :
                         </div>
                         <div class="flex-1">
                                 {{
-                                        item.profitability.effectiveRatio
+                                        profitability?.effectiveRatio
                                 }} %
                         </div>
                 </li>
-                <li v-if="item.scale?.noOfBuildings" class="flex items-center">
+                <li v-if="scale?.noOfBuildings" class="flex items-center">
                         <IconMinus class="w-[18px] mr-1" />
                         <div class="w-[130px] whitespace-nowrap text-right mr-4 font-calibre">
                                 No. of Buildings :
                         </div>
                         <div class="flex-1">
                                 {{
-                                        item.scale.noOfBuildings
+                                        scale?.noOfBuildings
                                 }}
                         </div>
                 </li>
-                <li v-if="item.sector?.name" class="flex items-center">
+                <li v-if="sector?.name" class="flex items-center">
                         <IconMinus class="w-[18px] mr-1" />
                         <div class="w-[130px] whitespace-nowrap text-right mr-4 font-calibre">
                                 Sector :
                         </div>
                         <div class="flex-1">
                                 {{
-                                        item.sector.name
+                                        sector?.name
                                 }}
                         </div>
                 </li>
-                <li v-if="item.subsector?.name" class="flex items-center">
+                <li v-if="subsector?.name" class="flex items-center">
                         <IconMinus class="w-[18px] mr-1" />
                         <div class="w-[130px] whitespace-nowrap text-right mr-4 font-calibre">
                                 SubSector
@@ -58,11 +58,11 @@
                         </div>
                         <div class="flex-1">
                                 {{
-                                        item.subsector.name
+                                        subsector?.name
                                 }}
                         </div>
                 </li>
-                <li v-if="item.sector?.name === 'Logistics' && item.warehouse && item.warehouse.length > 0"
+                <li v-if="sector?.name === 'Logistics' && warehouse && warehouse.length > 0"
                         class="flex items-start mt-0 col-span-full">
                         <IconMinus class="w-[18px] mr-1 mt-2" />
                         <div class="w-[130px] whitespace-nowrap text-right mr-4 font-calibre pt-1">
@@ -91,16 +91,19 @@
 </template>
 
 <script setup lang="ts">
-const props = defineProps({
-        item: {
-                required: true,
-                type: Object
-        }
-});
+import type { ProfitabilityType, ScaleType, SectorType, SubSectorType, WarehouseType } from '~/types/property.type';
+
+const props = defineProps<{
+        profitability: ProfitabilityType | null | undefined;
+        scale: ScaleType | null | undefined;
+        sector: SectorType | null | undefined;
+        subsector: SubSectorType | null | undefined;
+        warehouse: WarehouseType[] | null | undefined;
+}>();
 
 // 💡 Warehouse 비율 추출 헬퍼 함수
 const getWarehouseRatio = (type: string) => {
-        const w = props.item?.warehouse?.find((item: any) => item.temperatureType === type);
+        const w = props.warehouse?.find((item: any) => item.temperatureType === type);
         return Number(w?.ratio) || 0;
 };
 

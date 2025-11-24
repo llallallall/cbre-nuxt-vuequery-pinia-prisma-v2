@@ -1,4 +1,5 @@
 // https://nuxt.com/docs/api/configuration/nuxt-config
+// Trigger rebuild for error.vue detection
 
 export default defineNuxtConfig({
         modules: [
@@ -13,7 +14,6 @@ export default defineNuxtConfig({
         //css: ['vue-final-modal/style.css'],
         auth: {
                 origin: process.env.AUTH_ORIGIN,
-                //origin: 'http://localhost:3000',
                 url: process.env.AUTH_URL,
                 baseURL: '/api/auth',
                 provider: {
@@ -51,7 +51,7 @@ export default defineNuxtConfig({
                 },
         },
         build: {
-                transpile: [/echarts/, /resize-detector/, /tslib/, /xlsx/, /vue3-table-lite/, /vue3-pdf-app/],
+                transpile: [/xlsx/, /vue3-pdf-app/],
         },
         vite: {
                 ssr: {
@@ -69,5 +69,12 @@ export default defineNuxtConfig({
         devtools: { enabled: false },
         css: [
                 '/assets/css/mosha-vue-toastify.css',
-        ]
+        ],
+        typescript: {
+                tsConfig: {
+                        compilerOptions: {
+                                types: ['@types/google.maps']
+                        }
+                }
+        }
 })

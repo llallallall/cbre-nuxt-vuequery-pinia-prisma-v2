@@ -109,8 +109,8 @@ export const LAYER_MINIMAP_POINTS = {
                         'interpolate',
                         ['linear'],
                         ['zoom'],
-                        7,
-                        ['interpolate', ['linear'], ['coalesce', ['get', 'mag'], 1], 1, 1, 6, 4],
+                        4,
+                        ['interpolate', ['linear'], ['coalesce', ['get', 'mag'], 1], 1, 3, 6, 10],
                         16,
                         ['interpolate', ['linear'], ['coalesce', ['get', 'mag'], 1], 1, 5, 6, 50]
                 ],
@@ -132,13 +132,13 @@ export const LAYER_MINIMAP_POINTS = {
                         'rgba(0,63,45, 0.8)'
                 ],
                 'circle-stroke-color': 'white',
-                'circle-stroke-width': 1,
+                'circle-stroke-width': 0,
                 'circle-opacity': [
                         'interpolate',
                         ['linear'],
                         ['zoom'],
                         4,
-                        1,
+                        0.2,
                         8,
                         1
                 ]

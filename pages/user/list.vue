@@ -120,9 +120,9 @@ import "@vueform/slider/themes/default.css";
 // reload - get api data
 import { useUserStore } from '~/stores/user';
 const userStore = useUserStore()
-userStore.getAllUsers()
+// userStore.getAllUsers()
 
-import Vue3EasyDataTable from 'vue3-easy-data-table';
+// import Vue3EasyDataTable from 'vue3-easy-data-table';
 import 'vue3-easy-data-table/dist/style.css';
 import type { Header, Item, ClickRowArgument, FilterOption  } from "vue3-easy-data-table";
 
@@ -241,7 +241,7 @@ const editItem = (propertyId: Item) => {
         // editingItem.height = height;
         // editingItem.weight = weight;
         // editingItem.id = id;
-        router.push({ path: "/asset/modify/"+propertyId })
+        router.push({ path: "/property/modify/"+propertyId })
 
 };
 

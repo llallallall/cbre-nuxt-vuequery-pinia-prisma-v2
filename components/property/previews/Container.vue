@@ -60,51 +60,51 @@
                                         </div>
 
                                         <div class="space-y-8 border-b pb-10">
-                                                <AssetPreviewsGeneral />
+                                                <PropertyPreviewsGeneral />
                                         </div>
 
                                         <div class="space-y-8 border-b pb-10">
-                                                <AssetPreviewsLocation />
+                                                <PropertyPreviewsLocation />
                                         </div>
 
                                         <div class="space-y-8 border-b pb-10">
-                                                <AssetPreviewsPhoto />
+                                                <PropertyPreviewsPhoto />
                                         </div>
 
                                         <div class="space-y-8 border-b pb-10">
-                                                <AssetPreviewsBrochure @open-pdf-modal="handleOpenPdfModal" />
+                                                <PropertyPreviewsBrochure @open-pdf-modal="handleOpenPdfModal" />
                                         </div>
 
                                         <div class="space-y-8 border-b pb-10">
-                                                <AssetPreviewsProfitability />
+                                                <PropertyPreviewsProfitability />
                                         </div>
 
                                         <div class="space-y-8 border-b pb-10">
-                                                <AssetPreviewsHistory />
+                                                <PropertyPreviewsHistory />
                                         </div>
 
                                         <div class="space-y-8 border-b pb-10">
-                                                <AssetPreviewsSizes />
+                                                <PropertyPreviewsSizes />
                                         </div>
 
                                         <div class="space-y-8 border-b pb-10">
-                                                <AssetPreviewsFloorData :key="props.floorDataKey" />
+                                                <PropertyPreviewsFloorData :key="props.floorDataKey" />
                                         </div>
 
                                         <div class="space-y-8 border-b pb-10">
-                                                <AssetPreviewsFloorPlanPhoto />
+                                                <PropertyPreviewsFloorPlanPhoto />
                                         </div>
 
                                         <div class="space-y-8 border-b pb-10">
-                                                <AssetPreviewsFacility />
+                                                <PropertyPreviewsFacility />
                                         </div>
 
                                         <div class="space-y-8 border-b pb-10">
-                                                <AssetPreviewsAccessibility />
+                                                <PropertyPreviewsAccessibility />
                                         </div>
 
                                         <div class="space-y-8 border-b pb-10">
-                                                <AssetPreviewsTransaction />
+                                                <PropertyPreviewsTransaction />
                                         </div>
 
                                 </div>

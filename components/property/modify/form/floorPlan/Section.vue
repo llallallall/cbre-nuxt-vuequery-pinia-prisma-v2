@@ -2,20 +2,20 @@
     <div class="p-6 space-y-6">
         <form @submit.prevent="onSubmit" class="space-y-8">
 
-            <AssetModifyFormFloorPlanFileHandler title="1. Longitudinal Section"
+            <PropertyModifyFormFloorPlanFileHandler title="1. Longitudinal Section"
                 :type="FloorFlanTypeEnum.LOGITUDINALSECTION" :files="logitudinalFiles"
                 @update:files="files => updateFiles(FloorFlanTypeEnum.LOGITUDINALSECTION, files)" />
 
-            <AssetModifyFormFloorPlanFileHandler title="2. Cross Section" :type="FloorFlanTypeEnum.CROSSSECTION"
+            <PropertyModifyFormFloorPlanFileHandler title="2. Cross Section" :type="FloorFlanTypeEnum.CROSSSECTION"
                 :files="crossFiles" @update:files="files => updateFiles(FloorFlanTypeEnum.CROSSSECTION, files)" />
 
             <div class="border p-4 rounded-lg shadow-md bg-white space-y-4">
                 <h3 class="text-xl font-bold text-primary mb-4">3. Each Floor Plans </h3>
 
-                <AssetModifyFormFloorPlanFileHandler title="Upper Floors" :type="FloorFlanTypeEnum.UPPERSECTION"
+                <PropertyModifyFormFloorPlanFileHandler title="Upper Floors" :type="FloorFlanTypeEnum.UPPERSECTION"
                     :files="upperFiles" @update:files="files => updateFiles(FloorFlanTypeEnum.UPPERSECTION, files)" />
 
-                <AssetModifyFormFloorPlanFileHandler title="Basement Floors" :type="FloorFlanTypeEnum.BASEMENTSECTION"
+                <PropertyModifyFormFloorPlanFileHandler title="Basement Floors" :type="FloorFlanTypeEnum.BASEMENTSECTION"
                     :files="basementFiles"
                     @update:files="files => updateFiles(FloorFlanTypeEnum.BASEMENTSECTION, files)" />
             </div>

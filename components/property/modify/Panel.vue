@@ -19,54 +19,54 @@
           </div>
 
           <div v-if="uiStore.currentSection === 'general'">
-            <AssetModifyFormGeneral @close="uiStore.closeModifyPanel()" />
+            <PropertyModifyFormGeneral @close="uiStore.closeModifyPanel()" />
           </div>
 
           <div v-if="uiStore.currentSection === 'location'">
-            <AssetModifyFormLocation @close="uiStore.closeModifyPanel()" />
+            <PropertyModifyFormLocation @close="uiStore.closeModifyPanel()" />
           </div>
 
           <div v-if="uiStore.currentSection === 'photo'">
-            <AssetModifyFormPhoto @close="uiStore.closeModifyPanel()" />
+            <PropertyModifyFormPhoto @close="uiStore.closeModifyPanel()" />
           </div>
 
           <div v-if="uiStore.currentSection === 'brochure'">
-            <AssetModifyFormBrochure @close="uiStore.closeModifyPanel()" />
+            <PropertyModifyFormBrochure @close="uiStore.closeModifyPanel()" />
           </div>
 
           <div v-if="uiStore.currentSection === 'profitability'">
-            <AssetModifyFormProfitability @close="uiStore.closeModifyPanel()" />
+            <PropertyModifyFormProfitability @close="uiStore.closeModifyPanel()" />
           </div>
 
           <div v-if="uiStore.currentSection === 'history'">
-            <AssetModifyFormHistory @close="uiStore.closeModifyPanel()" />
+            <PropertyModifyFormHistory @close="uiStore.closeModifyPanel()" />
           </div>
 
           <div v-if="uiStore.currentSection === 'scale'">
-            <AssetModifyFormSizes @close="uiStore.closeModifyPanel()" />
+            <PropertyModifyFormSizes @close="uiStore.closeModifyPanel()" />
           </div>
 
           <div v-if="uiStore.currentSection === 'floor'">
-            <AssetModifyFormFloor @close="uiStore.closeModifyPanel()" />
+            <PropertyModifyFormFloor @close="uiStore.closeModifyPanel()" />
           </div>
 
           <div v-if="uiStore.currentSection === 'floorplan'">
-            <AssetModifyFormFloorPlanSection @close="uiStore.closeModifyPanel()" />
+            <PropertyModifyFormFloorPlanSection @close="uiStore.closeModifyPanel()" />
           </div>
           <div v-if="uiStore.currentSection === 'facility'">
-            <AssetModifyFormFacility @close="uiStore.closeModifyPanel()" />
+            <PropertyModifyFormFacility @close="uiStore.closeModifyPanel()" />
           </div>
 
           <div v-if="uiStore.currentSection === 'accessibility'">
-            <AssetModifyFormAccessibility @close="uiStore.closeModifyPanel()" />
+            <PropertyModifyFormAccessibility @close="uiStore.closeModifyPanel()" />
           </div>
 
           <div v-if="uiStore.currentSection === 'sale'">
-            <AssetModifyFormSale @close="uiStore.closeModifyPanel()" />
+            <PropertyModifyFormSale @close="uiStore.closeModifyPanel()" />
           </div>
 
           <div v-if="uiStore.currentSection === 'lease'">
-            <AssetModifyFormLease @close="uiStore.closeModifyPanel()" />
+            <PropertyModifyFormLease @close="uiStore.closeModifyPanel()" />
           </div>
         </div>
       </div>

@@ -4,11 +4,11 @@
                         class="absolute -top-[1em] left-[1em] text-cbre_primary_3/60 text-xs border border-[rgba(255,255,255,0.4)] rounded-[5px] px-[0.7em] py-[0.2em] bg-[rgba(230,234,234,1)] shadow-sm backdrop-blur-3xl">
                         Photos
                 </label>
-                <AssetRegisterFileUploader name="photos" multiple composed @transfer="storeFileData"
+                <PropertyRegisterFileUploader name="photos" multiple composed @transfer="storeFileData"
                         @delete="deleteFileData" />
         </div>
 
-        <AssetRegisterFileUploader name="LOGITUDINALSECTION" composed @transfer="storeFileData"
+        <PropertyRegisterFileUploader name="LOGITUDINALSECTION" composed @transfer="storeFileData"
                 @delete="deleteFileData" />
 </template>
 

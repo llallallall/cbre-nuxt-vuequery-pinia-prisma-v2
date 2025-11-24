@@ -105,7 +105,7 @@ const propertyStore = usePropertyStore();
 const { getThumbnailUrl } = useFormat();
 
 const { filterMapPins, flyTo, searchedMarkersChanged } = storeToRefs(mapStore);
-const { filteredAssets } = storeToRefs(propertyStore);
+const { filteredProperties } = storeToRefs(propertyStore);
 
 const mapRef = useMapboxRef("cbre-map");
 const miniMapRef = useMapboxRef("cbre-minimap");
@@ -117,7 +117,7 @@ const cbreDataSource = computed(() => {
 
         // 💡 [추가] Keep(Star) 필터링 적용
         if (mapStore.filterMapPins) {
-                assets = assets.filter(asset => propertyStore.keptAssetIds.includes(asset.id));
+                assets = assets.filter(asset => propertyStore.keptPropertyIds.includes(asset.id));
         }
 
         const features = assets.map(asset => ({
@@ -176,7 +176,7 @@ const onGeolocateError = (e: any) => {
 // Watchers
 
 // 1. 필터링 변경 감지 -> 지도 소스 업데이트
-watch(() => propertyStore.filteredAssets, () => {
+watch(() => propertyStore.filteredProperties, () => {
         const sourceData = cbreDataSource.value.data;
         // @ts-ignore
         mapRef.value?.getSource('cbre-assets')?.setData(sourceData);
@@ -273,7 +273,7 @@ useMapbox("cbre-map", (map) => {
                         .setLngLat(coordinates)
                         .setHTML(`
                 <div class="w-full h-full p-2">
-                    <a href="/asset/${props.propertyId}" target="_blank" rel="noopener noreferrer">
+                    <a href="/property/${props.propertyId}" target="_blank" rel="noopener noreferrer">
                         <div class="flex flex-col gap-1">
                             <div class="font-bold text-md mb-1">${props.propertyName}</div>
                             <div class="text-xs text-gray-600">
