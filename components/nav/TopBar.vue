@@ -12,8 +12,8 @@
                                 <sub class="text-[14px] font-calibreBold translate-y-1 ml-1">Map</sub>
                         </div>
                         <div class="ml-[10px] h-[30px] pt-[8px] font-calibre ">
-                                <span class="hidden xl:flex whitespace-nowrap">Asset Management System</span>
-                                <span class="flex xl:hidden whitespace-nowrap">AMS</span>
+                                <span class="hidden xl:flex whitespace-nowrap">Property Management System</span>
+                                <span class="flex xl:hidden whitespace-nowrap">PMS</span>
                         </div>
 
                         <div

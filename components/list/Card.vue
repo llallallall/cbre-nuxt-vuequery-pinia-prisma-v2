@@ -72,7 +72,7 @@ const props = defineProps({
 
 const propertyStore = usePropertyStore();
 const uiStore = useUiStore();
-const { filteredAssets } = storeToRefs(propertyStore);
+const { filteredProperties } = storeToRefs(propertyStore);
 
 // Local State
 const itemsToDisplay = ref<PropertyType[]>([]);

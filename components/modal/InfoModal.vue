@@ -107,18 +107,15 @@
                                                                 </DialogTitle>
                                                                 <div class="mt-2">
                                                                         <p class="text-sm text-gray-500">
-                                                                                You can filter properties using the
-                                                                                toggle
-                                                                                buttons above, or select individual
-                                                                                properties for Excel download via the
-                                                                                buttons on each card.
+                                                                                The filters above apply only to the screen view. Use the toggles on each card to control data inclusion in the Excel download.
                                                                         </p>
                                                                 </div>
 
                                                                 <div
                                                                         class="mt-4 grid grid-cols-2 xl:grid-cols-3 3xl:grid-cols-4 gap-4">
                                                                         <div v-for="(item, index) in filteredItems"
-                                                                                class="border border-primary/10 p-4 shadow-md">
+                                                                                class="border border-primary/10 p-4 shadow-md transition-colors duration-200"
+                                                                                :class="isGeneralSelected(item.id) ? 'bg-white' : 'bg-gray-100'">
                                                                                 <div
                                                                                         class="font-financierMedium text-2xl text-primary pb-2 mb-2 border-b border-gray-200">
                                                                                         {{ item.name }}
@@ -249,7 +246,25 @@
                                                                                                         </div>
                                                                                                 </div>
                                                                                         </li>
+
+                                                                                        
                                                                                 </ul>
+
+                                                                                <div
+                                                                                        class="flex flex-row items-center justify-between mt-2">
+                                                                                        <div class="font-calibreLight" :class="isGeneralSelected(item.id) ? 'text-teal-700' : 'text-red-400'">{{ isGeneralSelected(item.id) ? 'Included in Excel' : 'Excluded from Excel' }}</div>
+                                                                                        <div
+                                                                                                class="flex items-center">
+                                                                                                <Switch :model-value="isGeneralSelected(item.id)"
+                                                                                                        @update:model-value="toggleGeneral(item.id)"
+                                                                                                        :class="isGeneralSelected(item.id) ? 'bg-teal-900' : 'bg-gray-300'"
+                                                                                                        class="relative inline-flex h-[24px] w-[44px] shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-opacity-75">
+                                                                                                        <span aria-hidden="true"
+                                                                                                                :class="isGeneralSelected(item.id) ? 'translate-x-5' : 'translate-x-0'"
+                                                                                                                class="pointer-events-none inline-block h-[20px] w-[20px] transform rounded-full bg-white shadow-lg ring-0 transition duration-200 ease-in-out" />
+                                                                                                </Switch>
+                                                                                        </div>
+                                                                                </div>
                                                                         </div>
                                                                 </div>
                                                         </DialogPanel>
@@ -285,6 +300,7 @@ const emit = defineEmits<{
 
 const selectedPropertiesSales = ref([] as string[]);
 const selectedPropertiesLeases = ref([] as string[]);
+const selectedPropertiesGeneral = ref([] as string[]);
 
 // Filters
 const filterNoTransaction = ref(false);
@@ -362,15 +378,143 @@ const toggleLease = (propertyId: string, idx: number) => {
         }
 };
 
-import { usePropertyExcel } from '~/composables/usePropertyExcel';
+const isGeneralSelected = (propertyId: string) => {
+        return selectedPropertiesGeneral.value.includes(propertyId);
+};
 
-const { downloadPropertyExcel } = usePropertyExcel();
+const toggleGeneral = (propertyId: string) => {
+        const index = selectedPropertiesGeneral.value.indexOf(propertyId);
+        const item = props.items.find(i => i.id === propertyId);
+
+        if (index === -1) {
+                // Enable General
+                selectedPropertiesGeneral.value.push(propertyId);
+                
+                // Auto-select all Sales and Leases for this property
+                if (item) {
+                        // Select Sales
+                        if (item.transaction) {
+                                item.transaction.forEach((t, idx) => {
+                                        if (t.type === 'SALE') {
+                                                const key = `${propertyId}-${idx}`;
+                                                if (!selectedPropertiesSales.value.includes(key)) {
+                                                        selectedPropertiesSales.value.push(key);
+                                                }
+                                        }
+                                });
+                        }
+                        
+                        // Select Leases
+                        const leases = getLeases(item);
+                        leases.forEach((_, idx) => {
+                                const key = `${propertyId}-${idx}`;
+                                if (!selectedPropertiesLeases.value.includes(key)) {
+                                        selectedPropertiesLeases.value.push(key);
+                                }
+                        });
+                }
+        } else {
+                // Disable General
+                selectedPropertiesGeneral.value.splice(index, 1);
+
+                // Auto-deselect all Sales and Leases for this property
+                if (item) {
+                        // Deselect Sales
+                        if (item.transaction) {
+                                item.transaction.forEach((t, idx) => {
+                                        if (t.type === 'SALE') {
+                                                const key = `${propertyId}-${idx}`;
+                                                const saleIndex = selectedPropertiesSales.value.indexOf(key);
+                                                if (saleIndex !== -1) {
+                                                        selectedPropertiesSales.value.splice(saleIndex, 1);
+                                                }
+                                        }
+                                });
+                        }
+                        
+                        // Deselect Leases
+                        const leases = getLeases(item);
+                        leases.forEach((_, idx) => {
+                                const key = `${propertyId}-${idx}`;
+                                const leaseIndex = selectedPropertiesLeases.value.indexOf(key);
+                                if (leaseIndex !== -1) {
+                                        selectedPropertiesLeases.value.splice(leaseIndex, 1);
+                                }
+                        });
+                }
+        }
+};
+
+import { useExcel } from '~/composables/useExcel';
+
+const { downloadExcel } = useExcel();
 
 const onDownloadExcel = async () => {
-        if (filteredItems.value.length > 0) {
-                await downloadPropertyExcel(filteredItems.value);
+        // Use props.items (all kept items) instead of filteredItems (visual filter)
+        // Filter items based on individual selections
+        const dataToExport = props.items
+                .filter(item => isGeneralSelected(item.id)) // First, check if the asset itself is selected
+                .map(item => {
+                        // Create a shallow copy to modify transactions without affecting original
+                        const newItem = { ...item };
+
+                        // Filter Transactions (Sales and Leases)
+                        if (newItem.transaction && newItem.transaction.length > 0) {
+                                newItem.transaction = newItem.transaction.filter((t, idx) => {
+                                        if (t.type === 'SALE') {
+                                                return isSaleSelected(item.id, idx);
+                                        } else if (t.type === 'LEASE') {
+                                                const leases = getLeases(item);
+                                                const leaseIdx = leases.findIndex(l => l === t.lease);
+                                                
+                                                if (leaseIdx !== -1) {
+                                                        return isLeaseSelected(item.id, leaseIdx);
+                                                }
+                                                return false;
+                                        }
+                                        return false; 
+                                });
+                        }
+                        return newItem;
+                });
+
+        if (dataToExport.length > 0) {
+                await downloadExcel(dataToExport);
         }
 }
+
+// Initialize selections when items change or modal opens
+import { watch } from 'vue';
+watch(() => props.items, (newItems) => {
+    // Select all items and their transactions by default
+    newItems.forEach(item => {
+        // General
+        if (!selectedPropertiesGeneral.value.includes(item.id)) {
+            selectedPropertiesGeneral.value.push(item.id);
+        }
+
+        // Sales
+        if (item.transaction) {
+            item.transaction.forEach((t, idx) => {
+                if (t.type === 'SALE') {
+                    const key = `${item.id}-${idx}`;
+                    if (!selectedPropertiesSales.value.includes(key)) {
+                        selectedPropertiesSales.value.push(key);
+                    }
+                }
+            });
+        }
+
+        // Leases
+        const leases = getLeases(item);
+        leases.forEach((_, idx) => {
+            const key = `${item.id}-${idx}`;
+            if (!selectedPropertiesLeases.value.includes(key)) {
+                selectedPropertiesLeases.value.push(key);
+            }
+        });
+    });
+}, { immediate: true });
 </script>
 
 <style scoped>
