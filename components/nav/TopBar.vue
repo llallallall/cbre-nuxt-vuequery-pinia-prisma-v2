@@ -200,6 +200,47 @@
                                 </div>
                         </div>
 
+                        <!-- mobile filter -->
+                        <div
+                                class="inline-flex sm:hidden items-center px-[10px]  lg:px-[14px] h-full hover:bg-gray-200/20 hover:underline hover:decoration-primary/50">
+                                <div class="relative mt-1 select-none font-calibre ">
+                                        <div class="relative cursor-default rounded-lg py-2 translate-y-[2px]"
+                                                @click="openMenu('filterPannel')">
+                                                <div class="absolute top-0 right-1 font-calibreLight text-xs translate-x-1 -translate-y-2 whitespace-nowrap"
+                                                        :class="uiStore.isMenuOverlay ? 'text-primary/50' : 'text-white/50'">
+                                                        Filters</div>
+                                                <div class="flex-1 w-full flex justify-end whitespace-nowrap">
+                                                        <Icon name="system-uicons:filtering" size="24"
+                                                                :class="openFilterPannel === true ? 'text-accent' : (uiStore.isMenuOverlay ? 'text-primary/50' : 'text-white/80')" />
+                                                </div>
+
+                                        </div>
+                                </div>
+
+                        </div>
+
+                        <!-- web search  -->
+                        <div
+                                class="inline-flex items-center px-[10px]  lg:px-[14px] h-full hover:bg-gray-200/20 hover:underline hover:decoration-primary/50">
+                                <div class="relative mt-1 select-none font-calibre ">
+                                        <div class="relative cursor-default rounded-lg py-2 translate-y-[2px]"
+                                                @click="openMenu('webSearchPannel')">
+                                                <div class="absolute top-0 right-1 font-calibreLight text-xs -translate-y-2 whitespace-nowrap"
+                                                        :class="uiStore.isMenuOverlay ? 'text-primary/50' : 'text-white/50'">
+                                                        Web</div>
+                                                <div class="flex-1 w-full flex justify-end whitespace-nowrap">
+                                                        <IconExplorer width="24px" height="24px"
+                                                                class="hover:text-accent "
+                                                                :class="openWebSearchPannel === true ? 'text-accent' : (uiStore.isMenuOverlay ? 'text-primary/50' : 'text-white/80')" />
+                                                </div>
+
+                                        </div>
+                                </div>
+
+                        </div>
+
+                        <!-- user menu -->
+
                         <NavUserMenu />
 
                 </div>

@@ -18,7 +18,6 @@ export interface Coordinate {
  */
 export interface MapState {
         // 1. UI 상태
-        showMiniMap: boolean;
         keepStateMiniMap: boolean;
         filterMapPins: boolean;
 
@@ -36,4 +35,5 @@ export interface MapState {
         kakaoAddress: any[];
         kakaoKeyword: any[];
         googleGeocoder: any[];
+
 }

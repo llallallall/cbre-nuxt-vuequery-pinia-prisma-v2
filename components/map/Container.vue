@@ -67,7 +67,7 @@
 
                 </MapboxMap>
 
-                <MapboxMap map-id="cbre-minimap" :class="mapStore.showMiniMap ? 'block' : 'hidden'"
+                <MapboxMap map-id="cbre-minimap" :class="uiStore.showMiniMap ? 'block' : 'hidden'"
                         style="position: absolute; top:calc(100% - 260px); left:0; width: 220px; height:260px; z-index:10;"
                         :options="{
                                 style: 'mapbox://styles/mapbox/' + mapStyleId,
@@ -92,6 +92,7 @@ import { ref, computed, watch } from 'vue';
 import { storeToRefs } from "pinia";
 import { useMapStore } from '~/stores/map';
 import { usePropertyStore } from '~/stores/property';
+import { useUiStore } from '~/stores/ui';
 import { useFormat } from '~/composables/useFormat';
 import mapboxgl from "mapbox-gl";
 import MapboxLanguage from "@mapbox/mapbox-gl-language";
@@ -99,10 +100,11 @@ import { mapCenter, mapZoom, maxZoom, minZoom, mapStyleId, LAYER_3D_BUILDINGS, L
 import { createToast } from 'mosha-vue-toastify';
 
 const mapStore = useMapStore();
+const uiStore = useUiStore();
 const propertyStore = usePropertyStore();
 const { getThumbnailUrl } = useFormat();
 
-const { showMiniMap, filterMapPins, flyTo, searchedMarkersChanged } = storeToRefs(mapStore);
+const { filterMapPins, flyTo, searchedMarkersChanged } = storeToRefs(mapStore);
 const { filteredAssets } = storeToRefs(propertyStore);
 
 const mapRef = useMapboxRef("cbre-map");

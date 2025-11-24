@@ -73,6 +73,13 @@ interface UiState {
 
         // 사용자 프로필 모달
         isUserProfileModalOpen: boolean;
+
+        // Fab 버튼
+        isFabOpen: boolean;
+        showInfoModal: boolean;
+
+        // map
+        showMiniMap: boolean,
 }
 
 // ----------------------------------------------------------------------
@@ -106,6 +113,11 @@ const getInitialState = (): UiState => ({
 
         currentLocale: 'en', // 기본은 영어
         isUserProfileModalOpen: false,
+
+        isFabOpen: false,
+        showInfoModal: false,
+
+        showMiniMap: true,
 });
 
 // ----------------------------------------------------------------------

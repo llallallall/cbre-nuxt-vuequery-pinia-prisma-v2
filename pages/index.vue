@@ -20,44 +20,53 @@
                 'h-full transition-all duration-300 border-l border-gray-200',
                 uiStore.isExpandedList ? 'w-[50%]' : 'w-[40%] min-w-[400px] max-w-[600px]'
             ]">
-                <ListCard :data="filteredAssets" :totalCount="filteredAssets.length" :itemsPerRender="6"
+                <ListCard :data="filteredProperties" :totalCount="filteredProperties.length" :itemsPerRender="6"
                     containerClasses="bg-[#f4f7f7] p-4 h-full" defaultLoadingColor="#222" />
             </div>
 
-            <div ref="fabElement" class="floating-snap-btn-wrapper drop-shadow-xl select-none">
+            <div ref="fabElement" class="floating-snap-btn-wrapper drop-shadow-xl select-none left"
+                :class="{ 'fab-active': uiStore.isFabOpen }">
 
+                <!-- BEGIN :: Floating Button -->
                 <div class="fab-btn shadow-md flex justify-center cursor-pointer"
-                    :class="isFabOpen ? ' bg-primary/90 delay-300' : ' bg-primary '" @click="toggleFabMenu">
-                    <Icon name="ion:add-sharp" :class="isFabOpen ? 'rotate-45' : 'rotate-0'"
+                    :class="uiStore.isFabOpen ? ' bg-primary/90 delay-300' : ' bg-primary '">
+                    <Icon name="ion:add-sharp" :class="uiStore.isFabOpen ? 'rotate-45' : 'rotate-0'"
                         class="transition-transform duration-300 w-6 h-6 text-white" />
                 </div>
+                <!-- BEGIN :: Expand Section -->
+                <ul class="fab-menu-ul select-none">
 
-                <ul class="fab-menu-ul select-none" :class="{ 'fab-active': isFabOpen }">
-                    <li class="fab-menu-li shadow-md" @click="toggleViewMode" title="Toggle View">
-                        <Icon :name="uiStore.isGridView ? 'ion:list' : 'ion:grid'" class="fab-menu-icon" />
+
+                    <li class="fab-menu-li shadow-md bg-white" @click="resetUserSelection" title="Reset Selection">
+                        <label>Reset</label>
+                        <Icon name="ion:refresh" class="fab-menu-icon" />
                     </li>
 
-                    <li class="fab-menu-li shadow-md" @click="toggleListVisibility" title="Toggle List">
-                        <Icon :name="uiStore.isHiddenList ? 'ion:arrow-back' : 'ion:arrow-forward'"
-                            class="fab-menu-icon" />
+                    <li class="fab-menu-li shadow-md bg-white" @click="openInfoModal" title="Show Transaction Info">
+                        <label>Info</label>
+                        <Icon name="ion:document-text" class="fab-menu-icon" />
                     </li>
-
-                    <li class="fab-menu-li shadow-md" title="Settings">
-                        <Icon name="ion:settings-sharp" class="fab-menu-icon" />
+                    <li class="fab-menu-li shadow-md bg-white" @click="uiStore.showMiniMap = !uiStore.showMiniMap"
+                        title="Toggle Mini Map">
+                        <label>Toggle</label>
+                        <Icon name="ion:map" class="fab-menu-icon" />
                     </li>
                 </ul>
             </div>
 
-            <div v-if="isFabOpen" @click="toggleFabMenu"
-                class="backdrop fixed inset-0 top-[80px] z-20 bg-black/10 transition-opacity">
+            <div v-if="uiStore.isFabOpen || uiStore.showInfoModal" @click="closeFabMenu"
+                class="backdrop fixed inset-0 top-[80px] bg-black/10 transition-opacity"
+                :class="uiStore.isFabOpen ? 'block z-40' : 'hidden z-0'">
             </div>
         </div>
+        <ModalInfoModal :show="uiStore.showInfoModal" :items="propertyStore.keptProperties" @close="closeInfoModal" />
     </div>
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, defineAsyncComponent } from 'vue';
+import { ref, onMounted, computed, onBeforeUnmount } from 'vue';
 import { storeToRefs } from 'pinia';
+import { useToast } from '~/composables/useToast';
 
 // 1. Store 임포트
 import { usePropertyStore } from '~/stores/property';
@@ -65,9 +74,6 @@ import { useUiStore } from '~/stores/ui';
 import { useMapStore } from '~/stores/map'; // 필요 시 사용
 
 // 2. 컴포넌트 임포트 (동적 임포트 또는 일반 임포트)
-// Nuxt는 components 폴더를 자동 스캔하므로, 파일명과 일치한다면 import가 없어도 되지만 명시적으로 작성합니다.
-// import ListCard from '~/components/list/Card.vue';
-// import MapContainer from '~/components/map/Container.vue';
 
 // 3. Store 인스턴스
 const propertyStore = usePropertyStore();
@@ -75,10 +81,7 @@ const uiStore = useUiStore();
 const mapStore = useMapStore();
 
 // 4. 반응형 상태 (Store)
-const { filteredAssets } = storeToRefs(propertyStore);
-// isFabOpen, isHiddenList, isGridView 등 UI 상태는 uiStore에서 관리한다고 가정 (없으면 로컬로 구현하거나 추가)
-// 만약 uiStore에 없다면 로컬 ref로 구현합니다.
-const isFabOpen = ref(false);
+const { filteredProperties } = storeToRefs(propertyStore);
 const { mapStyleOptions } = storeToRefs(mapStore);
 
 
@@ -93,25 +96,6 @@ onMounted(async () => {
 });
 
 // 7. 핸들러 함수
-const toggleFabMenu = () => {
-    isFabOpen.value = !isFabOpen.value;
-};
-
-const toggleViewMode = () => {
-    uiStore.toggleViewMode(); // uiStore 액션 호출
-};
-
-const toggleListVisibility = () => {
-    // uiStore에 액션이 있다면 호출, 없다면 직접 상태 변경
-    // 예: uiStore.isHiddenList = !uiStore.isHiddenList;
-    // 여기서는 가상의 액션 호출
-    // if (uiStore.toggleListHidden) {
-    //     uiStore.toggleListHidden();
-    // } else {
-    //     uiStore.isHiddenList = !uiStore.isHiddenList;
-    // }
-};
-
 const listWidthClass = computed(() => {
     if (uiStore.isHiddenList) {
         // 리스트가 숨겨지면 맵이 전체 너비(w-full)를 차지합니다.
@@ -125,98 +109,358 @@ const listWidthClass = computed(() => {
     return `w-[${listRatio}%] min-w-[40%]`;
 });
 
+// 8. Fab Menu
+let oldPositionX: any;
+let oldPositionY: any;
+let startMouseX: number = 0;
+let startMouseY: number = 0;
+const DRAG_THRESHOLD = 5;
+
+const move = (e: any) => {
+    if (fabElement.value && fabElement.value.style && !fabElement.value.classList.contains("fab-active")) {
+        let clientX, clientY;
+        if (e.type === "touchmove") {
+            clientX = e.touches[0].clientX;
+            clientY = e.touches[0].clientY;
+        } else {
+            clientX = e.clientX;
+            clientY = e.clientY;
+        }
+
+        if (Math.abs(clientX - startMouseX) < DRAG_THRESHOLD && Math.abs(clientY - startMouseY) < DRAG_THRESHOLD) {
+            return;
+        }
+
+        fabElement.value.style.top = clientY + "px";
+        fabElement.value.style.left = clientX + "px";
+    }
+};
+
+const mouseDown = (e: any) => {
+    // console.log("mouse down ");
+    if (fabElement.value && fabElement.value.style) {
+
+        oldPositionY = fabElement.value.style.top;
+        oldPositionX = fabElement.value.style.left;
+        if (e.type === "mousedown") {
+            startMouseX = e.clientX;
+            startMouseY = e.clientY;
+            window.addEventListener("mousemove", move);
+        } else {
+            startMouseX = e.touches[0].clientX;
+            startMouseY = e.touches[0].clientY;
+            window.addEventListener("touchmove", move);
+        }
+
+        fabElement.value.style.transition = "none";
+    }
+};
+
+const mouseUp = (e: any) => {
+    // console.log("mouse up");
+    if (e.type === "mouseup") {
+        window.removeEventListener("mousemove", move);
+    } else {
+        window.removeEventListener("touchmove", move);
+    }
+    snapToSide(e);
+    if (fabElement.value && fabElement.value.style) {
+        fabElement.value.style.transition = "0.3s ease-in-out left";
+    }
+
+};
+
+const snapToSide = (e: any) => {
+    // console.log(e)
+    const windowWidth = window.innerWidth;
+    let currPositionX = 0;
+    let currPositionY = 0;
+    if (e.type === "touchend") {
+        currPositionX = e.changedTouches[0].clientX;
+        currPositionY = e.changedTouches[0].clientY;
+    } else {
+        currPositionX = e.clientX;
+        currPositionY = e.clientY;
+    }
+
+    if (fabElement.value && fabElement.value.style && wrapperElement.value) {
+        // console.log(currPositionX)
+        // console.log(currPositionY)
+        if (currPositionY < 50) {
+            fabElement.value.style.top = 50 + "px";
+        }
+        if (currPositionY > wrapperElement.value.clientHeight - 50) {
+            fabElement.value.style.top = wrapperElement.value.clientHeight - 50 + "px";
+        }
+        if (currPositionX < windowWidth / 2) {
+            fabElement.value.style.left = 30 + "px";
+            fabElement.value.classList.remove("right");
+            fabElement.value.classList.add("left");
+        } else {
+            fabElement.value.style.left = windowWidth - 30 + "px";
+            fabElement.value.classList.remove("left");
+            fabElement.value.classList.add("right");
+        }
+    }
+};
+
+onMounted(() => {
+
+    if (fabElement.value && fabElement.value.style) {
+        // Initialize inline styles with computed values to ensure first click works
+        const computedStyle = window.getComputedStyle(fabElement.value);
+        fabElement.value.style.top = computedStyle.top;
+        fabElement.value.style.left = computedStyle.left;
+
+        if (fabElement.value) {
+            fabElement.value.addEventListener("mousedown", mouseDown);
+        }
+
+        if (fabElement.value) {
+            fabElement.value.addEventListener("mouseup", mouseUp);
+        }
+
+        if (fabElement.value) {
+            fabElement.value.addEventListener("touchstart", mouseDown);
+        }
+
+        fabElement.value.addEventListener("touchend", mouseUp);
+
+        fabElement.value.addEventListener("click", (_e: any) => {
+
+            if (
+                oldPositionY === fabElement.value?.style.top &&
+                oldPositionX === fabElement.value?.style.left
+            ) {
+                // fabElement.value?.classList.toggle("fab-active"); // Removed this line
+                uiStore.isFabOpen = !uiStore.isFabOpen;
+            }
+        });
+
+    }
+
+});
+
+onBeforeUnmount(() => {
+    fabElement.value?.removeEventListener("mousedown", mouseDown);
+    fabElement.value?.removeEventListener("mouseup", mouseUp);
+    fabElement.value?.removeEventListener("touchstart", mouseDown);
+    fabElement.value?.removeEventListener("touchend", mouseUp);
+    fabElement.value?.removeEventListener("click", (_e: any) => { });
+});
+
+// 9. Fab Elements
+
+
+const { showToast } = useToast();
+
+const openInfoModal = () => {
+    // console.log(propertyStore.keptPropertyIds)
+    if (propertyStore.keptPropertyIds.length > 0) {
+        uiStore.showInfoModal = true;
+    } else {
+        showToast("There are no properties selected.", 'warning');
+    }
+};
+
+const closeInfoModal = () => {
+    uiStore.showInfoModal = false;
+    uiStore.isFabOpen = false;
+};
+
+const closeFabMenu = () => {
+    uiStore.isFabOpen = false;
+    uiStore.showInfoModal = false;
+};
+
+const resetUserSelection = () => {
+    //console.log("reset");
+    propertyStore.resetFilter()
+    propertyStore.keptPropertyIds = [];
+    propertyStore.filteredPropertyIds = [];
+    propertyStore.filteredProperties = propertyStore.initialProperties;
+    //mapStore.filteredMapInfos = mapStore.allMapInfos;
+};
+
+
+// 10. EXCEL
+
+const onDownloadExcel = async () => {
+}
+
 </script>
 
 <style scoped>
 /* ------------------------------------------------ */
 /* --- FAB (Floating Action Button) CSS --- */
 /* ------------------------------------------------ */
-.floating-snap-btn-wrapper {
+
+.backdrop {
+    display: hidden;
     position: absolute;
-    bottom: 30px;
-    right: 30px;
-    z-index: 50;
-    /* 지도 컨트롤 위에 표시되도록 높은 z-index */
+    top: 80px;
+    right: 0px;
+    width: 100%;
+    height: calc(100% - 80px);
+    background-color: rgba(0, 0, 0, 0.25);
+    backdrop-filter: blur(10px);
 }
 
-.fab-btn {
-    width: 56px;
-    /* 크기 약간 키움 */
-    height: 56px;
+.floating-snap-btn-wrapper {
+    position: absolute;
+    transform: translate(-50%, -50%);
+    top: 60%;
+    left: 30px;
+    /* bottom: calc(3% + 55px);
+right: 0px; */
+    width: 50px;
+    height: 50px;
     border-radius: 50%;
-    cursor: pointer;
+    z-index: 50;
+}
+
+.floating-snap-btn-wrapper .fab-btn {
+    position: absolute;
+    top: 0;
+    left: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    /* background-color: #003F2D; */
+    color: white;
+    z-index: 100;
+    box-shadow: 0px 2px 17px -1px rgba(0, 0, 0, 0.3);
+}
+
+.floating-snap-btn-wrapper ul {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+}
+
+.floating-snap-btn-wrapper ul li {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
     display: flex;
     align-items: center;
     justify-content: center;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    color: black;
+    list-style-type: none;
+    transition: 0.4s;
+    transition-property: top, left;
+    border-radius: 50%;
 }
 
-.fab-btn:hover {
-    transform: scale(1.05);
+.floating-snap-btn-wrapper.fab-active li:hover {
+    background-color: #17e88f;
+    transform: scale(1.1);
 }
 
-.fab-btn:active {
-    transform: scale(0.95);
+.floating-snap-btn-wrapper.fab-active.left li:nth-child(1) {
+    top: 0%;
+    left: 450%;
+    transition-delay: 0s;
 }
 
-.fab-menu-ul {
-    position: absolute;
-    bottom: 0;
-    right: 0;
-    width: 100%;
-    height: 100%;
-    list-style: none;
-    padding: 0;
-    margin: 0;
-    pointer-events: none;
-    /* 비활성 시 클릭 방지 */
+.floating-snap-btn-wrapper.fab-active.left li:nth-child(2) {
+    top: 0%;
+    left: 300%;
+    transition-delay: 0.2s;
+}
+
+.floating-snap-btn-wrapper.fab-active.left li:nth-child(3) {
+    top: 0%;
+    left: 150%;
+    transition-delay: 0.4s;
+}
+
+.floating-snap-btn-wrapper.fab-active.right li:nth-child(1) {
+    top: 0%;
+    left: -300%;
+    transition-delay: 0s;
+}
+
+.floating-snap-btn-wrapper.fab-active.right li:nth-child(2) {
+    top: 0%;
+    left: -200%;
+    transition-delay: 0.2s;
+}
+
+.floating-snap-btn-wrapper.fab-active.right li:nth-child(3) {
+    top: 0%;
+    left: -100%;
+    transition-delay: 0.4s;
 }
 
 .fab-menu-li {
-    position: absolute;
-    bottom: 0;
-    right: 0;
-    width: 48px;
-    height: 48px;
-    border-radius: 50%;
-    background-color: #012A2D;
-    /* Primary Color */
-    color: white;
     display: flex;
     align-items: center;
     justify-content: center;
-    cursor: pointer;
-    opacity: 0;
-    transform: scale(0);
-    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    flex-direction: column;
+    gap: 1px;
 }
 
-/* FAB 활성화 애니메이션 */
-.fab-active .fab-menu-li {
-    opacity: 1;
-    transform: scale(1);
-    pointer-events: auto;
+
+
+.fab-menu-li label {
+    font-size: 8px;
+    font-weight: 600;
+    color: gray;
 }
 
-/* 버튼 위치 배치 (부채꼴 또는 수직/수평) */
-/* 여기서는 수직 위로 배치하는 예시 */
-.fab-active .fab-menu-li:nth-child(1) {
-    bottom: 70px;
-    transition-delay: 0.05s;
-}
-
-.fab-active .fab-menu-li:nth-child(2) {
-    bottom: 130px;
-    transition-delay: 0.1s;
-}
-
-.fab-active .fab-menu-li:nth-child(3) {
-    bottom: 190px;
-    transition-delay: 0.15s;
+.fab-menu-li:hover label {
+    color: black;
 }
 
 .fab-menu-icon {
-    width: 20px;
-    height: 20px;
+    color: gray;
+    font-size: 18px;
+}
+
+.fab-menu-li:hover .fab-menu-icon {
+    color: black;
+}
+
+
+.detail-card-wrapper {
+    width: 100%;
+    height: 100%;
+}
+
+.detail-card-outer {
+    width: 100%;
+    height: 100%;
+}
+
+.detail-card-inner {
+    width: 100%;
+    height: 100%;
+}
+
+.detail-card-contents {
+    width: 100%;
+    height: 100%;
+}
+
+.modalCloseButton {
+    position: absolute;
+    top: 165px;
+    right: 70px;
+    z-index: 100;
+}
+
+.bulletList {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    line-height: 2;
 }
 </style>

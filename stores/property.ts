@@ -36,12 +36,12 @@ interface PropertyState {
         currentProperty: PropertyType | null;
         currentPropertyId: string;
 
-        initialAllAssets: PropertyType[];
-        initialAssetIds: string[];
+        initialProperties: PropertyType[];
+        initialPropertyIds: string[];
         initialDataLoaded: boolean;
 
-        filteredAssets: PropertyType[];
-        filteredAssetsIds: string[];
+        filteredProperties: PropertyType[];
+        filteredPropertyIds: string[];
 
         adminList: AdminListType[];
         filteredAdminList: AdminListType[];
@@ -53,7 +53,7 @@ interface PropertyState {
         filterSubSectorTypes: string[];
         moreFilters: MoreFiltersType;
 
-        keptAssetIds: string[];
+        keptPropertyIds: string[];
 }
 
 // ----------------------------------------------------------------------
@@ -64,12 +64,12 @@ const getInitialState = (): PropertyState => ({
         currentProperty: null,
         currentPropertyId: '',
 
-        initialAllAssets: [],
-        initialAssetIds: [],
+        initialProperties: [],
+        initialPropertyIds: [],
         initialDataLoaded: false,
 
-        filteredAssets: [],
-        filteredAssetsIds: [],
+        filteredProperties: [],
+        filteredPropertyIds: [],
 
         adminList: [],
         filteredAdminList: [],
@@ -91,8 +91,10 @@ const getInitialState = (): PropertyState => ({
                 iod: 0, gdm: 0, noc: 0, effRatio: 0,
         },
 
-        keptAssetIds: [],
+        keptPropertyIds: [],
 });
+
+
 
 // ----------------------------------------------------------------------
 // 3. Pinia Store 정의
@@ -102,33 +104,33 @@ export const usePropertyStore = defineStore('property', {
         state: getInitialState,
 
         getters: {
-                getAssetById: (state) => (id: string) => {
-                        return state.initialAllAssets.find((el) => el.id === id);
+                getPropertyById: (state) => (id: string) => {
+                        return state.initialProperties.find((el) => el.id === id);
                 },
 
                 getFilteredMapData: (state) => {
-                        return state.filteredAssets.map(asset => ({
-                                id: asset.id,
-                                name: asset.name,
-                                latitude: asset.location?.latitude ?? 0,
-                                longitude: asset.location?.longitude ?? 0,
-                                sector: asset.sector?.name,
-                                subSector: asset.subsector?.name,
-                                mainImageUrl: asset.propertyImageFile?.find(img => img.main)?.fileUrl ?? null
+                        return state.filteredProperties.map(property => ({
+                                id: property.id,
+                                name: property.name,
+                                latitude: property.location?.latitude ?? 0,
+                                longitude: property.location?.longitude ?? 0,
+                                sector: property.sector?.name,
+                                subSector: property.subsector?.name,
+                                mainImageUrl: property.propertyImageFile?.find(img => img.main)?.fileUrl ?? null
                         })).filter(p => p.latitude !== 0 && p.longitude !== 0);
                 },
 
-                previousAssetId: (state) => {
-                        const idx = state.filteredAssetsIds.indexOf(state.currentPropertyId);
-                        return idx > 0 ? state.filteredAssetsIds[idx - 1] : '';
+                previousPropertyId: (state) => {
+                        const idx = state.filteredPropertyIds.indexOf(state.currentPropertyId);
+                        return idx > 0 ? state.filteredPropertyIds[idx - 1] : '';
                 },
-                nextAssetId: (state) => {
-                        const idx = state.filteredAssetsIds.indexOf(state.currentPropertyId);
-                        return (idx !== -1 && idx < state.filteredAssetsIds.length - 1) ? state.filteredAssetsIds[idx + 1] : '';
+                nextPropertyId: (state) => {
+                        const idx = state.filteredPropertyIds.indexOf(state.currentPropertyId);
+                        return (idx !== -1 && idx < state.filteredPropertyIds.length - 1) ? state.filteredPropertyIds[idx + 1] : '';
                 },
 
                 // 호환성을 위한 getter (기존 코드 호환)
-                assetData: (state) => state.currentProperty || ({} as PropertyType),
+                propertyData: (state) => state.currentProperty || ({} as PropertyType),
                 propertyId: (state) => state.currentPropertyId,
 
                 // 메인 이미지 URL을 동적으로 반환
@@ -176,7 +178,11 @@ export const usePropertyStore = defineStore('property', {
                         };
                 },
 
-                isKept: (state) => (id: string) => state.keptAssetIds.includes(id),
+                isKept: (state) => (id: string) => state.keptPropertyIds.includes(id),
+
+                keptProperties: (state) => {
+                        return state.initialProperties.filter(p => state.keptPropertyIds.includes(p.id));
+                }
         },
 
         actions: {
@@ -186,16 +192,16 @@ export const usePropertyStore = defineStore('property', {
 
                 async fetchInitialData() {
                         const statusStore = useStatusStore();
-                        if (this.initialDataLoaded && this.initialAllAssets.length > 0) return;
+                        if (this.initialDataLoaded && this.initialProperties.length > 0) return;
                         statusStore.setGlobalLoading(true, 'fetchInitialData');
 
                         try {
-                                const allAssets = await $fetch<PropertyType[]>('/api/property/list');
+                                const allProperties = await $fetch<PropertyType[]>('/api/property/list');
                                 // 💡 리스트의 각 항목에 대해 날짜 변환 적용
-                                const transformedAssets = allAssets.map(asset => transformPropertyResponse(asset));
+                                const transformedProperties = allProperties.map(property => transformPropertyResponse(property));
 
-                                this.initialAllAssets = transformedAssets;
-                                this.initialAssetIds = transformedAssets.map(a => a.id);
+                                this.initialProperties = transformedProperties;
+                                this.initialPropertyIds = transformedProperties.map(a => a.id);
 
                                 this.generateAdminListFromInitial();
                                 this.applyFilter();
@@ -266,20 +272,20 @@ export const usePropertyStore = defineStore('property', {
                 /**
                  * @description 현재 자산 상태를 수동으로 업데이트합니다.
                  */
-                setProperty(asset: Partial<PropertyType>) {
+                setProperty(property: Partial<PropertyType>) {
                         if (this.currentProperty) {
-                                Object.assign(this.currentProperty, asset);
+                                Object.assign(this.currentProperty, property);
 
                                 // 전체 목록에도 반영
-                                const index = this.initialAllAssets.findIndex(p => p.id === this.currentPropertyId);
+                                const index = this.initialProperties.findIndex(p => p.id === this.currentPropertyId);
                                 if (index !== -1) {
-                                        this.initialAllAssets[index] = { ...this.initialAllAssets[index], ...asset } as PropertyType;
+                                        this.initialProperties[index] = { ...this.initialProperties[index], ...property } as PropertyType;
                                 }
                         }
                 },
 
-                setPropertyPartial(asset: Partial<PropertyType>) {
-                        this.setProperty(asset);
+                setPropertyPartial(property: Partial<PropertyType>) {
+                        this.setProperty(property);
                 },
 
                 updateFloorList(updatedFloors: FloorType[]) {
@@ -294,9 +300,9 @@ export const usePropertyStore = defineStore('property', {
 
                                 this.currentProperty.floor = transformedFloors;
 
-                                const index = this.initialAllAssets.findIndex(p => p.id === this.currentPropertyId);
+                                const index = this.initialProperties.findIndex(p => p.id === this.currentPropertyId);
                                 if (index !== -1) {
-                                        this.initialAllAssets[index].floor = transformedFloors;
+                                        this.initialProperties[index].floor = transformedFloors;
                                 }
                         }
                 },
@@ -317,15 +323,15 @@ export const usePropertyStore = defineStore('property', {
                 },
 
                 applyFilter() {
-                        if (this.initialAllAssets.length === 0) return;
+                        if (this.initialProperties.length === 0) return;
 
-                        let assets = [...this.initialAllAssets];
+                        let properties = [...this.initialProperties];
                         const filters = this.moreFilters;
 
                         // 1. Text Search
                         if (this.searchKeyword.trim()) {
                                 const keyword = this.searchKeyword.toLowerCase().trim();
-                                assets = assets.filter(p =>
+                                properties = properties.filter(p =>
                                         p.name.toLowerCase().includes(keyword) ||
                                         p.location?.addressFull?.toLowerCase().includes(keyword) ||
                                         p.location?.addressProvince?.toLowerCase().includes(keyword) ||
@@ -336,7 +342,7 @@ export const usePropertyStore = defineStore('property', {
                         // 2. Transaction Type
                         if (this.filterTransactionType) {
                                 const type = this.filterTransactionType.toLowerCase();
-                                assets = assets.filter(p => {
+                                properties = properties.filter(p => {
                                         const hasSale = p.transaction.some(t => t.type === 'SALE');
                                         const hasLease = p.transaction.some(t => t.type === 'LEASE');
 
@@ -349,13 +355,13 @@ export const usePropertyStore = defineStore('property', {
 
                         // 3. Sectors
                         if (this.filterSectorTypes.length > 0) {
-                                assets = assets.filter(p =>
+                                properties = properties.filter(p =>
                                         p.sector && this.filterSectorTypes.some(t => t.toLowerCase() === p.sector!.name.toLowerCase())
                                 );
                         }
 
                         if (this.filterSubSectorTypes.length > 0) {
-                                assets = assets.filter(p =>
+                                properties = properties.filter(p =>
                                         p.subsector && this.filterSubSectorTypes.some(t => t.toLowerCase() === p.subsector!.name.toLowerCase())
                                 );
                         }
@@ -363,56 +369,56 @@ export const usePropertyStore = defineStore('property', {
                         // 4. More Filters
                         if (filters.gfa > 0) {
                                 const key = filters.gfaType ? 'gfaSqm' : 'gfaPy';
-                                assets = assets.filter(p => (p.scale?.[key] ?? 0) >= filters.gfa);
+                                properties = properties.filter(p => (p.scale?.[key] ?? 0) >= filters.gfa);
                         }
                         if (filters.nfa > 0) {
                                 const key = filters.nfaType ? 'nfaSqm' : 'nfaPy';
-                                assets = assets.filter(p => (p.scale?.[key] ?? 0) >= filters.nfa);
+                                properties = properties.filter(p => (p.scale?.[key] ?? 0) >= filters.nfa);
                         }
                         if (filters.siteArea > 0) {
                                 const key = filters.siteAreaType ? 'siteAreaSqm' : 'siteAreaPy';
-                                assets = assets.filter(p => (p.scale?.[key] ?? 0) >= filters.siteArea);
+                                properties = properties.filter(p => (p.scale?.[key] ?? 0) >= filters.siteArea);
                         }
 
                         if (filters.built > 0) {
-                                assets = assets.filter(p => {
+                                properties = properties.filter(p => {
                                         const completion = p.history.find(h => h.type === 'COMPLETION');
                                         return completion ? parseInt(completion.year) >= filters.built : false;
                                 });
                         }
                         if (filters.reno > 0) {
-                                assets = assets.filter(p => {
+                                properties = properties.filter(p => {
                                         const renovation = p.history.find(h => h.type === 'RENOVATION');
                                         return renovation ? parseInt(renovation.year) >= filters.reno : false;
                                 });
                         }
 
                         if (filters.sales > 0) {
-                                assets = assets.filter(p =>
+                                properties = properties.filter(p =>
                                         p.transaction.some(t => t.type === 'SALE' && parseInt(t.year) >= filters.sales)
                                 );
                         }
                         if (filters.leases > 0) {
-                                assets = assets.filter(p =>
+                                properties = properties.filter(p =>
                                         p.transaction.some(t => t.type === 'LEASE' && parseInt(t.year) >= filters.leases)
                                 );
                         }
 
                         // Facility
-                        if (filters.buildings > 0) assets = assets.filter(p => (p.scale?.noOfBuildings ?? 0) >= filters.buildings);
-                        if (filters.basement > 0) assets = assets.filter(p => (p.scale?.basementLevels ?? 0) >= filters.basement);
-                        if (filters.upperFloor > 0) assets = assets.filter(p => (p.scale?.upperLevels ?? 0) >= filters.upperFloor);
-                        if (filters.elevator > 0) assets = assets.filter(p => (p.facility?.elevatorsTotal ?? 0) >= filters.elevator);
-                        if (filters.parking > 0) assets = assets.filter(p => (p.facility?.cpsExisting ?? 0) >= filters.parking);
+                        if (filters.buildings > 0) properties = properties.filter(p => (p.scale?.noOfBuildings ?? 0) >= filters.buildings);
+                        if (filters.basement > 0) properties = properties.filter(p => (p.scale?.basementLevels ?? 0) >= filters.basement);
+                        if (filters.upperFloor > 0) properties = properties.filter(p => (p.scale?.upperLevels ?? 0) >= filters.upperFloor);
+                        if (filters.elevator > 0) properties = properties.filter(p => (p.facility?.elevatorsTotal ?? 0) >= filters.elevator);
+                        if (filters.parking > 0) properties = properties.filter(p => (p.facility?.cpsExisting ?? 0) >= filters.parking);
 
                         // Finance
-                        if (filters.effRatio > 0) assets = assets.filter(p => (p.profitability?.effectiveRatio ?? 0) >= filters.effRatio);
-                        if (filters.noc > 0) assets = assets.filter(p => p.transaction.some(t => t.lease && (t.lease.noc ?? 0) >= filters.noc));
-                        if (filters.iod > 0) assets = assets.filter(p => p.transaction.some(t => t.lease && (t.lease.iod ?? 0) >= filters.iod));
-                        if (filters.gdm > 0) assets = assets.filter(p => p.transaction.some(t => t.lease && (t.lease.gdm ?? 0) >= filters.gdm));
+                        if (filters.effRatio > 0) properties = properties.filter(p => (p.profitability?.effectiveRatio ?? 0) >= filters.effRatio);
+                        if (filters.noc > 0) properties = properties.filter(p => p.transaction.some(t => t.lease && (t.lease.noc ?? 0) >= filters.noc));
+                        if (filters.iod > 0) properties = properties.filter(p => p.transaction.some(t => t.lease && (t.lease.iod ?? 0) >= filters.iod));
+                        if (filters.gdm > 0) properties = properties.filter(p => p.transaction.some(t => t.lease && (t.lease.gdm ?? 0) >= filters.gdm));
 
-                        this.filteredAssets = assets;
-                        this.filteredAssetsIds = assets.map(a => a.id);
+                        this.filteredProperties = properties;
+                        this.filteredPropertyIds = properties.map(a => a.id);
                 },
 
                 filterAdminList(searchKeyword: string) {
@@ -431,6 +437,26 @@ export const usePropertyStore = defineStore('property', {
                                 item.subSector?.toLowerCase().includes(keyword) ||
                                 item.grade?.toLowerCase().includes(keyword)
                         );
+                },
+
+                resetFilter() {
+                        this.searchKeyword = '';
+                        this.filterTransactionType = '';
+                        this.filterSectorTypes = [];
+                        this.filterSubSectorTypes = [];
+
+                        this.moreFilters = {
+                                gfa: 0, gfaType: true,
+                                nfa: 0, nfaType: true,
+                                siteArea: 0, siteAreaType: true,
+                                built: 0, reno: 0,
+                                sales: 0, leases: 0,
+                                buildings: 0, basement: 0, upperFloor: 0,
+                                elevator: 0, parking: 0,
+                                iod: 0, gdm: 0, noc: 0, effRatio: 0,
+                        };
+
+                        this.keptPropertyIds = [];
                 },
 
                 // ------------------------------------------------------------------
@@ -477,7 +503,7 @@ export const usePropertyStore = defineStore('property', {
                                                 method: 'DELETE' as any
                                         });
 
-                                        this.initialAllAssets = this.initialAllAssets.filter(p => p.id !== propertyId);
+                                        this.initialProperties = this.initialProperties.filter(p => p.id !== propertyId);
                                         this.adminList = this.adminList.filter(p => p.propertyId !== propertyId);
 
                                         this.applyFilter();
@@ -507,7 +533,7 @@ export const usePropertyStore = defineStore('property', {
                                         body: { propertyIds },
                                 });
 
-                                this.initialAllAssets = this.initialAllAssets.filter(
+                                this.initialProperties = this.initialProperties.filter(
                                         p => !propertyIds.includes(p.id)
                                 );
                                 this.adminList = this.adminList.filter(
@@ -537,23 +563,23 @@ export const usePropertyStore = defineStore('property', {
                 // ------------------------------------------------------------------
 
                 generateAdminListFromInitial() {
-                        if (!this.initialAllAssets.length) return;
+                        if (!this.initialProperties.length) return;
 
-                        this.adminList = this.initialAllAssets.map((asset, idx) => ({
+                        this.adminList = this.initialProperties.map((property, idx) => ({
                                 no: idx + 1,
-                                propertyId: asset.id,
-                                propertyName: asset.name,
-                                mainImageUrl: asset.propertyImageFile?.find(i => i.main)?.fileUrl ?? null,
-                                grade: asset.profitability?.grade ?? null,
-                                sector: asset.sector?.name ?? 'N/A',
-                                subSector: asset.subsector?.name ?? null,
-                                addressFull: asset.location?.addressFull ?? null,
-                                addressProvince: asset.location?.addressProvince ?? null,
-                                addressCity: asset.location?.addressCity ?? null,
-                                latitude: asset.location?.latitude ?? null,
-                                longitude: asset.location?.longitude ?? null,
-                                createdAt: asset.createdAt,
-                                updatedAt: asset.updatedAt
+                                propertyId: property.id,
+                                propertyName: property.name,
+                                mainImageUrl: property.propertyImageFile?.find(i => i.main)?.fileUrl ?? null,
+                                grade: property.profitability?.grade ?? null,
+                                sector: property.sector?.name ?? 'N/A',
+                                subSector: property.subsector?.name ?? null,
+                                addressFull: property.location?.addressFull ?? null,
+                                addressProvince: property.location?.addressProvince ?? null,
+                                addressCity: property.location?.addressCity ?? null,
+                                latitude: property.location?.latitude ?? null,
+                                longitude: property.location?.longitude ?? null,
+                                createdAt: property.createdAt,
+                                updatedAt: property.updatedAt
                         }));
 
                         this.filteredAdminList = this.adminList;
@@ -572,10 +598,10 @@ export const usePropertyStore = defineStore('property', {
                 },
 
                 toggleKeep(id: string) {
-                        if (this.keptAssetIds.includes(id)) {
-                                this.keptAssetIds = this.keptAssetIds.filter(assetId => assetId !== id);
+                        if (this.keptPropertyIds.includes(id)) {
+                                this.keptPropertyIds = this.keptPropertyIds.filter(propertyId => propertyId !== id);
                         } else {
-                                this.keptAssetIds.push(id);
+                                this.keptPropertyIds.push(id);
                         }
                 }
         }

@@ -83,7 +83,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue';
+import { ref, computed, watch } from 'vue';
 import { useRouter } from 'vue-router';
 import { storeToRefs } from 'pinia';
 import { useUiStore } from '~/stores/ui';
@@ -129,20 +129,20 @@ watch(() => props.item, () => {
  * 3. 원본 실패 -> Placeholder
  */
 const handleImageError = () => {
-	const mainImage = props.item.propertyImageFile?.find(img => img.main);
-	const originalUrl = mainImage?.fileUrl;
+        const mainImage = props.item.propertyImageFile?.find(img => img.main);
+        const originalUrl = mainImage?.fileUrl;
 
-	// [Step 2] "생성 API"도 실패했거나, 키가 없는 경우 -> "원본 이미지"로 변경
-	if (originalUrl && currentImage.value !== originalUrl) {
-		// console.warn('썸네일 로드 실패, 원본 사용:', originalUrl);
-		currentImage.value = originalUrl;
-		return;
-	}
+        // [Step 2] "생성 API"도 실패했거나, 키가 없는 경우 -> "원본 이미지"로 변경
+        if (originalUrl && currentImage.value !== originalUrl) {
+                // console.warn('썸네일 로드 실패, 원본 사용:', originalUrl);
+                currentImage.value = originalUrl;
+                return;
+        }
 
-	// [Step 3] 원본도 실패 -> "Placeholder"
-	if (currentImage.value !== '/images/placeholder.jpg') {
-		currentImage.value = '/images/placeholder.jpg';
-	}
+        // [Step 3] 원본도 실패 -> "Placeholder"
+        if (currentImage.value !== '/images/placeholder.jpg') {
+                currentImage.value = '/images/placeholder.jpg';
+        }
 };
 
 const hasSale = computed(() => props.item.transaction?.some(t => t.type === 'SALE'));

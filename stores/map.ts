@@ -11,7 +11,6 @@ import type { MapState, Coordinate } from '~/types/map.type';
 // ----------------------------------------------------------------------
 
 const getInitialState = (): MapState => ({
-        showMiniMap: true,
         keepStateMiniMap: true,
         filterMapPins: false,
 
@@ -50,7 +49,7 @@ export const useMapStore = defineStore('map', {
                  */
                 filteredPinCoordinates: (state) => {
                         const propertyStore = usePropertyStore();
-                        return propertyStore.filteredAssets.map(asset => ({
+                        return propertyStore.filteredProperties.map(asset => ({
                                 id: asset.id,
                                 name: asset.name,
                                 latitude: asset.location?.latitude || 0,
