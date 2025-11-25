@@ -23,9 +23,14 @@
                         <div id="right-menu" class="flex z-20 h-full">
 
                                 <div v-for="(item, index) in filteredNavItems" :key="index"
-                                        class="h-full flex items-center text-sm font-calibre px-2 md:px-4 cursor-pointer hover:bg-gray-100 transition-colors"
+                                        class="group flex items-center px-2 md:px-4 h-full hover:bg-gray-200/20 hover:underline hover:decoration-primary/50 cursor-pointer"
                                         @click="navigateTo(item.link)">
-                                        <span>{{ item.label }}</span>
+                                        <div
+                                                class="flex justify-center items-center gap-1 font-calibre text-sm font-bold">
+                                                <Icon :name="item.icon" size="20"
+                                                        class="text-gray-400 group-hover:text-primary" />
+                                                <div class="hidden md:flex whitespace-nowrap">{{ item.label }}</div>
+                                        </div>
                                 </div>
 
                                 <div v-if="userRole === 'ADMIN' || userRole === 'DEVELOPER'"
@@ -62,11 +67,21 @@
                         </div>
                 </div>
 
-                <div id="Content" class="h-full pt-[80px]">
+                <ul class="cb-slideshow">
+                        <li><span></span></li>
+                        <li><span></span></li>
+                        <li><span></span></li>
+                        <li><span></span></li>
+                        <li><span></span></li>
+                        <li><span></span></li>
+                </ul>
+
+                <div id="Content"
+                        class="absolute top-[80px] left-0 w-full h-[calc(100%-80px)] z-10 overflow-y-auto bg-transparent">
                         <slot />
                 </div>
 
-                <AdminPanel />
+
 
         </div>
 </template>
@@ -102,13 +117,40 @@ interface NavItem {
         label: string;
         link: string;
         roles: RoleEnum[];
+        icon: string;
 }
 
 const navItems: NavItem[] = [
-        { label: 'Main Page', link: '/', roles: ['USER', 'ADMIN', 'DEVELOPER'] }, // 일반 사용자도 접근 가능
-        { label: 'Admin List', link: '/admin/list', roles: ['ADMIN', 'DEVELOPER'] },
-        { label: 'User Management', link: '/admin/users', roles: ['ADMIN', 'DEVELOPER'] },
-        { label: 'System Settings', link: '/admin/settings', roles: ['DEVELOPER'] },
+        {
+                label: 'Property List',
+                link: '/admin',
+                icon: 'solar:pen-new-square-outline',
+                roles: ['USER', 'ADMIN', 'DEVELOPER']
+        },
+        {
+                label: 'New Property',
+                link: '/property/register',
+                icon: 'solar:home-add-angle-outline',
+                roles: ['ADMIN', 'DEVELOPER']
+        },
+        {
+                label: 'Users',
+                link: '/user/list',
+                icon: 'solar:user-outline',
+                roles: ['ADMIN', 'DEVELOPER']
+        },
+        {
+                label: 'Upload File',
+                link: '/property/upload',
+                icon: 'solar:upload-outline',
+                roles: ['ADMIN', 'DEVELOPER']
+        },
+        {
+                label: 'Download File',
+                link: '/api/property/bulk',
+                icon: 'solar:download-outline',
+                roles: ['ADMIN', 'DEVELOPER']
+        }
 ];
 
 const filteredNavItems = computed(() => {
@@ -230,5 +272,262 @@ const handleLogin = () => {
 /* Fallback for no support for CSS Background Size */
 .no-backgroundsize .cb-slideshow li.title span.imgInfo {
         opacity: 1;
+}
+
+.cb-slideshow,
+.cb-slideshow:after {
+        position: fixed;
+        width: 100%;
+        height: 100%;
+        top: 0px;
+        left: 0px;
+        z-index: 0;
+}
+
+.cb-slideshow:after {
+        content: '';
+        background: transparent url('/assets/images/background/admin/pattern.png') repeat top left;
+        backdrop-filter: brightness(40%) opacity(80%);
+}
+
+.cb-slideshow li span {
+        width: 100%;
+        height: 100%;
+        position: absolute;
+        top: 0px;
+        left: 0px;
+        background-size: cover;
+        background-position: 50% 50%;
+        background-repeat: none;
+        opacity: 0;
+        z-index: 0;
+        -webkit-backface-visibility: hidden;
+        -webkit-animation: imageAnimation 120s linear infinite 0s;
+        -moz-animation: imageAnimation 120s linear infinite 0s;
+        -o-animation: imageAnimation 120s linear infinite 0s;
+        -ms-animation: imageAnimation 120s linear infinite 0s;
+        animation: imageAnimation 120s linear infinite 0s;
+}
+
+.cb-slideshow li:nth-child(1) span {
+        background-image: url('/assets/images/background/admin/2023-asia-pacific-real-estate-market-outlook-mid-year-review_2736x1824.webp')
+}
+
+.cb-slideshow li:nth-child(2) span {
+        background-image: url('/assets/images/background/admin/cbre-korea-office-hero-2760x828.webp');
+        -webkit-animation-delay: 20s;
+        -moz-animation-delay: 20s;
+        -o-animation-delay: 20s;
+        -ms-animation-delay: 20s;
+        animation-delay: 20s;
+}
+
+.cb-slideshow li:nth-child(3) span {
+        background-image: url('/assets/images/background/admin/investor-relations-module-1664x936.webp');
+        -webkit-animation-delay: 40s;
+        -moz-animation-delay: 40s;
+        -o-animation-delay: 40s;
+        -ms-animation-delay: 40s;
+        animation-delay: 40s;
+}
+
+.cb-slideshow li:nth-child(4) span {
+        background-image: url('/assets/images/background/admin/korea-report-live-work-shop-2023-2736x1824.webp');
+        -webkit-animation-delay: 60s;
+        -moz-animation-delay: 60s;
+        -o-animation-delay: 60s;
+        -ms-animation-delay: 60s;
+        animation-delay: 60s;
+}
+
+.cb-slideshow li:nth-child(5) span {
+        background-image: url('/assets/images/background/admin/understanding-korea-real-estate-liquidity-flows-and-cap-rates-2736x1824.webp');
+        -webkit-animation-delay: 80s;
+        -moz-animation-delay: 80s;
+        -o-animation-delay: 80s;
+        -ms-animation-delay: 80s;
+        animation-delay: 80s;
+}
+
+.cb-slideshow li:nth-child(6) span {
+        background-image: url('/assets/images/background/admin/why-apac-offices-are-different-and-now-is-the-time-to-invest-2736x1824.webp');
+        -webkit-animation-delay: 100s;
+        -moz-animation-delay: 100s;
+        -o-animation-delay: 100s;
+        -ms-animation-delay: 100s;
+        animation-delay: 100s;
+}
+
+
+@-webkit-keyframes imageAnimation {
+        0% {
+                opacity: 0;
+                -webkit-animation-timing-function: ease-in;
+        }
+
+        8% {
+                opacity: 1;
+                -webkit-transform: scale(1.05);
+                -webkit-animation-timing-function: ease-out;
+        }
+
+        17% {
+                opacity: 1;
+                -webkit-transform: scale(1.1);
+        }
+
+        22% {
+                opacity: 0;
+                -webkit-transform: scale(1.1) translateY(-20%);
+        }
+
+        25% {
+                opacity: 0;
+                -webkit-transform: scale(1.1) translateY(-100%);
+        }
+
+        100% {
+                opacity: 0
+        }
+}
+
+@-moz-keyframes imageAnimation {
+        0% {
+                opacity: 0;
+                -moz-animation-timing-function: ease-in;
+        }
+
+        8% {
+                opacity: 1;
+                -moz-transform: scale(1.05);
+                -moz-animation-timing-function: ease-out;
+        }
+
+        17% {
+                opacity: 1;
+                -moz-transform: scale(1.1);
+        }
+
+        22% {
+                opacity: 0;
+                -webkit-transform: scale(1.1) translateY(-20%);
+        }
+
+        25% {
+                opacity: 0;
+                -moz-transform: scale(1.1) translateY(-100%);
+        }
+
+        100% {
+                opacity: 0
+        }
+}
+
+@-o-keyframes imageAnimation {
+        0% {
+                opacity: 0;
+                -o-animation-timing-function: ease-in;
+        }
+
+        8% {
+                opacity: 1;
+                -o-transform: scale(1.05);
+                -o-animation-timing-function: ease-out;
+        }
+
+        17% {
+                opacity: 1;
+                -o-transform: scale(1.1);
+        }
+
+        22% {
+                opacity: 0;
+                -webkit-transform: scale(1.1) translateY(-20%);
+        }
+
+        25% {
+                opacity: 0;
+                -o-transform: scale(1.1) translateY(-100%);
+        }
+
+        100% {
+                opacity: 0
+        }
+}
+
+@-ms-keyframes imageAnimation {
+        0% {
+                opacity: 0;
+                -ms-animation-timing-function: ease-in;
+        }
+
+        8% {
+                opacity: 1;
+                -ms-transform: scale(1.05);
+                -ms-animation-timing-function: ease-out;
+        }
+
+        17% {
+                opacity: 1;
+                -ms-transform: scale(1.1);
+        }
+
+        22% {
+                opacity: 0;
+                -webkit-transform: scale(1.1) translateY(-20%);
+        }
+
+        25% {
+                opacity: 0;
+                -ms-transform: scale(1.1) translateY(-100%);
+        }
+
+        100% {
+                opacity: 0
+        }
+}
+
+@keyframes imageAnimation {
+        0% {
+                opacity: 0;
+                animation-timing-function: ease-in;
+        }
+
+        8% {
+                opacity: 1;
+                transform: scale(1.05);
+                animation-timing-function: ease-out;
+        }
+
+        17% {
+                opacity: 1;
+                transform: scale(1.1);
+        }
+
+        22% {
+                opacity: 0;
+                -webkit-transform: scale(1.1) translateY(-20%);
+        }
+
+        25% {
+                opacity: 0;
+                -transform: scale(1.1) translateY(-100%);
+        }
+
+        100% {
+                opacity: 0
+        }
+}
+
+@media screen and (max-width: 1140px) {
+        .cb-slideshow li div h3 {
+                font-size: 100px
+        }
+}
+
+@media screen and (max-width: 600px) {
+        .cb-slideshow li div h3 {
+                font-size: 50px
+        }
 }
 </style>

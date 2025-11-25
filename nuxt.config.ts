@@ -51,13 +51,11 @@ export default defineNuxtConfig({
                 },
         },
         build: {
-                transpile: [/xlsx/, /vue3-pdf-app/],
+                transpile: [],
         },
         vite: {
                 ssr: {
-                        noExternal: [
-                                'vue3-pdf-app',
-                        ],
+                        noExternal: [],
                 },
         },
         mapbox: {

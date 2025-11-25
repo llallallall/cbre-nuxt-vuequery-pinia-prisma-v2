@@ -4,19 +4,13 @@
 
     <GlobalLoader />
 
-    <!-- <div v-if="statusStore.isGlobalLoading"
-      class="fixed inset-0 z-[9999] flex items-center justify-center bg-black/50 backdrop-blur-sm">
-      <div class="w-16 h-16 border-4 border-white border-t-transparent rounded-full animate-spin"></div>
-      </div> -->
-
     <ConfirmModal v-if="isConfirmModalOpen" :title="confirmModalTitle" :message="confirmModalMessage"
       @confirm="statusStore.closeConfirmModal(true)" @cancel="statusStore.closeConfirmModal(false)" />
 
     <FullscreenModal v-if="isViewerModalOpen && viewerModalType === 'image'" :imgUrl="viewerModalUrl"
       @close="statusStore.closeViewerModal()" />
 
-    <!-- <PdfViewerModal v-if="isViewerModalOpen && viewerModalType === 'pdf'" :pdfUrl="viewerModalUrl"
-      :isOpen="isViewerModalOpen" @close="statusStore.closeViewerModal()" /> -->
+    <PdfViewerModal />
 
     <UserProfileModal v-if="isUserProfileModalOpen" @close="uiStore.toggleUserProfileModal(false)" />
 
@@ -41,7 +35,7 @@ import { useUiStore } from '~/stores/ui';
 import GlobalLoader from '~/components/GlobalLoader.vue';
 import ConfirmModal from '~/components/modal/ConfirmModal.vue';
 import FullscreenModal from '~/components/modal/FullscreenModal.vue';
-// import PdfViewerModal from '~/components/modal/PdfViewerModal.vue';
+import PdfViewerModal from '~/components/modal/PdfViewerModal.vue';
 import UserProfileModal from '~/components/modal/UserProfileModal.vue';
 
 // --- Meta ---

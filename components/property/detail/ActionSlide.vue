@@ -27,7 +27,8 @@
                                 Floor Plan
                         </div>
 
-                        <div class="action-buttons bg-primary/10 hover:bg-primary/25 text-primary rounded-full whitespace-nowrap px-4 py-1 flex justify-center items-center gap-1 cursor-pointer"
+                        <div class="action-buttons bg-primary/10 text-primary rounded-full whitespace-nowrap px-4 py-1 flex justify-center items-center gap-1 transition-all"
+                                :class="[hasBrochure ? 'hover:bg-primary/25 cursor-pointer' : 'opacity-50 cursor-pointer']"
                                 @click="downloadAsPdf()">
                                 <IconBook class="text-primary w-[20px] h-[20px]" />
                                 Brochure
@@ -65,8 +66,10 @@
 import { ref, computed } from 'vue';
 import { useModal } from 'vue-final-modal';
 import ModalFullscreen from '@/components/modal/FullscreenModal.vue';
+import BrochureListModal from '@/components/modal/BrochureListModal.vue';
 import { useFormat } from '~/composables/useFormat';
 import type { LocationType, PropertyImageFileType, PropertyBrochureFileType } from '~/types/property.type';
+import { createToast } from 'mosha-vue-toastify';
 
 // Props 정의
 const props = defineProps<{
@@ -99,10 +102,53 @@ const setImageSrc = (src: string | null) => {
         if (src) currentImgUrl.value = src;
 };
 
+const hasBrochure = computed(() => props.brochure && props.brochure.length > 0);
+
+const { open: openBrochureModal, close: closeBrochureModal, patchOptions: patchBrochureModalOptions } = useModal({
+        component: BrochureListModal,
+        attrs: {
+                brochures: [],
+                onClose() {
+                        closeBrochureModal();
+                },
+                'onUpdate:modelValue': (val: boolean) => {
+                        if (!val) closeBrochureModal();
+                }
+        }
+});
+
+import { useStatusStore } from '~/stores/status';
+
+// ... (existing code)
+
+const statusStore = useStatusStore();
+
 const downloadAsPdf = () => {
-        const brochureFile = props.brochure?.[0];
-        const pdfUrl = brochureFile?.fileUrl || '/sample/files/sample.pdf';
-        window.open(pdfUrl, '_blank');
+        const brochures = props.brochure || [];
+
+        if (brochures.length === 0) {
+                createToast('No brochure file registered', { type: 'danger', showIcon: true });
+                return;
+        }
+
+        if (brochures.length === 1) {
+                const brochureFile = brochures[0];
+                const pdfUrl = brochureFile?.fileUrl;
+                if (pdfUrl) {
+                        statusStore.openViewerModal(pdfUrl, 'pdf');
+                } else {
+                        createToast('Invalid file URL', { type: 'danger', showIcon: true });
+                }
+                return;
+        }
+
+        // Multiple files
+        patchBrochureModalOptions({
+                attrs: {
+                        brochures: brochures
+                }
+        });
+        openBrochureModal();
 };
 
 // 💡 스크롤 이동 함수

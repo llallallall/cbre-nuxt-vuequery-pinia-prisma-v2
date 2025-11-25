@@ -37,7 +37,6 @@
     "@prisma/client": "^6.18.0",
     "@types/formidable": "^3.4.5",
     "@types/minio": "^7.1.1",
-    "@types/xlsx": "^0.0.36",
     "@vueform/slider": "^2.1.9",
     "@watergis/mapbox-gl-export": "^2.0.1",
     "bcrypt": "^5.1.1",
@@ -54,8 +53,6 @@
     "uuid": "^9.0.1",
     "vue-echarts": "^6.6.1",
     "vue3-easy-data-table": "^1.5.47",
-    "vue3-google-map": "^0.18.0",
-    "vue3-pdf-app": "^1.0.3",
-    "xlsx": "https://cdn.sheetjs.com/xlsx-0.20.3/xlsx-0.20.3.tgz"
+    "vue3-google-map": "^0.18.0"
   }
 }
