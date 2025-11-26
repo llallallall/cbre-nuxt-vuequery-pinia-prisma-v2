@@ -505,6 +505,7 @@ model Lease {
   lease_type                       LeaseType? // 임대 유형 (ASKING/ACTUAL)
   floor                            String? // 층 정보 (문자열)
   unit                             String? // 호실 정보 (문자열)
+  tenant                           String? // 임차인
   lease_start_date                 DateTime?     @db.Timestamp(6) // 임대 시작일
   lease_end_date                   DateTime?     @db.Timestamp(6) // 임대 종료일
   gfa_sqm                          Float?        @db.DoublePrecision // 총 연면적 (m²)

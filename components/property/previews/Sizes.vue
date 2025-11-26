@@ -40,6 +40,14 @@ const { currentProperty: property } = storeToRefs(propertyStore);
 const formatInt = (v: any) => numberFormat(v, 0);
 
 const openEditPanel = () => {
-  uiStore.openModifyPanel(propertyStore.currentPropertyId, 'scale'); // 'sizes' -> 'scale'
+  uiStore.openModifyForm(propertyStore.currentPropertyId, 'scale'); // 'sizes' -> 'scale'
 };
 </script>
+
+<style scoped>
+.cbre_bulletList {
+  list-style: none;
+  padding: 0 0 0 20px;
+  line-height: 2;
+}
+</style>

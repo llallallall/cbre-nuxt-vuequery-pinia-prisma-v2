@@ -32,6 +32,14 @@ const uiStore = useUiStore();
 const { currentProperty: property } = storeToRefs(propertyStore);
 
 const openEditPanel = () => {
-  uiStore.openModifyPanel(propertyStore.currentPropertyId, 'profitability');
+  uiStore.openModifyForm(propertyStore.currentPropertyId, 'profitability');
 };
 </script>
+
+<style scoped>
+.cbre_bulletList {
+  list-style: none;
+  padding: 0 0 0 20px;
+  line-height: 2;
+}
+</style>

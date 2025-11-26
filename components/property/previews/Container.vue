@@ -1,23 +1,21 @@
 <template>
         <div class="bg-[rgba(255,255,255,0.2)] rounded-[15px] outline-none 
-                flex w-full justify-start transition-all duration-600 ease-in-out">
+            flex w-full min-w-[990px] justify-start transition-all duration-600 ease-in-out">
 
-                <div class="relative 
-                    px-[0.5em] py-[0.5em] 
-                    backdrop-blur-[25px] shadow-[0_0_10px_2px_rgba(0,0,0,0.2)]
-                    border-2 border-[rgba(255,255,255,0.4)] rounded-[15px] 
-                    flex flex-col gap-10 m-5
-                    transition-all duration-600 ease-in-out" :class="[
-                        // 💡 수정: panelStore.growPreview -> uiStore.isGrownPreview
-                        uiStore.isGrownPreview ? 'w-full' : 'w-1/2',
-
-                        // 💡 수정: panelStore.shrinkPreview -> uiStore.isShrunkPreview
-                        uiStore.isShrunkPreview ? 'mr-auto' : 'mx-auto'
+                <div class=" relative 
+                px-[0.5em] py-[0.5em] 
+                backdrop-blur-[25px] shadow-[0_0_10px_2px_rgba(0,0,0,0.2)]
+                border-2 border-[rgba(255,255,255,0.4)] rounded-[15px] 
+                flex flex-col gap-10 m-5
+                transition-all duration-600 ease-in-out" :class="[
+                        uiStore.isGrownPreview ? 'w-full' : 'w-[calc(50%-60px)]',
+                        uiStore.isOpenModifyPanel ? 'ml-[30px] mr-auto' : 'mx-auto',
+                        uiStore.isOpenPreview ? 'mt-[4em]' : ''
                 ]">
 
-                        <div class="relative bg-white w-full min-h-[50em]  rounded-[10px] p-6">
+                        <div class="relative bg-white w-full rounded-[10px] ">
                                 <div
-                                        class="absolute top-0 left-0 w-full h-[2em] flex items-center justify-between border-b">
+                                        class="absolute top-0 left-0 w-full h-[2em] bg-white flex items-center justify-between border-b z-100">
                                         <div class="flex items-center">
                                                 <span
                                                         class="rounded-full w-[0.6em] h-[0.6em] bg-[#ff6057] ml-[1em] first-line:cursor-pointer"></span>
@@ -30,29 +28,25 @@
                                                 </span>
                                         </div>
                                         <div class="flex flex-1 items-center justify-end">
-                                                <button class="text-sm font-bold text-[#ff6057] mr-[1.5em] hover:bg-[#28c840]/20 px-2 rounded-[10px] "
-                                                        @click="goToAdminList(); uiStore.closeModifyPanel();">
-                                                        Return to the list
-                                                </button>
-
-                                                <icon name="ic:outline-minus" size="1.2em"
+                                                <Icon name="ic:outline-minus" size="1.2em"
                                                         class="mr-[0.5em] text-cbre_primary_4 cursor-pointer" :class="{
                                                                 'bg-cbre_primary_2/40 rounded-full ': !uiStore.isGrownPreview,
                                                                 'bg-transparent ': uiStore.isGrownPreview,
                                                         }" @click.prevent="() => {
-                                                                uiStore.isGrownPreview = false
-                                                        }" />
-                                                <icon name="openmoji:overlapping-white-squares" size="1.2em"
+                                uiStore.isGrownPreview = false
+                        }" />
+                                                <Icon name="openmoji:overlapping-white-squares" size="1.2em"
                                                         class="mr-[0.5em] text-cbre_primary_4 cursor-pointer" :class="{
                                                                 'bg-cbre_primary_2/40 rounded-full ': uiStore.isGrownPreview,
                                                                 'bg-transparent ': !uiStore.isGrownPreview,
                                                         }" @click.prevent="() => {
-                                                                uiStore.isGrownPreview = true;
-                                                        }" />
+                                uiStore.isGrownPreview = true;
+                        }" />
 
                                         </div>
                                 </div>
-                                <div class="left-0 w-full pt-[2em] overflow-x-hidden overflow-y-scroll">
+                                <div
+                                        class="relative left-0 w-full pt-[2em] h-[calc(100vh-300px)] p-6 overflow-y-auto custom-scrollbar z-20">
 
                                         <div
                                                 class="detail-title text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-financierMedium leading-6 text-primary">
@@ -115,11 +109,10 @@
 </template>
 
 <script setup lang="ts">
-// 💡 1. 수정: Store Import 경로 변경
 import { useRouter } from 'vue-router';
 import { usePropertyStore } from '~/stores/property';
-import { useUiStore } from '~/stores/ui';         // ModifyPanelStore 대체
-import { useStatusStore } from '~/stores/status'; // AppStore 대체
+import { useUiStore } from '~/stores/ui';
+import { useStatusStore } from '~/stores/status';
 
 const props = defineProps({
         floorDataKey: {
@@ -128,23 +121,18 @@ const props = defineProps({
         }
 });
 
-// 💡 2. 수정: Store 인스턴스 생성
-const uiStore = useUiStore();          // Panel UI 상태
+const uiStore = useUiStore();
 const propertyStore = usePropertyStore();
-const statusStore = useStatusStore();  // 전역 상태 (Modal 등)
+const statusStore = useStatusStore();
 
 const router = useRouter();
 
-const goToAdminList = () => {
-        // 선택 사항: propertyStore.$reset() 등을 호출할 수 있습니다.
-        router.push('/admin');
-}
-
 const handleOpenPdfModal = (url: string) => {
         if (url) {
-                // 💡 3. 수정: Status Store의 새로운 액션 사용
                 statusStore.openViewerModal(url, 'pdf');
         }
 };
 
 </script>
+
+<style scoped></style>

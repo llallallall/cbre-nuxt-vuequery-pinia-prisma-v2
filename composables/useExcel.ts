@@ -387,16 +387,20 @@ export const useExcel = () => {
 
     const applyHeaderStyle = (sheet: Excel.Worksheet) => {
         const headerRow = sheet.getRow(1);
-        headerRow.font = { bold: true, color: { argb: 'FFFFFFFF' } };
-        headerRow.fill = {
-            type: 'pattern',
-            pattern: 'solid',
-            fgColor: { argb: 'FF006A4D' }
-        };
-        headerRow.alignment = { vertical: 'middle', horizontal: 'center' };
+
+        // Apply styles to each cell in the header row
+        headerRow.eachCell({ includeEmpty: true }, (cell) => {
+            cell.font = { bold: true, color: { argb: 'FFFFFFFF' } };
+            cell.fill = {
+                type: 'pattern',
+                pattern: 'solid',
+                fgColor: { argb: 'FF006A4D' }
+            };
+            cell.alignment = { vertical: 'middle', horizontal: 'center' };
+        });
 
         // Add auto-filter
-        if (sheet.columns.length > 0) {
+        if (sheet.columns && sheet.columns.length > 0) {
             sheet.autoFilter = {
                 from: { row: 1, column: 1 },
                 to: { row: 1, column: sheet.columns.length }

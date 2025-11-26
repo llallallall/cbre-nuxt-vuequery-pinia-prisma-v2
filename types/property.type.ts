@@ -282,6 +282,7 @@ export interface LeaseType {
         leaseType: LeaseTypeEnum | null;
         floor: string | null;
         unit: string | null;
+        tenant: string | null;
         leaseStartDate: Date | null;
         leaseEndDate: Date | null;
         gfaSqm: number | null;
@@ -440,6 +441,7 @@ export interface LeaseCreatePayload {
         leaseType: LeaseTypeEnum; // 'ASKING' | 'ACTUAL'
         floor: string | null;
         unit: string | null;
+        tenant: string | null;
 
         leaseStartDate: string | Date | null;
         leaseEndDate: string | Date | null;

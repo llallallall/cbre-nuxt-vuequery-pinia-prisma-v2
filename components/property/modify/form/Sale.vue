@@ -1,16 +1,3 @@
-<template>
-        <div class="p-6 space-y-6">
-                <div class="flex justify-end mb-4">
-                        <button @click="openModal('create')"
-                                class="bg-cbre_primary_1 text-white text-sm font-medium py-2 px-4 rounded-[10px] flex items-center">
-                                <span class="mr-1">+</span> Add New Sale Record
-                        </button>
-                </div>
-
-                <div class="border border-gray-300 rounded-md overflow-x-auto">
-                        <table class="min-w-full divide-y divide-gray-200">
-                                <thead class="bg-gray-50">
-                                        <tr class="text-xs font-medium text-gray-500 uppercase tracking-wider">
                                                 <th class="px-3 py-2 text-left">Year/Q</th>
                                                 <th class="px-3 py-2 text-left">Type</th>
                                                 <th class="px-3 py-2 text-left">Buyer</th>
@@ -19,7 +6,7 @@
                                                 <th class="px-3 py-2 text-center">Action</th>
                                         </tr>
                                 </thead>
-                                <tbody class="bg-white divide-y divide-gray-200">
+                                <tbody class="bg-white divide-y divide-gray-200 font-calibreLight text-lg text-primary">
                                         <tr v-for="t in saleTransactions" :key="t.id" class="hover:bg-gray-50">
                                                 <td class="px-3 py-2 text-sm text-gray-900">{{ t.year }} / {{ t.quarter
                                                         || '-' }}</td>
@@ -33,9 +20,9 @@
                                                         formatNumber(t.sale?.priceKrw) }}</td>
                                                 <td class="px-3 py-2 text-sm text-center">
                                                         <button @click="openModal('edit', t)"
-                                                                class="text-indigo-600 hover:text-indigo-900 mr-2">Edit</button>
+                                                                class="text-indigo-600 hover:text-indigo-900 mr-2 font-medium">Edit</button>
                                                         <button @click="confirmDelete(t.id)"
-                                                                class="text-red-600 hover:text-red-900">Delete</button>
+                                                                class="text-red-600 hover:text-red-900 font-medium">Delete</button>
                                                 </td>
                                         </tr>
                                         <tr v-if="saleTransactions.length === 0">

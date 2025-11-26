@@ -150,7 +150,7 @@
                                                                     {{ formatNumber(partial.monthlyManagementFee) }} /
                                                                     <span class="text-gray-500">({{
                                                                         formatNumber(partial.monthlyManagementPerPy)
-                                                                    }})</span>
+                                                                        }})</span>
                                                                 </span>
                                                             </div>
 
@@ -237,7 +237,7 @@ const { currentProperty: property } = storeToRefs(propertyStore);
 const expandedFloors: Ref<string[]> = ref([]);
 
 const openEditPanel = () => {
-    uiStore.openModifyPanel(propertyStore.currentPropertyId, 'floor');
+    uiStore.openModifyForm(propertyStore.currentPropertyId, 'floor');
 };
 
 const toggleExpand = (floorId: string) => {

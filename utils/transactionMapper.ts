@@ -20,6 +20,7 @@ export const mapLeaseDetailFromClientToPrisma = (payload: LeaseCreatePayload) =>
                 lease_type: payload.leaseType as LeaseType,
                 floor: payload.floor,
                 unit: payload.unit,
+                tenant: payload.tenant,
 
                 lease_start_date: toDateOrNull(payload.leaseStartDate),
                 lease_end_date: toDateOrNull(payload.leaseEndDate),

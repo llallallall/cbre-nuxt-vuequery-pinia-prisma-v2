@@ -97,7 +97,7 @@ const hasFloorPlans = computed(() => {
 });
 
 const openEditPanel = () => {
-        uiStore.openModifyPanel(propertyStore.currentPropertyId, 'floorplan');
+        uiStore.openModifyForm(propertyStore.currentPropertyId, 'floorplan');
 };
 
 const { open, close } = useModal({

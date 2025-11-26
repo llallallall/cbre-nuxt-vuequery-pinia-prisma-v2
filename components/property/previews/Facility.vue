@@ -131,7 +131,7 @@ const formatDecimal = (value: any) => numberFormat(value, 2);
 
 // 패널 열기
 const openEditPanel = () => {
-  uiStore.openModifyPanel(propertyStore.currentPropertyId, 'facility');
+  uiStore.openModifyForm(propertyStore.currentPropertyId, 'facility');
 }
 
 // 💡 수정: 섹션별 정보 유무 판단 (Flat 구조 반영)

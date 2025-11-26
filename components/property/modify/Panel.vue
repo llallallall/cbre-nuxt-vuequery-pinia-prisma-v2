@@ -1,15 +1,16 @@
 <template>
   <Transition name="slide-fade">
     <div class="bg-[rgba(255,255,255,0.2)] rounded-[15px] outline-none flex w-full justify-start">
-      <div v-if="uiStore.isModifyPanelOpen" class="fixed mt-[100px] right-[20px] mb-[20px] top-0 bottom-0 
-                w-full ml-[30px] lg:w-[calc(50%-60px)] 
+      <div v-if="uiStore.isOpenModifyPanel && uiStore.currentSection" class="fixed mt-[6.5em] right-[5em] mb-[20px] top-0
+                ml-[30px] w-full lg:w-[calc(50%-100px)] 
                 backdrop-blur-[25px] shadow-[0_0_10px_2px_rgba(0,0,0,0.2)]
                 border-2 border-[rgba(255,255,255,0.4)] rounded-[15px] 
                 z-20">
 
-        <div class="m-2 p-6 bg-white rounded-[15px] h-[calc(100%-20px)] overflow-y-auto">
+        <div class="m-2 p-6 bg-white rounded-[15px] max-h-[calc(100vh-300px)] overflow-y-auto custom-scrollbar">
           <div class="flex justify-between items-center border-b pb-4 mb-6">
-            <h3 class="text-xl font-bold text-gray-800">Modify : {{ title }} </h3>
+            <h3 class="text-2xl font-financierMedium text-primary">Modify
+              : {{ title }} </h3>
             <button @click="uiStore.closeModifyPanel()" class="text-gray-500 hover:text-gray-700">
               <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"
                 xmlns="http://www.w3.org/2000/svg">

@@ -36,7 +36,7 @@ const { currentProperty: property } = storeToRefs(propertyStore);
 const currentImgUrl = ref<string>('');
 
 const openEditPanel = () => {
-  uiStore.openModifyPanel(propertyStore.currentPropertyId, 'photo');
+  uiStore.openModifyForm(propertyStore.currentPropertyId, 'photo');
 };
 
 // 💡 유효한 이미지 필터링

@@ -49,8 +49,9 @@ interface UiState {
         currentPropertyIdToModify: string | null;
 
         // 미리보기 크기 조정 관련 상태
-        isShrunkPreview: boolean;
-        isGrownPreview: boolean;
+        isOpenPreview: boolean,
+        isOpenModifyPanel: boolean,
+        isGrownPreview: boolean,
 
         // 2. 메뉴 및 오버레이 상태 (Menu & Overlay State)
         isMenuOverlay: boolean;
@@ -92,8 +93,9 @@ const getInitialState = (): UiState => ({
         currentSection: null,
         currentPropertyIdToModify: null,
 
-        isShrunkPreview: false,
-        isGrownPreview: false,
+        isOpenPreview: false,   // 좌측 preview 화면
+        isOpenModifyPanel: false,   // 우측 form 화면    
+        isGrownPreview: false,  // 좌측 preview 화면이 확장된 상태
 
         // 메뉴 및 오버레이 초기 상태
         isMenuOverlay: false,
@@ -135,7 +137,7 @@ export const useUiStore = defineStore('ui', {
                  * @param propertyIdToModify - 수정할 자산의 ID (생성 시 null)
                  * @param section - 패널을 열 때 기본으로 표시할 섹션 ('general'이 기본값)
                  */
-                openModifyPanel(
+                openModifyForm(
                         propertyIdToModify: string | null, // 💡 첫 번째 인자: 수정할 자산 ID
                         section: AdminModifySectionType = 'general' // 💡 두 번째 인자: 열 섹션 (기본값 설정)
                 ) {
@@ -148,14 +150,37 @@ export const useUiStore = defineStore('ui', {
                         this.currentSection = section;
 
                         // 3. 패널 열기
-                        // 상태 변수 명칭: isModifyPanelOpen
-                        this.isModifyPanelOpen = true;
+                        // 상태 변수 명칭: isOpenPreview
+                        this.isOpenPreview = true;
+
+                        // 4. Preview 크기 및 패널 상태 설정
+                        if (section) {
+                                // 섹션이 있음 (Create Mode or Direct Edit): 패널 열기, Preview 축소 (좌측 정렬 예정)
+                                this.openModifyPanel(section);
+                        } else {
+                                // 섹션이 없음 (Initial Modify Mode): 패널 닫기, Preview 축소 (중앙 정렬 예정)
+                                this.isOpenModifyPanel = false;
+                                this.isGrownPreview = false; // 💡 Shrunk State (Centered)
+                        }
+                },
+
+                closeModifyForm() {
+                        this.isOpenPreview = false;
+                        this.isOpenModifyPanel = false;
+                        this.currentPropertyIdToModify = null;
+                        this.currentSection = null;
+                },
+
+                openModifyPanel(section: AdminModifySectionType) {
+                        this.isOpenModifyPanel = true;
+                        this.isGrownPreview = false; // 💡 Shrunk State (Left Aligned when Panel is Open)
+                        this.currentSection = section;
                 },
 
                 closeModifyPanel() {
-                        this.isModifyPanelOpen = false;
-                        this.currentPropertyIdToModify = null;
-                        this.currentSection = 'general';
+                        this.isOpenModifyPanel = false;
+                        this.isGrownPreview = false; // 💡 Return to Shrunk State (Centered)
+                        this.currentSection = null;
                 },
 
                 // ------------------- B. UI 토글 및 설정 액션 -------------------

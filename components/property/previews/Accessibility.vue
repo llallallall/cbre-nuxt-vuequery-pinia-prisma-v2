@@ -60,7 +60,7 @@ const uiStore = useUiStore();
 const { currentProperty: property } = storeToRefs(propertyStore);
 
 const openEditPanel = () => {
-  uiStore.openModifyPanel(propertyStore.currentPropertyId, 'accessibility');
+  uiStore.openModifyForm(propertyStore.currentPropertyId, 'accessibility');
 };
 
 const hasAccessibilityInfo = computed(() => {

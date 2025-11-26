@@ -77,7 +77,7 @@
                 </ul>
 
                 <div id="Content"
-                        class="absolute top-[80px] left-0 w-full h-[calc(100%-80px)] z-10 overflow-y-auto bg-transparent">
+                        class="absolute top-[80px] left-0 w-full h-[calc(100%-80px)] z-10 overflow-y-hidden bg-transparent">
                         <slot />
                 </div>
 
@@ -127,12 +127,12 @@ const navItems: NavItem[] = [
                 icon: 'solar:pen-new-square-outline',
                 roles: ['USER', 'ADMIN', 'DEVELOPER']
         },
-        {
-                label: 'New Property',
-                link: '/property/register',
-                icon: 'solar:home-add-angle-outline',
-                roles: ['ADMIN', 'DEVELOPER']
-        },
+        // {
+        //         label: 'New Property',
+        //         link: '/property/register',
+        //         icon: 'solar:home-add-angle-outline',
+        //         roles: ['ADMIN', 'DEVELOPER']
+        // },
         {
                 label: 'Users',
                 link: '/user/list',

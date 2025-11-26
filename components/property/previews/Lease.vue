@@ -8,27 +8,51 @@
       </button>
     </div>
 
-    <div v-if="leasesActual.length > 0">
-      <table class="table-auto w-full border border-gray-300">
-        <thead>
-          <tr class="bg-gray-100 text-sm font-medium">
-            <th class="px-2 py-1 text-left">Tenant</th>
-            <th class="px-2 py-1 text-left">Execution Date</th>
-            <th class="px-2 py-1 text-right">Rent (PY)</th>
-            <th class="px-2 py-1 text-right">NOC</th>
-            <th class="px-2 py-1 text-right">Lease Term (Year)</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr v-for="(t, index) in leasesActual" :key="index" class="text-left border-t">
-            <td class="px-2 py-1">-</td>
-            <td class="px-2 py-1">{{ t.executionDate ? formatDate(t.executionDate) : '-' }}</td>
-            <td class="px-2 py-1 text-right">{{ formatInt(t.lease?.rentMonthlyPy) }}</td>
-            <td class="px-2 py-1 text-right">{{ t.lease?.noc || '-' }}</td>
-            <td class="px-2 py-1 text-right">{{ t.lease?.leaseTermYear || '-' }}</td>
-          </tr>
-        </tbody>
-      </table>
+    <div v-if="leases.length > 0">
+      <div class="overflow-x-auto">
+        <table class="table-auto w-full border border-gray-300 min-w-[1000px]">
+          <thead>
+            <tr class="bg-gray-100 text-sm font-medium">
+              <th class="px-2 py-1 text-left">Execution Date</th>
+              <th class="px-2 py-1 text-left">Floor / Unit</th>
+              <th class="px-2 py-1 text-left">Tenant</th>
+              <th class="px-2 py-1 text-left">Type</th>
+              <th class="px-2 py-1 text-right">Term (Y)</th>
+              <th class="px-2 py-1 text-left">Period</th>
+              <th class="px-2 py-1 text-right">Rent (PY)</th>
+              <th class="px-2 py-1 text-right">NOC (PY)</th>
+              <th class="px-2 py-1 text-right">Maint. (PY)</th>
+              <th class="px-2 py-1 text-right">Deposit (PY)</th>
+              <th class="px-2 py-1 text-left">Rent Free</th>
+              <th class="px-2 py-1 text-right">Fit Out</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-for="(t, index) in leases" :key="index" class="text-left border-t text-sm">
+              <td class="px-2 py-1 whitespace-nowrap">{{ formatDateForDisplay(t.executionDate) }}</td>
+              <td class="px-2 py-1 whitespace-nowrap">{{ displayValue(t.lease?.floor) }} / {{
+                displayValue(t.lease?.unit) }}</td>
+              <td class="px-2 py-1 truncate max-w-[150px]" :title="t.lease?.tenant || ''">{{
+                displayValue(t.lease?.tenant) }}</td>
+              <td class="px-2 py-1 whitespace-nowrap">{{ displayValue(t.lease?.leaseType) }}</td>
+              <td class="px-2 py-1 text-right">{{ displayValue(t.lease?.leaseTermYear) }}</td>
+              <td class="px-2 py-1 whitespace-nowrap text-xs">
+                {{ formatDateForDisplay(t.lease?.leaseStartDate) }} ~ <br>
+                {{ formatDateForDisplay(t.lease?.leaseEndDate) }}
+              </td>
+              <td class="px-2 py-1 text-right">{{ formatInt(t.lease?.rentMonthlyPy) }}</td>
+              <td class="px-2 py-1 text-right">{{ formatInt(t.lease?.noc) }}</td>
+              <td class="px-2 py-1 text-right">{{ formatInt(t.lease?.camfMonthlyPy) }}</td>
+              <td class="px-2 py-1 text-right">{{ formatInt(t.lease?.depositPy) }}</td>
+              <td class="px-2 py-1 whitespace-nowrap">
+                <span v-if="t.lease?.rentFreeMonth">{{ t.lease.rentFreeMonth }} Mo ({{ t.lease.rentFreeType }})</span>
+                <span v-else>-</span>
+              </td>
+              <td class="px-2 py-1 text-right">{{ formatInt(t.lease?.fitOut) }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
     </div>
     <div v-else class="text-gray-500 text-sm mt-2 text-center">
       No lease information available.
@@ -45,31 +69,18 @@ import { useFormat } from '~/composables/useFormat';
 
 const propertyStore = usePropertyStore();
 const uiStore = useUiStore();
-const { numberFormat } = useFormat();
+const { numberFormat, displayValue, formatDateForDisplay } = useFormat();
 
 const { currentProperty: property } = storeToRefs(propertyStore);
 const formatInt = (v: any) => numberFormat(v, 0);
 
 const openEditPanel = () => {
-  uiStore.openModifyPanel(propertyStore.currentPropertyId, 'lease');
+  uiStore.openModifyForm(propertyStore.currentPropertyId, 'lease');
 };
 
-// 💡 Lease Actual 필터링
-const leasesActual = computed(() => {
+const leases = computed(() => {
   return property.value?.transaction?.filter(
-    (t: any) => t.type === 'LEASE' && t.lease?.leaseType === 'ACTUAL'
+    (t: any) => t.type === 'LEASE'
   ) || [];
 });
-
-const formatDate = (dateInput: Date | string): string => {
-  if (!dateInput) return '-';
-
-  // 입력이 Date 객체인 경우
-  if (dateInput instanceof Date) {
-    return dateInput.toISOString().split('T')[0];
-  }
-
-  // 입력이 문자열인 경우
-  return new Date(dateInput).toISOString().split('T')[0];
-};
 </script>

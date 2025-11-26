@@ -32,7 +32,7 @@ import { useStatusStore } from '~/stores/status';
 import { useUiStore } from '~/stores/ui';
 
 // Components
-import GlobalLoader from '~/components/GlobalLoader.vue';
+import GlobalLoader from '~/components/common/GlobalLoader.vue';
 import ConfirmModal from '~/components/modal/ConfirmModal.vue';
 import FullscreenModal from '~/components/modal/FullscreenModal.vue';
 import PdfViewerModal from '~/components/modal/PdfViewerModal.vue';
@@ -107,5 +107,26 @@ provide('detailCardPrintAreaRef', detailCardPrintAreaRef);
 
 ::-webkit-scrollbar-thumb:hover {
   background: #555;
+}
+
+/* Custom Scrollbar Styles */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 6px;
+  /* Thinner width */
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background-color: #17E88F;
+  /* cbre_primary_2 */
+  border-radius: 10px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background-color: #14C67A;
+  /* Slightly darker on hover */
 }
 </style>

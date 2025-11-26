@@ -1,230 +1,238 @@
 <template>
     <div class="p-6 space-y-6">
-        <form @submit.prevent="onSubmit" class="space-y-8">
+        <form @submit.prevent="onSubmit" class="space-y-8 font-financier">
 
             <fieldset class="border p-4 rounded-lg space-y-4">
-                <legend class="text-sm font-semibold text-gray-600 px-2">Building Structure</legend>
+                <legend class="text-base font-semibold text-primary px-2">Building Structure</legend>
                 <div class="flex gap-4 items-end">
                     <div class="flex-1">
-                        <label class="block text-sm font-medium mb-1">Upper Levels (Ground Floors)</label>
+                        <label class="block text-base font-semibold text-primary mb-2">Upper Levels (Ground
+                            Floors)</label>
                         <input type="text" :value="upperLevelsCountDisplay"
                             @input="e => handleStructureInput(e, 'upperLevelsCount')"
-                            class="w-full border border-gray-300 rounded-md p-2 text-right" placeholder="e.g. 5" />
+                            class="w-full border border-gray-300 rounded-md p-2 text-right font-calibreLight text-lg text-primary"
+                            placeholder="e.g. 5" />
                     </div>
                     <div class="flex-1">
-                        <label class="block text-sm font-medium mb-1">Basement Levels</label>
+                        <label class="block text-base font-semibold text-primary mb-2">Basement Levels</label>
                         <input type="text" :value="basementLevelsCountDisplay"
                             @input="e => handleStructureInput(e, 'basementLevelsCount')"
-                            class="w-full border border-gray-300 rounded-md p-2 text-right" placeholder="e.g. 2" />
+                            class="w-full border border-gray-300 rounded-md p-2 text-right font-calibreLight text-lg text-primary"
+                            placeholder="e.g. 2" />
                     </div>
-                    <button type="button" @click="generateFloors(true)"
-                        class="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 h-[42px]">
-                        Generate Floors
-                    </button>
+                    <div class="pb-1">
+                        <button type="button" @click="generateFloors(true)"
+                            class="bg-cbre_primary_1 hover:bg-cbre_primary_2 text-white py-2 px-4 rounded-[10px] transition duration-150">
+                            Generate Floors
+                        </button>
+                    </div>
                 </div>
-                <p class="text-xs text-gray-500">Clicking 'Generate' will reset the floor list based on the counts
-                    above.</p>
+                <p class="text-sm text-gray-500 italic">
+                    * Click "Generate Floors" to create/reset the floor list based on the levels above.
+                    Existing data for matching floor numbers will be preserved if possible.
+                </p>
             </fieldset>
 
-            <div v-if="formData.length === 0" class="text-center py-10 text-gray-500 border rounded-lg bg-gray-50">
-                Please enter the building structure and click 'Generate Floors'.
-            </div>
-
-            <div v-for="(floor, fIndex) in formData" :key="floor.floorId"
-                class="border p-4 rounded-lg shadow-sm bg-white space-y-6">
-
-                <div class="flex justify-between items-center border-b pb-2">
-                    <h3 class="text-lg font-bold text-primary">
-                        {{ floor.type === 'UPPER' ? '' : 'B' }}{{ Math.abs(floor.floor ?? 0) }}F
-                        <span :class="floor.isNew ? 'text-green-600' : 'text-gray-500'"
-                            class="text-sm font-normal ml-2">
-                            ({{ floor.isNew ? 'New' : 'Existing' }})
-                        </span>
-                    </h3>
-                </div>
-
-                <div class="grid md:grid-cols-4 gap-4">
-                    <div class="flex flex-col">
-                        <label class="text-sm font-medium mb-1">Usage</label>
-                        <select v-model="floor.use" class="border p-2 rounded text-sm">
-                            <option :value="null">— Select —</option>
-                            <option v-for="type in FLOOR_USE_TYPES" :key="type" :value="type">{{ type }}</option>
-                        </select>
+            <div v-if="formData.length > 0" class="space-y-6">
+                <div v-for="(floor, fIndex) in formData" :key="floor.floorId" class="border rounded-lg p-4 bg-gray-50">
+                    <div class="flex justify-between items-center mb-4 border-b pb-2">
+                        <h3 class="text-lg font-bold text-primary">
+                            {{ floor.type === 'BASEMENT' ? `B${Math.abs(floor.floor)}` : `${floor.floor}F` }}
+                        </h3>
+                        <span v-if="floor.isNew" class="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded">New</span>
                     </div>
-                    <div class="flex flex-col">
-                        <label class="text-sm font-medium mb-1">Ceiling Height (m)</label>
-                        <input type="text" :value="getDisplayValue(floor, 'ceilingHeight', 2)"
-                            @input="e => formatFloorInput(e, floor, 'ceilingHeight', true, 2, floor.floorId)"
-                            class="border p-2 rounded text-right" />
-                    </div>
-                    <div class="flex flex-col">
-                        <label class="text-sm font-medium mb-1">Floor Load (t/㎡)</label>
-                        <input type="text" :value="getDisplayValue(floor, 'floorLoad', 2)"
-                            @input="e => formatFloorInput(e, floor, 'floorLoad', true, 2, floor.floorId)"
-                            class="border p-2 rounded text-right" />
-                    </div>
-                    <div class="flex flex-col">
-                        <label class="text-sm font-medium mb-1">Truck Berths</label>
-                        <input type="text" :value="getDisplayValue(floor, 'truckBerths', 0)"
-                            @input="e => formatFloorInput(e, floor, 'truckBerths', false, 0, floor.floorId)"
-                            class="border p-2 rounded text-right" />
-                    </div>
-                </div>
 
-                <fieldset class="border p-3 rounded bg-gray-50">
-                    <legend class="text-xs font-semibold px-2 text-gray-600">Floor Area Measurements</legend>
-                    <div class="grid md:grid-cols-3 gap-4">
-                        <div class="space-y-1">
-                            <label class="text-xs font-medium block">Total Area (㎡)</label>
+                    <!-- Floor Common Info -->
+                    <div class="grid grid-cols-4 gap-4 mb-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">Ceiling Height</label>
+                            <div class="flex">
+                                <input type="text" :value="getDisplayValue(floor, 'ceilingHeight', 2)"
+                                    @input="e => formatFloorInput(e, floor, 'ceilingHeight', true, 2, floor.floorId)"
+                                    class="w-full border border-gray-300 rounded-l-md p-1 text-right" />
+                                <select v-model="floor.ceilingHeightUnit"
+                                    class="border border-l-0 border-gray-300 rounded-r-md bg-gray-100 text-sm">
+                                    <option value="m">m</option>
+                                    <option value="ft">ft</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">Floor Load</label>
+                            <div class="flex">
+                                <input type="text" :value="getDisplayValue(floor, 'floorLoad', 2)"
+                                    @input="e => formatFloorInput(e, floor, 'floorLoad', true, 2, floor.floorId)"
+                                    class="w-full border border-gray-300 rounded-l-md p-1 text-right" />
+                                <select v-model="floor.floorLoadUnit"
+                                    class="border border-l-0 border-gray-300 rounded-r-md bg-gray-100 text-sm">
+                                    <option value="ton/㎡">ton/㎡</option>
+                                    <option value="kg/㎡">kg/㎡</option>
+                                    <option value="lbs/ft²">lbs/ft²</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">Truck Berths</label>
+                            <input type="number" v-model.number="floor.truckBerths"
+                                class="w-full border border-gray-300 rounded-md p-1 text-right" />
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">Use</label>
+                            <select v-model="floor.use" class="w-full border border-gray-300 rounded-md p-1">
+                                <option :value="null">Select Use</option>
+                                <option v-for="t in FLOOR_USE_TYPES" :key="t" :value="t">{{ t }}</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-3 gap-4 mb-6 bg-white p-3 rounded border">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">Total Area (Sqm)</label>
                             <input type="text" :value="getDisplayValue(floor, 'totalAreaSqm', 2)"
                                 @input="e => formatFloorInput(e, floor, 'totalAreaSqm', true, 2, floor.floorId)"
                                 @blur="() => handleFloorAreaInputBlur(fIndex, 'totalAreaSqm')"
-                                class="w-full border p-2 rounded text-right text-sm" />
-                            <input type="text" :value="getDisplayValue(floor, 'totalAreaPy', 2)" disabled
-                                class="w-full border bg-gray-100 p-2 rounded text-right text-sm text-gray-500"
-                                placeholder="(py)" />
+                                class="w-full border border-gray-300 rounded-md p-1 text-right" />
                         </div>
-                        <div class="space-y-1">
-                            <label class="text-xs font-medium block">Gross Leasable (㎡)</label>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">GLA (Sqm)</label>
                             <input type="text" :value="getDisplayValue(floor, 'grossLeasableAreaSqm', 2)"
                                 @input="e => formatFloorInput(e, floor, 'grossLeasableAreaSqm', true, 2, floor.floorId)"
                                 @blur="() => handleFloorAreaInputBlur(fIndex, 'grossLeasableAreaSqm')"
-                                class="w-full border p-2 rounded text-right text-sm" />
-                            <input type="text" :value="getDisplayValue(floor, 'grossLeasableAreaPy', 2)" disabled
-                                class="w-full border bg-gray-100 p-2 rounded text-right text-sm text-gray-500"
-                                placeholder="(py)" />
+                                class="w-full border border-gray-300 rounded-md p-1 text-right" />
                         </div>
-                        <div class="space-y-1">
-                            <label class="text-xs font-medium block">Net Leasable (㎡)</label>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">NLA (Sqm)</label>
                             <input type="text" :value="getDisplayValue(floor, 'netLeasableAreaSqm', 2)"
                                 @input="e => formatFloorInput(e, floor, 'netLeasableAreaSqm', true, 2, floor.floorId)"
                                 @blur="() => handleFloorAreaInputBlur(fIndex, 'netLeasableAreaSqm')"
-                                class="w-full border p-2 rounded text-right text-sm" />
-                            <input type="text" :value="getDisplayValue(floor, 'netLeasableAreaPy', 2)" disabled
-                                class="w-full border bg-gray-100 p-2 rounded text-right text-sm text-gray-500"
-                                placeholder="(py)" />
+                                class="w-full border border-gray-300 rounded-md p-1 text-right" />
                         </div>
-                    </div>
-                </fieldset>
-
-                <fieldset class="border p-3 rounded bg-blue-50/30">
-                    <legend class="text-xs font-semibold px-2 text-blue-600">Unit / Room Details</legend>
-
-                    <div v-for="(partial, pIndex) in floor.floorPartial" :key="partial.id"
-                        class="mb-4 p-3 bg-white rounded border shadow-sm relative">
-                        <div class="flex justify-between items-center mb-3 pb-2 border-b border-dashed">
-                            <div class="flex items-center gap-2">
-                                <span class="text-sm font-bold text-gray-700">Unit #{{ pIndex + 1 }}</span>
-                                <input type="text" v-model="partial.unitNumber" placeholder="Unit No."
-                                    class="border px-2 py-1 rounded text-xs w-24" />
-                            </div>
-                            <button type="button" @click="removeUnit(fIndex, pIndex)"
-                                class="text-red-500 text-xs hover:text-red-700 flex items-center gap-1">
-                                <span>Delete Unit</span>
-                            </button>
+                        <!-- Py Values (Readonly) -->
+                        <div>
+                            <label class="block text-xs text-gray-500">Total Area (Py)</label>
+                            <input type="text" :value="getDisplayValue(floor, 'totalAreaPy', 2)" readonly
+                                class="w-full bg-gray-100 border border-gray-300 rounded-md p-1 text-right text-sm" />
                         </div>
-
-                        <div class="grid grid-cols-2 md:grid-cols-4 gap-3 text-xs">
-                            <div class="col-span-2">
-                                <label class="block font-medium mb-1">Tenant</label>
-                                <input type="text" v-model="partial.tenant" class="w-full border p-2 rounded" />
-                            </div>
-                            <div class="col-span-1">
-                                <label class="block font-medium mb-1">Lease Area (㎡)</label>
-                                <input type="text" :value="getDisplayValue(partial, 'leaseAreaSqm', 2, pIndex)"
-                                    @input="e => formatFloorInput(e, partial, 'leaseAreaSqm', true, 2, floor.floorId, pIndex)"
-                                    @blur="() => handlePartialAreaInputBlur(fIndex, pIndex)"
-                                    class="w-full border p-2 rounded text-right" />
-                            </div>
-                            <div class="col-span-1">
-                                <label class="block font-medium mb-1">Lease Area (py)</label>
-                                <input type="text" :value="getDisplayValue(partial, 'leaseAreaPy', 2, pIndex)" disabled
-                                    class="w-full border bg-gray-100 p-2 rounded text-right text-gray-500" />
-                            </div>
-
-                            <div class="col-span-1">
-                                <label class="block font-medium mb-1">Usage</label>
-                                <select v-model="partial.tenantUse" class="w-full border p-2 rounded">
-                                    <option :value="null">-</option>
-                                    <option v-for="type in ROOM_USE_TYPES" :key="type" :value="type">{{ type }}</option>
-                                </select>
-                            </div>
-
-                            <div class="col-span-1">
-                                <label class="block font-medium mb-1">Rent (Total)</label>
-                                <input type="text" :value="getDisplayValue(partial, 'monthlyRent', 0, pIndex)"
-                                    @input="e => formatFloorInput(e, partial, 'monthlyRent', true, 0, floor.floorId, pIndex)"
-                                    class="w-full border p-2 rounded text-right" />
-                            </div>
-                            <div class="col-span-1">
-                                <label class="block font-medium mb-1">Deposit</label>
-                                <input type="text" :value="getDisplayValue(partial, 'depositKrw', 0, pIndex)"
-                                    @input="e => formatFloorInput(e, partial, 'depositKrw', true, 0, floor.floorId, pIndex)"
-                                    class="w-full border p-2 rounded text-right" />
-                            </div>
-                            <div class="col-span-1 flex items-center pt-4">
-                                <label class="flex items-center gap-2 cursor-pointer">
-                                    <input type="checkbox" v-model="partial.tenantEquipment"
-                                        class="rounded text-blue-600" />
-                                    <span class="font-medium">Equipment Included</span>
-                                </label>
-                            </div>
+                        <div>
+                            <label class="block text-xs text-gray-500">GLA (Py)</label>
+                            <input type="text" :value="getDisplayValue(floor, 'grossLeasableAreaPy', 2)" readonly
+                                class="w-full bg-gray-100 border border-gray-300 rounded-md p-1 text-right text-sm" />
                         </div>
-
-                        <div class="grid grid-cols-2 gap-3 mt-3 pt-3 border-t border-dashed text-xs">
-                            <div>
-                                <label class="block font-medium mb-1">Lease Start (YYYY-MM-DD)</label>
-                                <input type="text" :value="partial.leaseStartDateDisplay"
-                                    @input="e => formatDateInput(e, partial, 'leaseStartDate')"
-                                    class="w-full border p-2 rounded" placeholder="YYYY-MM-DD" maxlength="10" />
-                            </div>
-                            <div>
-                                <label class="block font-medium mb-1">Lease End (YYYY-MM-DD)</label>
-                                <input type="text" :value="partial.leaseEndDateDisplay"
-                                    @input="e => formatDateInput(e, partial, 'leaseEndDate')"
-                                    class="w-full border p-2 rounded" placeholder="YYYY-MM-DD" maxlength="10" />
-                            </div>
-                        </div>
-
-                        <div class="grid grid-cols-1 gap-2 mt-2 pt-2 border-t border-dashed">
-                            <div class="flex flex-col">
-                                <label class="text-xs font-medium"> - Deposit Cond.</label>
-                                <textarea :value="partial.increaseConditionsForDeposit ?? ''"
-                                    @input="handleNullableStringInput(partial, 'increaseConditionsForDeposit', $event)"
-                                    placeholder="Deposit Cond." rows="2" class="border p-2 rounded resize-y text-xs" />
-                            </div>
-                            <div class="flex flex-col">
-                                <label class="text-xs font-medium"> - Rent Cond.</label>
-                                <textarea :value="partial.increaseConditionsForRent ?? ''"
-                                    @input="handleNullableStringInput(partial, 'increaseConditionsForRent', $event)"
-                                    placeholder="Rent Cond." rows="2" class="border p-2 rounded resize-y text-xs" />
-                            </div>
-                            <div class="flex flex-col">
-                                <label class="text-xs font-medium"> - Mgmt Fee Cond.</label>
-                                <textarea :value="partial.increaseConditionsForManagementFee ?? ''"
-                                    @input="handleNullableStringInput(partial, 'increaseConditionsForManagementFee', $event)"
-                                    placeholder="Mgmt Fee Cond." rows="2" class="border p-2 rounded resize-y text-xs" />
-                            </div>
+                        <div>
+                            <label class="block text-xs text-gray-500">NLA (Py)</label>
+                            <input type="text" :value="getDisplayValue(floor, 'netLeasableAreaPy', 2)" readonly
+                                class="w-full bg-gray-100 border border-gray-300 rounded-md p-1 text-right text-sm" />
                         </div>
                     </div>
 
-                    <button type="button" @click="addUnit(fIndex)"
-                        class="w-full py-2 border-2 border-dashed border-blue-200 text-blue-500 hover:bg-blue-50 rounded text-sm font-medium mt-2">
-                        + Add Unit
-                    </button>
-                </fieldset>
+                    <!-- Partials (Units) -->
+                    <div class="space-y-4">
+                        <div v-for="(partial, pIndex) in floor.floorPartial" :key="partial.id"
+                            class="border border-gray-200 rounded p-3 bg-white relative">
+                            <div class="absolute top-2 right-2">
+                                <button type="button" @click="removeUnit(fIndex, pIndex)"
+                                    class="text-red-500 hover:text-red-700 text-sm">
+                                    Remove Unit
+                                </button>
+                            </div>
+                            <h4 class="text-sm font-bold text-gray-600 mb-2">Unit {{ pIndex + 1 }}</h4>
 
+                            <div class="grid grid-cols-4 gap-3 mb-2">
+                                <div>
+                                    <label class="block text-xs font-medium text-gray-700">Unit Number</label>
+                                    <input type="text" v-model="partial.unitNumber"
+                                        class="w-full border border-gray-300 rounded-md p-1 text-sm" />
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-medium text-gray-700">Tenant</label>
+                                    <input type="text" :value="partial.tenant || ''"
+                                        @input="e => handleNullableStringInput(partial, 'tenant', e)"
+                                        class="w-full border border-gray-300 rounded-md p-1 text-sm" />
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-medium text-gray-700">Lease Area (Sqm)</label>
+                                    <input type="text" :value="getDisplayValue(partial, 'leaseAreaSqm', 2, pIndex)"
+                                        @input="e => formatFloorInput(e, partial, 'leaseAreaSqm', true, 2, floor.floorId, pIndex)"
+                                        @blur="() => handlePartialAreaInputBlur(fIndex, pIndex)"
+                                        class="w-full border border-gray-300 rounded-md p-1 text-right text-sm" />
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-medium text-gray-700">Lease Area (Py)</label>
+                                    <input type="text"
+                                        :value="partial.leaseAreaPy ? numberFormat(partial.leaseAreaPy, 2) : ''"
+                                        readonly
+                                        class="w-full bg-gray-100 border border-gray-300 rounded-md p-1 text-right text-sm" />
+                                </div>
+                            </div>
+
+                            <div class="grid grid-cols-4 gap-3 mb-2">
+                                <div>
+                                    <label class="block text-xs font-medium text-gray-700">Tenant Use</label>
+                                    <select v-model="partial.tenantUse"
+                                        class="w-full border border-gray-300 rounded-md p-1 text-sm">
+                                        <option :value="null">Select</option>
+                                        <option v-for="t in ROOM_USE_TYPES" :key="t" :value="t">{{ t }}</option>
+                                    </select>
+                                </div>
+                                <div class="flex items-center pt-5">
+                                    <input type="checkbox" v-model="partial.tenantEquipment" class="mr-2" />
+                                    <label class="text-xs font-medium text-gray-700">Tenant Equipment</label>
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-medium text-gray-700">Lease Start</label>
+                                    <input type="date" v-model="partial.leaseStartDateDisplay"
+                                        @change="e => partial.leaseStartDate = (e.target as HTMLInputElement).value ? new Date((e.target as HTMLInputElement).value) : null"
+                                        class="w-full border border-gray-300 rounded-md p-1 text-sm" />
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-medium text-gray-700">Lease End</label>
+                                    <input type="date" v-model="partial.leaseEndDateDisplay"
+                                        @change="e => partial.leaseEndDate = (e.target as HTMLInputElement).value ? new Date((e.target as HTMLInputElement).value) : null"
+                                        class="w-full border border-gray-300 rounded-md p-1 text-sm" />
+                                </div>
+                            </div>
+
+                            <div class="grid grid-cols-4 gap-3">
+                                <div>
+                                    <label class="block text-xs font-medium text-gray-700">Deposit (KRW)</label>
+                                    <input type="text" :value="getDisplayValue(partial, 'depositKrw', 0, pIndex)"
+                                        @input="e => formatFloorInput(e, partial, 'depositKrw', false, 0, floor.floorId, pIndex)"
+                                        class="w-full border border-gray-300 rounded-md p-1 text-right text-sm" />
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-medium text-gray-700">Monthly Rent (KRW)</label>
+                                    <input type="text" :value="getDisplayValue(partial, 'monthlyRent', 0, pIndex)"
+                                        @input="e => formatFloorInput(e, partial, 'monthlyRent', false, 0, floor.floorId, pIndex)"
+                                        class="w-full border border-gray-300 rounded-md p-1 text-right text-sm" />
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-medium text-gray-700">Rent / Py</label>
+                                    <input type="text" :value="getDisplayValue(partial, 'monthlyRentPerPy', 0, pIndex)"
+                                        @input="e => formatFloorInput(e, partial, 'monthlyRentPerPy', false, 0, floor.floorId, pIndex)"
+                                        class="w-full border border-gray-300 rounded-md p-1 text-right text-sm" />
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-medium text-gray-700">Mgmt Fee / Py</label>
+                                    <input type="text"
+                                        :value="getDisplayValue(partial, 'monthlyManagementPerPy', 0, pIndex)"
+                                        @input="e => formatFloorInput(e, partial, 'monthlyManagementPerPy', false, 0, floor.floorId, pIndex)"
+                                        class="w-full border border-gray-300 rounded-md p-1 text-right text-sm" />
+                                </div>
+                            </div>
+                        </div>
+                        <button type="button" @click="addUnit(fIndex)"
+                            class="w-full py-2 border-2 border-dashed border-gray-300 rounded-lg text-gray-500 hover:bg-gray-50 text-sm">
+                            + Add Unit
+                        </button>
+                    </div>
+                </div>
             </div>
 
-            <div class="flex justify-end pt-4 border-t mt-8">
-                <button type="button" @click="emit('close')" :disabled="computedIsLoading"
-                    class="bg-gray-200 py-2 px-4 rounded mr-2 text-sm font-bold text-gray-700">Cancel</button>
-                <button type="button" @click="resetForm"
-                    class="bg-gray-300 py-2 px-4 rounded mr-2 text-sm font-bold text-gray-700">Reset</button>
+            <div class="flex flex-row items-center justify-end pt-8 border-t font-financierMedium">
+                <button type="button" @click="emit('close')"
+                    class="bg-gray-200 hover:bg-gray-800 text-gray-800 hover:text-white py-2 px-4 rounded-[10px] mr-4 transition duration-150">Cancel</button>
                 <button type="submit" :disabled="computedIsLoading"
-                    class="bg-cbre_primary_1 text-white py-2 px-4 rounded text-sm font-bold hover:bg-cbre_primary_2">
-                    {{ computedIsLoading ? 'Saving...' : 'Save Changes' }}
-                </button>
+                    class="bg-cbre_primary_1 hover:bg-cbre_primary_2 text-white py-2 px-4 rounded-[10px] transition duration-150">Save</button>
             </div>
         </form>
     </div>
@@ -245,18 +253,18 @@ const FLOOR_USE_TYPES = ['ROOM', 'OFFICE', 'LOW', 'CONSTANT'];
 const ROOM_USE_TYPES = ['DRY', 'COLD', 'OFFICE', 'OTHERS'];
 
 // --- Local Type Definitions ---
-// 💡 [수정] floorId를 Omit에 포함하여 필수 조건에서 제외
 interface FloorPartialForm extends Omit<FloorPartialType, 'createdAt' | 'updatedAt' | 'id' | 'floorId'> {
     id?: string;
     leaseStartDateDisplay?: string | null;
     leaseEndDateDisplay?: string | null;
 }
 
-interface FloorForm extends Omit<FloorType, 'createdAt' | 'updatedAt' | 'id' | 'floorPartial'> {
+interface FloorForm extends Omit<FloorType, 'createdAt' | 'updatedAt' | 'id' | 'floorPartial' | 'floor'> {
     id?: string;
     floorId: string;
     isNew: boolean;
     floorPartial: FloorPartialForm[];
+    floor: number;
 }
 
 const emit = defineEmits(['close']);
@@ -270,7 +278,6 @@ const {
     processNumberInput,
     calculatePyValue,
     formatDate,
-    formatDateInput
 } = useFormat();
 
 const formData = ref<FloorForm[]>([]);
@@ -468,11 +475,6 @@ const removeUnit = (fIndex: number, pIndex: number) => {
     } else {
         createToast({ title: 'At least one unit required.' }, { type: 'warning' });
     }
-};
-
-const resetForm = () => {
-    initializeForm();
-    createToast({ title: 'Form Reset.' }, { type: 'info' });
 };
 
 const roundToTwoDecimals = (value: number | null): number | null => {

@@ -1,57 +1,65 @@
 <template>
   <div>
-    <form @submit.prevent="onSubmit" class="space-y-6">
+    <form @submit.prevent="onSubmit" class="space-y-6 font-financier">
       <div class="relative w-full h-full">
-        <label for="propertyName" class="block text-sm font-medium text-gray-700"><span class="text-sm text-red-500"> *
+        <label for="propertyName" class="block text-base font-semibold text-primary mb-2"><span
+            class="text-sm text-red-500"> *
           </span>Property Name</label>
-        <input id="propertyName" type="text" class="mt-1 block w-full border border-gray-300 rounded-md p-2"
+        <input id="propertyName" type="text"
+          class="mt-1 block w-full border border-gray-300 rounded-md p-2 font-calibreLight text-lg text-primary"
           v-model="formData.name" />
         <p v-if="errors.name" class="text-red-500 text-sm mt-1">{{ errors.name }}</p>
       </div>
 
       <div>
-        <label for="sector" class="block text-sm font-medium text-gray-700"><span class="text-sm text-red-500"> *
+        <label for="sector" class="block text-base font-semibold text-primary mb-2"><span class="text-sm text-red-500">
+            *
           </span>Sector</label>
-        <select id="sector" class="mt-1 block w-full border border-gray-300 rounded-md p-2" v-model="formData.sectorId"
-          @change="onSectorChange">
+        <select id="sector"
+          class="mt-1 block w-full border border-gray-300 rounded-md p-2 font-calibreLight text-lg text-primary"
+          v-model="formData.sectorId" @change="onSectorChange">
           <option value="" disabled>Please Select a Sector</option>
           <option v-for="option in sectorOptions" :key="option.id" :value="option.id">{{ option.name }}</option>
         </select>
       </div>
 
       <div v-if="subSectorOptions.length > 0">
-        <label for="subSector" class="block text-sm font-medium text-gray-700">Sub-Sector</label>
-        <select id="subSector" class="mt-1 block w-full border border-gray-300 rounded-md p-2"
+        <label for="subSector" class="block text-base font-semibold text-primary mb-2">Sub-Sector</label>
+        <select id="subSector"
+          class="mt-1 block w-full border border-gray-300 rounded-md p-2 font-calibreLight text-lg text-primary"
           v-model="formData.subsectorId">
           <option value="" disabled>Please Select a Sub Sector</option>
           <option v-for="option in subSectorOptions" :key="option.id" :value="option.id">{{ option.name }}</option>
         </select>
       </div>
 
-      <h3 class="text-lg font-semibold mt-4 pt-4 border-t">Warehouse Temperature Ratios (%)</h3>
+      <h3 class="text-lg font-semibold mt-4 pt-4 border-t text-primary">Warehouse Temperature Ratios (%)</h3>
       <div class="grid grid-cols-3 gap-4">
         <div>
-          <label class="block text-sm font-medium text-gray-700">Room</label>
-          <input type="number" class="mt-1 block w-full border border-gray-300 rounded-md p-2"
+          <label class="block text-base font-semibold text-primary mb-2">Room</label>
+          <input type="number"
+            class="mt-1 block w-full border border-gray-300 rounded-md p-2 font-calibreLight text-lg text-primary"
             v-model.number="warehouseData.room" />
         </div>
         <div>
-          <label class="block text-sm font-medium text-gray-700">Low</label>
-          <input type="number" class="mt-1 block w-full border border-gray-300 rounded-md p-2"
+          <label class="block text-base font-semibold text-primary mb-2">Low</label>
+          <input type="number"
+            class="mt-1 block w-full border border-gray-300 rounded-md p-2 font-calibreLight text-lg text-primary"
             v-model.number="warehouseData.low" />
         </div>
         <div>
-          <label class="block text-sm font-medium text-gray-700">Constant</label>
-          <input type="number" class="mt-1 block w-full border border-gray-300 rounded-md p-2"
+          <label class="block text-base font-semibold text-primary mb-2">Constant</label>
+          <input type="number"
+            class="mt-1 block w-full border border-gray-300 rounded-md p-2 font-calibreLight text-lg text-primary"
             :value="warehouseData.constant" readonly />
         </div>
       </div>
 
-      <div class="flex flex-row items-center justify-end pt-8 border-t">
+      <div class="flex flex-row items-center justify-end pt-8 border-t font-financierMedium">
         <button type="button" @click="emit('close')"
-          class="bg-gray-200 hover:bg-gray-800 text-gray-800 hover:text-white font-bold py-2 px-4 rounded-[10px] mr-4">Cancel</button>
+          class="bg-gray-200 hover:bg-gray-800 text-gray-800 hover:text-white py-2 px-4 rounded-[10px] mr-4 transition duration-150">Cancel</button>
         <button type="submit" :disabled="computedIsLoading"
-          class="bg-cbre_primary_1 hover:bg-cbre_primary_2 text-white font-bold py-2 px-4 rounded-[10px]">Save</button>
+          class="bg-cbre_primary_1 hover:bg-cbre_primary_2 text-white py-2 px-4 rounded-[10px] transition duration-150">Save</button>
       </div>
     </form>
   </div>

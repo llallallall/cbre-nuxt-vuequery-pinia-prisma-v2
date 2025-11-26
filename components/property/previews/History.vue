@@ -42,6 +42,6 @@ const uiStore = useUiStore();
 const { currentProperty: property } = storeToRefs(propertyStore);
 
 const openEditPanel = () => {
-  uiStore.openModifyPanel(propertyStore.currentPropertyId, 'history');
+  uiStore.openModifyForm(propertyStore.currentPropertyId, 'history');
 };
 </script>

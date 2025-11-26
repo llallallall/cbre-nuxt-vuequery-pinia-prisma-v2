@@ -51,7 +51,7 @@ const validBrochures = computed(() => {
 
 const openEditPanel = () => {
         // 💡 수정: uiStore 사용
-        uiStore.openModifyPanel(propertyStore.currentPropertyId, 'brochure');
+        uiStore.openModifyForm(propertyStore.currentPropertyId, 'brochure');
 };
 
 const openPdfModal = (url: string) => {

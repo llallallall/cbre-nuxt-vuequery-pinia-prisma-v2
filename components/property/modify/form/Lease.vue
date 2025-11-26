@@ -1,16 +1,3 @@
-<template>
-        <div class="p-6 space-y-6">
-                <div class="flex justify-end mb-4">
-                        <button @click="openModal('create')"
-                                class="bg-cbre_primary_1 text-white text-sm font-medium py-2 px-4 rounded-[10px] transition duration-150 flex items-center">
-                                <span class="mr-1">+</span> Add New Lease Record
-                        </button>
-                </div>
-
-                <div class="border border-gray-300 rounded-md overflow-x-auto">
-                        <table class="min-w-full divide-y divide-gray-200">
-                                <thead class="bg-gray-50">
-                                        <tr class="text-xs font-medium text-gray-500 uppercase tracking-wider">
                                                 <th class="px-3 py-2 text-left">Execution Date</th>
                                                 <th class="px-3 py-2 text-left">Floor / Unit</th>
                                                 <th class="px-3 py-2 text-left">Type</th>
@@ -20,7 +7,7 @@
                                                 <th class="px-3 py-2 text-center">Action</th>
                                         </tr>
                                 </thead>
-                                <tbody class="bg-white divide-y divide-gray-200">
+                                <tbody class="bg-white divide-y divide-gray-200 font-calibreLight text-lg text-primary">
                                         <tr v-for="t in leaseTransactions" :key="t.id">
                                                 <td class="px-3 py-2 text-sm text-gray-900">{{
                                                         formatDateForDisplay(t.executionDate) }}</td>
@@ -37,9 +24,9 @@
                                                         formatDateForDisplay(t.lease?.leaseEndDate) }}</td>
                                                 <td class="px-3 py-2 text-sm text-center">
                                                         <button @click="openModal('edit', t)"
-                                                                class="text-cbre_primary_1 hover:text-cbre_primary_2 mr-3">Edit</button>
+                                                                class="text-cbre_primary_1 hover:text-cbre_primary_2 mr-3 font-medium">Edit</button>
                                                         <button @click="confirmDelete(t.id)"
-                                                                class="text-red-600 hover:text-red-900">Delete</button>
+                                                                class="text-red-600 hover:text-red-900 font-medium">Delete</button>
                                                 </td>
                                         </tr>
                                         <tr v-if="leaseTransactions.length === 0">

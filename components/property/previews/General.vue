@@ -60,7 +60,8 @@ const uiStore = useUiStore();
 const { currentProperty: property } = storeToRefs(propertyStore);
 
 const openEditPanel = () => {
-  uiStore.openModifyPanel(propertyStore.currentPropertyId, 'general');
+  console.log('openEditPanel');
+  uiStore.openModifyPanel('general');
 };
 
 // 💡 Warehouse 비율 추출 헬퍼 함수
