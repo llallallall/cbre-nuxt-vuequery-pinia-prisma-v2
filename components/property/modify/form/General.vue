@@ -83,19 +83,32 @@ const { isGlobalLoading: computedIsLoading } = storeToRefs(statusStore);
 
 // 초기 데이터 (General)
 const formData = reactive({
-  name: currentProperty.value?.name || '',
-  sectorId: currentProperty.value?.sectorId || '',
-  subsectorId: currentProperty.value?.subsectorId || '',
+  name: '',
+  sectorId: '',
+  subsectorId: '',
 });
 
 // 초기 데이터 (Warehouse) - 배열에서 추출
 const getWarehouseVal = (type: string) => currentProperty.value?.warehouse?.find((w: any) => w.temperatureType === type)?.ratio || 0;
 
 const warehouseData = reactive({
-  room: getWarehouseVal('ROOM'),
-  low: getWarehouseVal('LOW'),
-  constant: getWarehouseVal('CONSTANT'),
+  room: 0,
+  low: 0,
+  constant: 0,
 });
+
+// 💡 [수정] 데이터 로드 시점 차이로 인한 초기값 누락 방지 (Watch)
+watch(currentProperty, (newVal) => {
+  if (newVal) {
+    formData.name = newVal.name || '';
+    formData.sectorId = newVal.sectorId || '';
+    formData.subsectorId = newVal.subsectorId || '';
+
+    warehouseData.room = getWarehouseVal('ROOM');
+    warehouseData.low = getWarehouseVal('LOW');
+    warehouseData.constant = getWarehouseVal('CONSTANT');
+  }
+}, { immediate: true, deep: true });
 
 // Constant 자동 계산
 watch([() => warehouseData.room, () => warehouseData.low], () => {
