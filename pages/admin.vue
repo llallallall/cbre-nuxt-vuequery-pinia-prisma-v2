@@ -29,7 +29,7 @@
                 <!-- 💡 Return to List Button (Shown when Modify Panel is Open) -->
                 <div v-else class="flex justify-end items-center mt-5 md:mt-1 mb-4">
                     <button
-                        class="px-4 py-2 border border-cbre_primary_1 text-cbre_primary_1 font-calibreSemiBold rounded-md hover:bg-cbre_primary_1 hover:text-white transition duration-300"
+                        class="px-4 py-2 border border-cbre_primary_1 text-cbre_primary_1 font-calibreSemiBold rounded-md bg-white/60 hover:bg-cbre_primary_1 hover:text-white transition duration-300"
                         @click="handleReturnToList">
                         Return to List
                     </button>

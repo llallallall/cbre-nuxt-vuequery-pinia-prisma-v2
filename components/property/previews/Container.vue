@@ -10,7 +10,7 @@
                 transition-all duration-600 ease-in-out" :class="[
                         uiStore.isGrownPreview ? 'w-full' : 'w-[calc(50%-60px)]',
                         uiStore.isOpenModifyPanel ? 'ml-[30px] mr-auto' : 'mx-auto',
-                        uiStore.isOpenPreview ? 'mt-[4em]' : ''
+                        uiStore.isOpenPreview ? 'mt-[2em]' : ''
                 ]">
 
                         <div class="relative bg-white w-full rounded-[10px] ">
@@ -33,15 +33,15 @@
                                                                 'bg-cbre_primary_2/40 rounded-full ': !uiStore.isGrownPreview,
                                                                 'bg-transparent ': uiStore.isGrownPreview,
                                                         }" @click.prevent="() => {
-                                uiStore.isGrownPreview = false
-                        }" />
+                                                                uiStore.isGrownPreview = false
+                                                        }" />
                                                 <Icon name="openmoji:overlapping-white-squares" size="1.2em"
                                                         class="mr-[0.5em] text-cbre_primary_4 cursor-pointer" :class="{
                                                                 'bg-cbre_primary_2/40 rounded-full ': uiStore.isGrownPreview,
                                                                 'bg-transparent ': !uiStore.isGrownPreview,
                                                         }" @click.prevent="() => {
-                                uiStore.isGrownPreview = true;
-                        }" />
+                                                                uiStore.isGrownPreview = true;
+                                                        }" />
 
                                         </div>
                                 </div>

@@ -32,8 +32,8 @@
                                 </svg>
                             </div>
                             <div class="flex flex-col overflow-hidden">
-                                <span class="text-sm font-medium text-gray-900 truncate" :title="item.fileName">{{
-                                    item.fileName }}</span>
+                                <span class="text-sm font-medium text-gray-900 truncate" :title="item.fileName || ''">{{
+                                    item.fileName || 'Untitled' }}</span>
                                 <span class="text-xs text-gray-500">{{ item.isNew ? 'New' : 'Uploaded' }}</span>
                             </div>
                         </div>

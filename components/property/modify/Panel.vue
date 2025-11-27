@@ -1,7 +1,7 @@
 <template>
   <Transition name="slide-fade">
     <div class="bg-[rgba(255,255,255,0.2)] rounded-[15px] outline-none flex w-full justify-start">
-      <div v-if="uiStore.isOpenModifyPanel && uiStore.currentSection" class="fixed mt-[6.5em] right-[5em] mb-[20px] top-0
+      <div v-if="uiStore.isOpenModifyPanel && uiStore.currentSection" class="fixed mt-[2em] right-[5em] mb-[20px] top-[120px]
                 ml-[30px] w-full lg:w-[calc(50%-100px)] 
                 backdrop-blur-[25px] shadow-[0_0_10px_2px_rgba(0,0,0,0.2)]
                 border-2 border-[rgba(255,255,255,0.4)] rounded-[15px] 

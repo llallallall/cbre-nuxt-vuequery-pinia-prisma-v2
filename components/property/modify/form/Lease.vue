@@ -1,3 +1,17 @@
+<template>
+        <div class="p-6">
+                <div class="flex justify-between items-center mb-4">
+                        <h3 class="text-lg font-semibold text-primary">Lease Transactions</h3>
+                        <button @click="openModal('create')"
+                                class="bg-cbre_primary_1 hover:bg-cbre_primary_2 text-white py-2 px-4 rounded-[10px] transition duration-150">
+                                Add Lease
+                        </button>
+                </div>
+
+                <div class="overflow-x-auto border border-gray-200 rounded-lg">
+                        <table class="min-w-full divide-y divide-gray-200">
+                                <thead class="bg-gray-50 font-financierMedium text-primary text-base">
+                                        <tr>
                                                 <th class="px-3 py-2 text-left">Execution Date</th>
                                                 <th class="px-3 py-2 text-left">Floor / Unit</th>
                                                 <th class="px-3 py-2 text-left">Type</th>
@@ -100,17 +114,34 @@ const closeModal = () => {
 const handleSave = async (payload: any) => {
         statusStore.setGlobalLoading(true);
         try {
-                // API 호출 (저장/수정) - API 경로는 예시입니다. 실제 경로 확인 필요.
-                // 여기서는 간단히 propertyStore의 Action을 통해 전체를 갱신하는 방식을 권장합니다.
-                // 예: await propertyStore.addTransaction(payload);
+                const propertyId = propertyStore.currentPropertyId;
+                const body = {
+                        ...payload,
+                        type: 'LEASE',
+                        propertyId
+                };
 
-                // 임시: 성공 처리
+                if (payload.transactionId) {
+                        // Update: PUT /api/property/admin/[id]/lease/[transactionId]
+                        await $fetch(`/api/property/admin/${propertyId}/lease/${payload.transactionId}`, {
+                                method: 'PUT' as any,
+                                body
+                        });
+                } else {
+                        // Create: POST /api/property/admin/[id]/lease
+                        await $fetch(`/api/property/admin/${propertyId}/lease`, {
+                                method: 'POST' as any,
+                                body
+                        });
+                }
+
                 showToast('Lease record saved.', 'success');
                 closeModal();
                 // 데이터 리로드
                 await propertyStore.fetchPropertyDetail(propertyStore.currentPropertyId);
 
         } catch (error) {
+                console.error(error);
                 showToast('Failed to save lease record.', 'danger');
         } finally {
                 statusStore.setGlobalLoading(false);
@@ -130,7 +161,8 @@ const confirmDelete = async (id: string) => {
         statusStore.setGlobalLoading(true);
         try {
                 // API 호출
-                await $fetch(`/api/property/transaction/${id}`, { method: 'DELETE' });
+                const propertyId = propertyStore.currentPropertyId;
+                await $fetch(`/api/property/admin/${propertyId}/lease/${id}`, { method: 'DELETE' });
 
                 // Store 갱신 (리로드)
                 await propertyStore.fetchPropertyDetail(propertyStore.currentPropertyId);

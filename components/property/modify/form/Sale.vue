@@ -1,3 +1,17 @@
+<template>
+        <div class="p-6">
+                <div class="flex justify-between items-center mb-4">
+                        <h3 class="text-lg font-semibold text-primary">Sale Transactions</h3>
+                        <button @click="openModal('create')"
+                                class="bg-cbre_primary_1 hover:bg-cbre_primary_2 text-white py-2 px-4 rounded-[10px] transition duration-150">
+                                Add Sale
+                        </button>
+                </div>
+
+                <div class="overflow-x-auto border border-gray-200 rounded-lg">
+                        <table class="min-w-full divide-y divide-gray-200">
+                                <thead class="bg-gray-50 font-financierMedium text-primary text-base">
+                                        <tr>
                                                 <th class="px-3 py-2 text-left">Year/Q</th>
                                                 <th class="px-3 py-2 text-left">Type</th>
                                                 <th class="px-3 py-2 text-left">Buyer</th>
@@ -68,8 +82,18 @@ const saleTransactions = computed(() => {
 });
 
 const openModal = (mode: 'create' | 'edit', transaction?: TransactionType) => {
-        selectedSaleData.value = (mode === 'edit' && transaction?.sale) ? transaction.sale : null;
         isModalOpen.value = true;
+        if (mode === 'edit' && transaction?.sale) {
+                selectedSaleData.value = {
+                        ...transaction.sale,
+                        transactionId: transaction.id,
+                        executionDate: transaction.executionDate,
+                        year: transaction.year,
+                        quarter: transaction.quarter,
+                } as any;
+        } else {
+                selectedSaleData.value = null;
+        }
 };
 
 const closeModal = () => {
@@ -80,12 +104,32 @@ const closeModal = () => {
 const handleSave = async (payload: any) => {
         statusStore.setGlobalLoading(true);
         try {
-                // API 호출 (예시)
-                // await propertyStore.saveTransaction(payload);
+                const propertyId = propertyStore.currentPropertyId;
+                const body = {
+                        ...payload,
+                        type: 'SALE',
+                        propertyId
+                };
+
+                if (payload.transactionId) {
+                        // Update: PUT /api/property/admin/[id]/sale/[transactionId]
+                        await $fetch(`/api/property/admin/${propertyId}/sale/${payload.transactionId}`, {
+                                method: 'PUT' as any,
+                                body
+                        });
+                } else {
+                        // Create: POST /api/property/admin/[id]/sale
+                        await $fetch(`/api/property/admin/${propertyId}/sale`, {
+                                method: 'POST' as any,
+                                body
+                        });
+                }
+
                 showToast('Sale record saved.', 'success');
                 closeModal();
                 await propertyStore.fetchPropertyDetail(propertyStore.currentPropertyId);
         } catch (error) {
+                console.error(error);
                 showToast('Failed to save.', 'danger');
         } finally {
                 statusStore.setGlobalLoading(false);
@@ -102,7 +146,9 @@ const confirmDelete = async (id: string) => {
 
         statusStore.setGlobalLoading(true);
         try {
-                await $fetch(`/api/property/transaction/${id}`, { method: 'DELETE' });
+                // Delete: DELETE /api/property/admin/[id]/sale/[transactionId]
+                const propertyId = propertyStore.currentPropertyId;
+                await $fetch(`/api/property/admin/${propertyId}/sale/${id}`, { method: 'DELETE' });
                 await propertyStore.fetchPropertyDetail(propertyStore.currentPropertyId);
                 showToast('Deleted.', 'success');
         } catch (e) {
