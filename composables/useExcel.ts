@@ -1,5 +1,6 @@
 import Excel from 'exceljs';
-import { saveAs } from 'file-saver';
+import FileSaver from 'file-saver';
+const { saveAs } = FileSaver;
 import { ref, computed } from 'vue';
 import { useStatusStore } from "~/stores/status";
 import type { PropertyType } from '~/types/property.type';
