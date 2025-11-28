@@ -1,10 +1,12 @@
-// /plugins/toast.ts
+// /plugins/toast.client.ts
 // Nuxt 3.6.5, Vue 3.3.7 기준
 
 import { createToast, type ToastOptions } from 'mosha-vue-toastify';
+import 'mosha-vue-toastify/dist/style.css'; // Ensure styles are imported
 
 /**
  * @description mosha-vue-toastify를 Nuxt의 전역 $toast 유틸리티로 등록합니다.
+ * Client-side only plugin to avoid SSR issues.
  */
 export default defineNuxtPlugin((nuxtApp) => {
 
