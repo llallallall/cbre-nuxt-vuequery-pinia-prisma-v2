@@ -73,6 +73,8 @@ import { useUiStore } from '~/stores/ui';
 import { useStatusStore } from '~/stores/status';
 import { createToast } from 'mosha-vue-toastify';
 
+
+// build test
 const emit = defineEmits(['close']);
 const propertyStore = usePropertyStore();
 const uiStore = useUiStore();
@@ -81,7 +83,7 @@ const { currentProperty } = storeToRefs(propertyStore);
 const { sectorList, subsectorList } = storeToRefs(uiStore);
 const { isGlobalLoading: computedIsLoading } = storeToRefs(statusStore);
 
-// 초기 데이터 (General)
+// 초기 데이터 (General) 
 const formData = reactive({
   name: '',
   sectorId: '',
