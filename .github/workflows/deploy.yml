@@ -57,9 +57,7 @@ jobs:
               --name ${{ env.CONTAINER_NAME }} \
               --restart always \
               --network cbre-net \
-              -e DATABASE_URL="postgresql://myuser:mypassword@cbre-postgres:5432/cbre_db" \
-              -e MINIO_ENDPOINT="http://cbre-minio:9000" \
-              -e NUXT_PUBLIC_MINIO_URL="https://minio-api.devowls.kr" \
+              --env-file /home/mhh/cbre-web-config/.env \
               ghcr.io/${{ env.IMAGE_NAME }}:latest
             
             # 5. 찌꺼기 이미지 정리
