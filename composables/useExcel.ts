@@ -1,7 +1,6 @@
 import Excel from 'exceljs';
 import { saveAs } from 'file-saver';
 import { ref, computed } from 'vue';
-import { createToast } from 'mosha-vue-toastify';
 import { useStatusStore } from "~/stores/status";
 import type { PropertyType } from '~/types/property.type';
 
@@ -18,6 +17,7 @@ export type SheetData = {
 
 export const useExcel = () => {
     const statusStore = useStatusStore();
+    const { showToast } = useToast();
 
     // --- State ---
     const file = ref<File | string>('');
@@ -349,18 +349,18 @@ export const useExcel = () => {
                     activeSheetIndex.value = 0;
 
                     if (totalErrors.value > 0) {
-                        createToast({
+                        showToast({
                             title: 'Validation Errors Found',
                             description: 'Please check the summary and fix errors before uploading.'
-                        }, { type: 'warning', timeout: 5000, showCloseButton: true, position: 'top-right', transition: 'bounce' });
+                        }, 'warning', { timeout: 5000, showCloseButton: true, position: 'top-right', transition: 'bounce' });
                     }
 
                 } catch (error) {
                     console.error("Error parsing Excel file:", error);
-                    createToast({
+                    showToast({
                         title: 'Failed to read the Excel file.',
                         description: 'It might be corrupted or in an unsupported format.'
-                    }, { type: 'danger', timeout: 5000, showCloseButton: true, position: 'top-right', transition: 'bounce' });
+                    }, 'danger', { timeout: 5000, showCloseButton: true, position: 'top-right', transition: 'bounce' });
 
                     resetUpload();
                 } finally {
@@ -370,10 +370,10 @@ export const useExcel = () => {
 
             reader.onerror = (error) => {
                 console.error("FileReader error:", error);
-                createToast({
+                showToast({
                     title: 'Error reading file.',
                     description: 'Please try again.'
-                }, { type: 'danger', timeout: 5000, showCloseButton: true, position: 'top-right', transition: 'bounce' });
+                }, 'danger', { timeout: 5000, showCloseButton: true, position: 'top-right', transition: 'bounce' });
 
                 statusStore.setGlobalLoading(false);
             };

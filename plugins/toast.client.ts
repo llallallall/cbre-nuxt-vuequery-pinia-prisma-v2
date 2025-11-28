@@ -13,7 +13,7 @@ export default defineNuxtPlugin((nuxtApp) => {
         // console.log('mosha-vue-toastify 플러그인을 $toast로 등록했습니다.');
 
         // 래핑 함수 정의
-        const showToast = (message: string, type: 'info' | 'success' | 'warning' | 'danger' = 'info', options: ToastOptions = {}) => {
+        const showToast = (content: string | { title: string; description: string }, type: 'info' | 'success' | 'warning' | 'danger' = 'info', options: ToastOptions = {}) => {
                 // 모든 토스트에 기본 옵션을 적용합니다.
                 const defaultOptions: ToastOptions = {
                         timeout: 3000,
@@ -24,7 +24,7 @@ export default defineNuxtPlugin((nuxtApp) => {
                 };
 
                 // 토스트 표시
-                createToast(message, { ...defaultOptions, ...options });
+                createToast(content, { ...defaultOptions, ...options });
         };
 
         // $toast 이름으로 템플릿 및 컴포저블에서 접근 가능하도록 주입

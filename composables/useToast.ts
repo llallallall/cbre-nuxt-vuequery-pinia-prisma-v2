@@ -10,8 +10,9 @@ export const useToast = () => {
         // useNuxtApp() 호출은 이 파일에서만 이루어집니다.
         const { $toast } = useNuxtApp();
 
-        const showToast = $toast as (
-                message: string,
+        // SSR에서는 $toast가 없을 수 있으므로 no-op 함수를 제공합니다.
+        const showToast = ($toast || (() => { })) as (
+                content: string | { title: string; description: string },
                 type?: 'info' | 'success' | 'warning' | 'danger',
                 options?: ToastOptions
         ) => void;
