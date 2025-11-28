@@ -97,12 +97,13 @@ import { useFormat } from '~/composables/useFormat';
 import mapboxgl from "mapbox-gl";
 import MapboxLanguage from "@mapbox/mapbox-gl-language";
 import { mapCenter, mapZoom, maxZoom, minZoom, mapStyleId, LAYER_3D_BUILDINGS, LAYER_CLUSTERS, LAYER_CLUSTER_COUNT, LAYER_UNCLUSTERED_POINT, LAYER_MINIMAP_POINTS, LAYER_MINIMAP_HEAT } from '~/context/mapData';
-import { createToast } from 'mosha-vue-toastify';
+
 
 const mapStore = useMapStore();
 const uiStore = useUiStore();
 const propertyStore = usePropertyStore();
 const { getThumbnailUrl } = useFormat();
+const { showToast } = useToast();
 
 const { filterMapPins, flyTo, searchedMarkersChanged } = storeToRefs(mapStore);
 const { filteredProperties } = storeToRefs(propertyStore);
@@ -157,17 +158,9 @@ const onMapLoad = () => {
 
 const onGeolocateError = (e: any) => {
         console.error('Geolocate error event:', e);
-        // MapboxGeolocateControl의 error 이벤트는 { type: 'error', error: PositionError, target: GeolocateControl } 형태일 수 있음
-        // 또는 Vue 컴포넌트가 이벤트를 어떻게 emit 하느냐에 따라 다름.
-        // 일단 로그를 확인하여 정확한 에러 객체 위치를 파악하고자 함.
-
         const errorMessage = e?.error?.message || e?.message || 'Failed to retrieve your location.';
 
-        createToast({
-                title: 'Geolocation Error',
-                description: errorMessage + ' Please check your browser settings.'
-        }, {
-                type: 'danger',
+        showToast(`Geolocation Error: ${errorMessage} Please check your browser settings.`, 'danger', {
                 showIcon: true,
                 hideProgressBar: true,
         });

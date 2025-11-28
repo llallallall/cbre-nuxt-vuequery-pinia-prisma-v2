@@ -167,7 +167,6 @@ import { storeToRefs } from 'pinia';
 import { usePropertyStore } from '~/stores/property';
 import { useStatusStore } from '~/stores/status';
 import { useFormat } from '~/composables/useFormat';
-import { createToast } from 'mosha-vue-toastify';
 
 const emit = defineEmits(['close']);
 const propertyStore = usePropertyStore();
@@ -175,6 +174,7 @@ const statusStore = useStatusStore();
 const { currentProperty } = storeToRefs(propertyStore);
 const { isGlobalLoading: computedIsLoading } = storeToRefs(statusStore);
 const { numberFormat, processNumberInput, calculatePyValue } = useFormat();
+const { showToast } = useToast();
 
 // --- Initial Data ---
 const getInitialData = () => {
@@ -256,9 +256,9 @@ const onSubmit = async () => {
   try {
     await propertyStore.updatePropertySection('scale', formData as any);
     emit('close');
-    createToast({ title: 'Scale saved.' }, { type: 'success' });
+    showToast('Scale saved.', 'success');
   } catch (e) {
-    createToast({ title: 'Error saving.' }, { type: 'danger' });
+    showToast('Error saving.', 'danger');
   } finally {
     statusStore.setGlobalLoading(false);
   }

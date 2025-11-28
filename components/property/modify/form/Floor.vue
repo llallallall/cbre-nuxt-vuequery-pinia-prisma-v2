@@ -244,7 +244,6 @@ import { storeToRefs } from 'pinia';
 import { usePropertyStore } from '~/stores/property';
 import { useStatusStore } from '~/stores/status';
 import { useFormat } from '~/composables/useFormat';
-import { createToast } from 'mosha-vue-toastify';
 
 import type { FloorType, FloorPartialType } from '~/types/property.type';
 
@@ -272,6 +271,7 @@ const propertyStore = usePropertyStore();
 const statusStore = useStatusStore();
 const { currentProperty } = storeToRefs(propertyStore);
 const computedIsLoading = computed(() => statusStore.isGlobalLoading);
+const { showToast } = useToast();
 
 const {
     numberFormat,
@@ -473,7 +473,7 @@ const removeUnit = (fIndex: number, pIndex: number) => {
     if (floor.floorPartial.length > 1) {
         floor.floorPartial.splice(pIndex, 1);
     } else {
-        createToast({ title: 'At least one unit required.' }, { type: 'warning' });
+        showToast('At least one unit required.', 'warning');
     }
 };
 
@@ -537,10 +537,10 @@ const onSubmit = async () => {
         }
 
         emit('close');
-        createToast({ title: 'Floor data saved.' }, { type: 'success' });
+        showToast('Floor data saved.', 'success');
     } catch (e) {
         console.error(e);
-        createToast({ title: 'Failed to save.' }, { type: 'danger' });
+        showToast('Failed to save.', 'danger');
     } finally {
         statusStore.setGlobalLoading(false);
     }

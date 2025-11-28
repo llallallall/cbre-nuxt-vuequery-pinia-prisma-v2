@@ -218,7 +218,7 @@
 import { ref, watch, computed, reactive } from 'vue';
 import { storeToRefs } from 'pinia';
 import type { SaleType, SaleCreatePayload, SaleTypeEnum } from '~/types/property.type';
-import { createToast } from 'mosha-vue-toastify';
+
 import { usePropertyStore } from '~/stores/property';
 import { useFormat } from '~/composables/useFormat';
 
@@ -238,6 +238,7 @@ const emit = defineEmits<{
 const isEditMode = computed(() => !!props.saleData?.transactionId);
 const propertyStore = usePropertyStore();
 const { currentProperty } = storeToRefs(propertyStore);
+const { showToast } = useToast();
 
 // 1. Local Form Type
 interface LocalSaleForm extends Omit<SaleCreatePayload, 'remarks'> {
@@ -377,7 +378,7 @@ const closeModal = () => emit('close');
 const onSubmit = () => {
         // 💡 [수정] Proxy 값(문자열)이 아니라 실제 Date 객체 확인
         if (!formData.value.executionDate || !formData.value.saleType) {
-                createToast({ title: 'Please fill in required fields.' }, { type: 'warning' });
+                showToast('Please fill in required fields.', 'warning');
                 return;
         }
         const payload: SaleCreatePayload & { transactionId?: string } = {

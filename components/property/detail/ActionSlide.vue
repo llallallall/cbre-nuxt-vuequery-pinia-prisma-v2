@@ -70,6 +70,7 @@ import BrochureListModal from '@/components/modal/BrochureListModal.vue';
 import { useFormat } from '~/composables/useFormat';
 import type { LocationType, PropertyImageFileType, PropertyBrochureFileType } from '~/types/property.type';
 import { createToast } from 'mosha-vue-toastify';
+import { useStatusStore } from '~/stores/status';
 
 // Props 정의
 const props = defineProps<{
@@ -77,6 +78,9 @@ const props = defineProps<{
         images: PropertyImageFileType[] | null | undefined;
         brochure: PropertyBrochureFileType[] | null | undefined;
 }>();
+
+const statusStore = useStatusStore();
+const { showToast } = useToast();
 
 const { getThumbnailUrl } = useFormat();
 
@@ -108,7 +112,7 @@ const { open: openBrochureModal, close: closeBrochureModal, patchOptions: patchB
         component: BrochureListModal,
         attrs: {
                 brochures: [],
-                onClose() {
+                onClosed() {
                         closeBrochureModal();
                 },
                 'onUpdate:modelValue': (val: boolean) => {
@@ -117,17 +121,13 @@ const { open: openBrochureModal, close: closeBrochureModal, patchOptions: patchB
         }
 });
 
-import { useStatusStore } from '~/stores/status';
 
-// ... (existing code)
-
-const statusStore = useStatusStore();
 
 const downloadAsPdf = () => {
         const brochures = props.brochure || [];
 
         if (brochures.length === 0) {
-                createToast('No brochure file registered', { type: 'danger', showIcon: true });
+                showToast('No brochure file registered', 'danger');
                 return;
         }
 
@@ -137,7 +137,7 @@ const downloadAsPdf = () => {
                 if (pdfUrl) {
                         statusStore.openViewerModal(pdfUrl, 'pdf');
                 } else {
-                        createToast('Invalid file URL', { type: 'danger', showIcon: true });
+                        showToast('Invalid file URL', 'danger');
                 }
                 return;
         }

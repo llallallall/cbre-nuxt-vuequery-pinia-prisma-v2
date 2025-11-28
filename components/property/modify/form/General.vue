@@ -71,7 +71,6 @@ import { storeToRefs } from 'pinia';
 import { usePropertyStore } from '~/stores/property';
 import { useUiStore } from '~/stores/ui';
 import { useStatusStore } from '~/stores/status';
-import { createToast } from 'mosha-vue-toastify';
 
 
 // build test
@@ -82,6 +81,7 @@ const statusStore = useStatusStore();
 const { currentProperty } = storeToRefs(propertyStore);
 const { sectorList, subsectorList } = storeToRefs(uiStore);
 const { isGlobalLoading: computedIsLoading } = storeToRefs(statusStore);
+const { showToast } = useToast();
 
 // 초기 데이터 (General) 
 const formData = reactive({
@@ -155,19 +155,93 @@ const onSubmit = async () => {
       method: 'PUT',
       body: payload,
     });
+    const { showToast } = useToast();
 
-    // 💡 수정: setProperty 삭제 -> currentProperty 직접 업데이트
-    if (propertyStore.currentProperty) {
-      Object.assign(propertyStore.currentProperty, updatedAsset);
-    }
+    // 초기 데이터 (General) 
+    const formData = reactive({
+      name: '',
+      sectorId: '',
+      subsectorId: '',
+    });
 
-    emit('close');
-    createToast({ title: 'Saved.' }, { type: 'success' });
-  } catch (error) {
-    console.error(error);
-    createToast({ title: 'Error.' }, { type: 'danger' });
-  } finally {
-    statusStore.setGlobalLoading(false);
-  }
-};
+    // 초기 데이터 (Warehouse) - 배열에서 추출
+    const getWarehouseVal = (type: string) => currentProperty.value?.warehouse?.find((w: any) => w.temperatureType === type)?.ratio || 0;
+
+    const warehouseData = reactive({
+      room: 0,
+      low: 0,
+      constant: 0,
+    });
+
+    // 💡 [수정] 데이터 로드 시점 차이로 인한 초기값 누락 방지 (Watch)
+    watch(currentProperty, (newVal) => {
+      if (newVal) {
+        formData.name = newVal.name || '';
+        formData.sectorId = newVal.sectorId || '';
+        formData.subsectorId = newVal.subsectorId || '';
+
+        warehouseData.room = getWarehouseVal('ROOM');
+        warehouseData.low = getWarehouseVal('LOW');
+        warehouseData.constant = getWarehouseVal('CONSTANT');
+      }
+    }, { immediate: true, deep: true });
+
+    // Constant 자동 계산
+    watch([() => warehouseData.room, () => warehouseData.low], () => {
+      const room = warehouseData.room || 0;
+      const low = warehouseData.low || 0;
+      warehouseData.constant = Math.max(0, 100 - room - low);
+    });
+
+    const errors = reactive({ name: '' });
+
+    // Options
+    const sectorOptions = computed(() => uiStore.sectorList || []);
+    const subSectorOptions = computed(() => {
+      if (!formData.sectorId || !uiStore.subsectorList) return [];
+      return uiStore.subsectorList.filter((s: any) => s.sectorId === formData.sectorId);
+    });
+
+    const onSectorChange = () => {
+      formData.subsectorId = '';
+    };
+
+    const onSubmit = async () => {
+      if (!formData.name) {
+        errors.name = 'Property Name is required.';
+        return;
+      }
+      statusStore.setGlobalLoading(true);
+
+      const payload = {
+        name: formData.name,
+        sectorId: formData.sectorId,
+        subsectorId: formData.subsectorId || null,
+        warehouse: [
+          { temperatureType: 'ROOM', ratio: warehouseData.room },
+          { temperatureType: 'LOW', ratio: warehouseData.low },
+          { temperatureType: 'CONSTANT', ratio: warehouseData.constant },
+        ]
+      };
+
+      try {
+        const updatedAsset = await $fetch(`/api/upload/${propertyStore.currentPropertyId}/general`, {
+          method: 'PUT',
+          body: payload,
+        });
+
+        // 💡 수정: setProperty 삭제 -> currentProperty 직접 업데이트
+        if (propertyStore.currentProperty) {
+          Object.assign(propertyStore.currentProperty, updatedAsset);
+        }
+
+        emit('close');
+        showToast('Saved.', 'success');
+      } catch (error) {
+        console.error(error);
+        showToast('Error.', 'danger');
+      } finally {
+        statusStore.setGlobalLoading(false);
+      }
+    };
 </script>

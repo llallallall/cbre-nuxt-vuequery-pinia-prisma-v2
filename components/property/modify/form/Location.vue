@@ -67,13 +67,13 @@ import { reactive, computed } from 'vue';
 import { storeToRefs } from 'pinia';
 import { usePropertyStore } from '~/stores/property';
 import { useStatusStore } from '~/stores/status';
-import { createToast } from 'mosha-vue-toastify';
 
 const emit = defineEmits(['close']);
 const propertyStore = usePropertyStore();
 const statusStore = useStatusStore();
 const { currentProperty } = storeToRefs(propertyStore);
 const { isGlobalLoading: computedIsLoading } = storeToRefs(statusStore);
+const { showToast } = useToast();
 
 const getInitialData = () => {
         return {
@@ -93,9 +93,9 @@ const onSubmit = async () => {
         try {
                 await propertyStore.updatePropertySection('location', formData as any);
                 emit('close');
-                createToast({ title: 'Location saved.' }, { type: 'success' });
+                showToast('Location saved.', 'success');
         } catch (e) {
-                createToast({ title: 'Error saving location.' }, { type: 'danger' });
+                showToast('Error saving location.', 'danger');
         } finally {
                 statusStore.setGlobalLoading(false);
         }

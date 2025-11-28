@@ -76,13 +76,13 @@ import { reactive, computed } from 'vue';
 import { storeToRefs } from 'pinia';
 import { usePropertyStore } from '~/stores/property';
 import { useStatusStore } from '~/stores/status';
-import { createToast } from 'mosha-vue-toastify';
 
 const emit = defineEmits(['close']);
 const propertyStore = usePropertyStore();
 const statusStore = useStatusStore();
 const { currentProperty } = storeToRefs(propertyStore);
 const { isGlobalLoading: computedIsLoading } = storeToRefs(statusStore);
+const { showToast } = useToast();
 
 // 초기 데이터
 const getInitialData = () => {
@@ -104,9 +104,9 @@ const onSubmit = async () => {
         try {
                 await propertyStore.updatePropertySection('accessibility', formData as any);
                 emit('close');
-                createToast({ title: 'Accessibility saved.' }, { type: 'success' });
+                showToast('Accessibility saved.', 'success');
         } catch (e) {
-                createToast({ title: 'Error saving.' }, { type: 'danger' });
+                showToast('Error saving.', 'danger');
         } finally {
                 statusStore.setGlobalLoading(false);
         }

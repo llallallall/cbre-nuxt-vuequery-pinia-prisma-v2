@@ -133,7 +133,7 @@ import { useUiStore } from '~/stores/ui';
 import { useUserStore } from '~/stores/user';
 import { useStatusStore } from '~/stores/status';
 import { useAuth } from '#imports';
-import { createToast } from 'mosha-vue-toastify';
+
 import type { ProfileType } from '~/types/user.type';
 
 // Stores
@@ -141,6 +141,7 @@ const uiStore = useUiStore();
 const userStore = useUserStore();
 const statusStore = useStatusStore();
 const { signOut } = useAuth();
+const { showToast } = useToast();
 
 // State
 const { isUserProfileModalOpen } = storeToRefs(uiStore);
@@ -193,12 +194,12 @@ const handleSave = async () => {
                 // Store 업데이트
                 userStore.updateProfile(updatedProfile);
 
-                createToast({ title: 'Profile updated successfully.' }, { type: 'success' });
+                showToast('Profile updated successfully.', 'success');
                 handleClose();
 
         } catch (error) {
                 console.error(error);
-                createToast({ title: 'Failed to update profile.' }, { type: 'danger' });
+                showToast('Failed to update profile.', 'danger');
         } finally {
                 statusStore.setGlobalLoading(false);
         }

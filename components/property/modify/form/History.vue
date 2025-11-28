@@ -50,7 +50,7 @@ import { ref, computed } from 'vue';
 import { storeToRefs } from 'pinia';
 import { usePropertyStore } from '~/stores/property';
 import { useStatusStore } from '~/stores/status';
-import { createToast } from 'mosha-vue-toastify';
+import { useToast } from '~/composables/useToast';
 import type { HistoryTypeEnum } from '~/types/property.type';
 
 const emit = defineEmits(['close']);
@@ -58,6 +58,7 @@ const propertyStore = usePropertyStore();
 const statusStore = useStatusStore();
 const { currentProperty } = storeToRefs(propertyStore);
 const { isGlobalLoading: computedIsLoading } = storeToRefs(statusStore);
+const { showToast } = useToast();
 
 interface HistoryItem {
   year: string;
@@ -91,7 +92,7 @@ const onSubmit = async () => {
   try {
     // Validate
     if (historyList.value.some(h => !h.year)) {
-      createToast({ title: 'Year is required for all items.' }, { type: 'warning' });
+      showToast('Year is required for all items.', 'warning');
       return;
     }
 
@@ -101,9 +102,9 @@ const onSubmit = async () => {
     await propertyStore.updatePropertySection('history', historyList.value as any);
 
     emit('close');
-    createToast({ title: 'History saved.' }, { type: 'success' });
+    showToast('History saved.', 'success');
   } catch (e) {
-    createToast({ title: 'Error saving history.' }, { type: 'danger' });
+    showToast('Error saving history.', 'danger');
   } finally {
     statusStore.setGlobalLoading(false);
   }

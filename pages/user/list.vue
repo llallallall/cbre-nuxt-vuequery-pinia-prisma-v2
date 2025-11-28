@@ -1,7 +1,6 @@
 <template>
         <div class="wrapper px-10 py-10">
-               
-                <div class="w-full bg-[rgba(255,255,255,0.2)] rounded-[15px] outline-none ] " >
+                <div class="w-full bg-[rgba(255,255,255,0.2)] rounded-[15px] outline-none ] ">
 
                         <div class="relative 
                         px-[2.5em] pt-[7.5em] pb-[2.5em] 
@@ -17,240 +16,124 @@
                                         before:content-[''] before:absolute before:top-0 before:-left-[30px] before:w-[30px] before:h-[30px] before:rounded-tr-[50%] before:bg-transparent  before:shadow-[15px_0_0_0_rgba(230,234,234,1)]
                                         after:content-[''] after:absolute after:top-0 after:-right-[30px] after:w-[30px] after:h-[30px] after:rounded-tl-[50%] after:bg-transparent  after:shadow-[-15px_0_0_0_rgba(230,234,234,1)]
                                         ">
-                                        List of Users ({{  userStore.allUsers.length }})
+                                        List of Users ({{ userStore.allUsers.length }})
                                 </div>
-                <div class="flex gap-5 justify-start items-center font-calibre text-white text-lg mb-2">
-                        <span>search field:</span>
-                        <select v-model="searchField" class="bg-transparent text-white">
-                                <option value="propertyName" class="text-black" selected>Name</option>
-                                <option value="addressFull" class="text-black">Address</option>
-                        </select>
-                        
-                        <span>search value: </span>
-                        <input type="text" v-model="searchValue" class="bg-transparent border-slate-300 border-0 border-b-2  outline-none px-2 py-0">
-                </div>
-                
-                
-                
-                
-                <Vue3EasyDataTable
-                        v-model:items-selected="itemsSelected"
-                        show-index
-                        :headers="headers"
-                        :items="items"
-                        :filter-options="filterOptions"
-                        :search-field="searchField"
-                        :search-value="searchValue"
-                        buttons-pagination
-                        alternating
-                        
-                        class="w-[95%] rounded-[15px] overflow-hidden"
+                                <div class="flex gap-5 justify-start items-center font-calibre text-white text-lg mb-2">
+                                        <span>search field:</span>
+                                        <select v-model="searchField" class="bg-transparent text-white">
+                                                <option value="name" class="text-black" selected>Name</option>
+                                                <option value="email" class="text-black">Email</option>
+                                        </select>
 
-                >
-                <template #header-name="header">
-                        <div class="filter-column">
-                                <img src="/images/eglass-filter.png" class="filter-icon" @click.stop="showNameFilter=!showNameFilter" >
-                                {{ header.text }}
-                                <div class="filter-menu" v-if="showNameFilter">
-                                <input v-model="nameCriteria"/>
+                                        <span>search value: </span>
+                                        <input type="text" v-model="searchValue"
+                                                class="bg-transparent border-slate-300 border-0 border-b-2  outline-none px-2 py-0">
                                 </div>
-                        </div>
-                </template>
-                
-                <!-- <template #item-profile.usePhoto="{ profile }">
-                        <div class="name-wrapper">
-                                <span>{{ profile.usePhoto ? 'Photo' : 'Avatar' }}</span>
-                        </div>
-                </template> -->
 
-                <!-- <template #item-profile.photo="{ profile }">
-                        <div class="name-wrapper">
-                                <img class="image" :src="profile.photo" alt="" />
+                                <Table :columns="columns" :data="filteredItems" :rows-per-page="rowsPerPage"
+                                        :current-page="currentPage" :total-pages="totalPages"
+                                        @page-change="handlePageChange" @update:rowsPerPage="handleRowsPerPageChange">
+                                        <template #operation="{ item }">
+                                                <div class="operation-wrapper">
+                                                        <img :title="`Delete User : ${item.id}`"
+                                                                src="/images/delete.png" class="operation-icon"
+                                                                @click="deleteUser(item.id)" />
+                                                        <img :title="`Modify User : ${item.id}`" src="/images/edit.png"
+                                                                class="operation-icon" @click="editItem(item.id)" />
+                                                </div>
+                                        </template>
+                                </Table>
+
                         </div>
-                </template> -->
-
-                <!-- <template #item-image="{ image }">
-                        <div class="name-wrapper">
-                                <img class="image" :src="image" alt="" />
-                        </div>
-                </template>
-
-                <template #item-avatar="{ avatar }">
-                        <div class="name-wrapper">
-                                <img class="image" :src="avatar" alt="" />
-                        </div>
-                </template> -->
-
-                <template #item-operation="item">
-                        <div class="operation-wrapper">
-             
-                                <img :title="`Delete User : ${item.id}`"
-                                src="/images/delete.png"
-                                class="operation-icon"
-                                @click="deleteUser(item.id)"
-                                />
-                                <img :title="`Modify User : ${item.id}`"
-                                src="/images/edit.png"
-                                class="operation-icon"
-                                @click="editItem(item.id)"
-                                />
-                        </div>
-                </template>
-
-                </Vue3EasyDataTable>
-
-                <!-- <div class="w-full h-[500px]">
-                {{ userStore.allUsers[0] }}
-                </div> -->
-                </div>
                 </div>
         </div>
 </template>
 
 <script setup lang="ts">
+import { ref, computed } from 'vue';
+import Table from '~/components/common/Table.vue';
+import "@vueform/slider/themes/default.css";
+import { useUserStore } from '~/stores/user';
+
 definePageMeta({
         middleware: "auth",
         layout: 'admin-layout',
 });
-// import the library
-import * as toast from 'mosha-vue-toastify';
-const { createToast } = toast;
 
-import "@vueform/slider/themes/default.css";
-// reload - get api data
-import { useUserStore } from '~/stores/user';
-const userStore = useUserStore()
-// userStore.getAllUsers()
+const { showToast } = useToast();
+const userStore = useUserStore();
+const router = useRouter();
 
-// import Vue3EasyDataTable from 'vue3-easy-data-table';
-import 'vue3-easy-data-table/dist/style.css';
-import type { Header, Item, ClickRowArgument, FilterOption  } from "vue3-easy-data-table";
-
-const headers: Header[] = [
-  { text: "Name", value: "name", sortable: true},
-  { text: "Email", value: "email", sortable: true},
-  { text: "Role", value: "role" , sortable: true},
-
-  { text: "Company", value: "profile.company", sortable: true},
-  { text: "Branch", value: "profile.branch", sortable: true},
-  { text: "Department", value: "profile.department"},
-  { text: "Title", value: "profile.title"},
-  
-//   { text: "Avatar", value: "image" },
-//   { text: "Photo", value: "profile.photo" },
-//   { text: "View", value: "profile.usePhoto" },
-
-  { text: "Operation", value: "operation" },
-
+const columns = [
+        { header: "Name", key: "name", sortable: true },
+        { header: "Email", key: "email", sortable: true },
+        { header: "Role", key: "role", sortable: true },
+        { header: "Company", key: "profile.company", sortable: true },
+        { header: "Branch", key: "profile.branch", sortable: true },
+        { header: "Department", key: "profile.department" },
+        { header: "Title", key: "profile.title" },
+        { header: "Operation", key: "operation", slotName: "operation" },
 ];
 
-const items = ref<Item[]>(userStore.allUsers)
-const itemsSelected = ref<Item[]>([]);
-const rowClicked = ref()
-const showRow = (item: ClickRowArgument) => {
-        rowClicked.value.innerHTML = JSON.stringify(item);
-};
+const searchField = ref("name");
+const searchValue = ref("");
 
-const showNameFilter = ref(false);
+// Pagination state
+const currentPage = ref(1);
+const rowsPerPage = ref(10);
 
-const nameCriteria = ref('');
+const filteredItems = computed(() => {
+        let items = userStore.allUsers;
 
-const filterOptions = computed((): FilterOption[] => {
-  const filterOptionsArray: FilterOption[] = [];
+        if (searchValue.value) {
+                items = items.filter((item: any) => {
+                        const field = searchField.value;
+                        const val = getNestedValue(item, field);
+                        return val && String(val).toLowerCase().includes(searchValue.value.toLowerCase());
+                });
+        }
 
-
-  filterOptionsArray.push({
-    field: 'name',
-    criteria: nameCriteria.value,
-    comparison: (value, criteria): boolean => (value != null && criteria != null &&
-      typeof value === 'string' && value.includes(`${criteria}`)),
-  });
-
-
-  return filterOptionsArray;
+        const start = (currentPage.value - 1) * rowsPerPage.value;
+        const end = start + rowsPerPage.value;
+        return items.slice(start, end);
 });
 
-const searchField = ref("name");
-const searchValue = ref();
+const totalPages = computed(() => {
+        let items = userStore.allUsers;
+        if (searchValue.value) {
+                items = items.filter((item: any) => {
+                        const field = searchField.value;
+                        const val = getNestedValue(item, field);
+                        return val && String(val).toLowerCase().includes(searchValue.value.toLowerCase());
+                });
+        }
+        return Math.ceil(items.length / rowsPerPage.value);
+});
 
-const isEditing = ref(false);
-    const editingItem = reactive({
-      height: "",
-      weight: "",
-      id: 0,
-    });
+
+const getNestedValue = (obj: any, path: string) => {
+        return path.split('.').reduce((acc, part) => acc && acc[part], obj);
+};
+
+const handlePageChange = (page: number) => {
+        currentPage.value = page;
+};
+
+const handleRowsPerPageChange = (val: number) => {
+        rowsPerPage.value = val;
+        currentPage.value = 1; // Reset to first page
+};
+
 
 const deleteUser = async (id: string) => {
-        
-        // delete files from s3
-        // const s3Result = await useFetch('/api/data/s3FilesById', {
-        //         method : 'DELETE',
-        //         query : {
-        //                 propertyId : propertyId
-        //         }
-        // })
-
-
-        // if(s3Result.status.value === "success" ) {
-        //         // console.log('delete files from s3')
-        //         // console.log(s3Result.data.value)
-
-        //          // delete data from db
-        //         const deleteResult = await useFetch('/api/data/items', {
-        //                 method : 'DELETE',
-        //                 query : {
-        //                         propertyId : propertyId
-        //                 }
-        //         })
-
-        //         if(deleteResult.status.value === "success" ) {
-        //                 // console.log('delete data from db')
-        //                 // console.log(deleteResult.data.value)
-
-        //                 // 4) TOAST                                        
-        //               createToast({
-        //                               title: 'Property deleted successful.',
-        //                               //@ts-ignore
-        //                               description: propertyId
-        //                               }, {
-        //                                       type: 'info', // 'info', 'danger', 'warning', 'success', 'default'
-        //                                       timeout: 2000,
-        //                                       showCloseButton: true,
-        //                                       position: 'top-right', // 'top-left', 'top-right', 'bottom-left', 'bottom-right', 'top-center', 'bottom-center'
-        //                                       transition: 'bounce',
-        //                                       hideProgressBar: false,
-        //                                       swipeClose: true,
-        //                 })
-
-        //                 items.value = items.value.filter((el :any) => el.propertyId !== propertyId)
-        //         }
-
-
-        // }
-        
-        
-       
-
-
-        
-};
-const router = useRouter()
-const editItem = (propertyId: Item) => {
-        // isEditing.value = true;
-        // const { height, weight, id } = val;
-        // editingItem.height = height;
-        // editingItem.weight = weight;
-        // editingItem.id = id;
-        router.push({ path: "/property/modify/"+propertyId })
-
+        // Implement delete logic
+        console.log("Delete user", id);
 };
 
-//const submitEdit = () => {
-        // isEditing.value = false;
-        // const item = items.value.find((item:any) => item.id === editingItem.id);
-        // item.height = editingItem.height;
-        // item.weight = editingItem.weight;
-//};
+const editItem = (propertyId: string) => {
+        router.push({ path: "/property/modify/" + propertyId })
+};
+
 </script>
 
 <style scoped>
@@ -261,59 +144,17 @@ const editItem = (propertyId: Item) => {
         flex-direction: column;
         justify-content: flex-start;
         align-items: center;
-        z-index:100;
+        z-index: 100;
 }
 
-.filter-column {
-  display: flex;
-  align-items: center;
-  justify-items: center;
-  position: relative;
-}
-.filter-icon {
-  cursor: pointer;
-  display: inline-block;
-  width: 15px !important;
-  height: 15px !important;
-  margin-right: 4px;
-}
-
-.filter-menu {
-  padding: 15px 30px;
-  z-index: 1;
-  position: absolute;
-  top: 30px;
-  width: 200px;
-  background-color: #fff;
-  border: 1px solid #e0e0e0;
-}
-
-.sector-selector {
-  width: 100%;
-}
-
-.name-wrapper {
-  padding: 5px;
-  display: flex;
-  align-items: center;
-  justify-items: center;
-}
-.image {
-  margin-right: 10px;
-  display: inline-block;
-  width: 40px;
-  height: 40px;
-  /* border-radius: 50%; */
-  object-fit: cover;
-  box-shadow: inset 0 2px 4px 0 rgb(0 0 0 / 10%);
-}
 .operation-wrapper {
-  display: flex;
-  align-items: center;
-  justify-items: center;       
+        display: flex;
+        align-items: center;
+        justify-items: center;
 }
+
 .operation-wrapper .operation-icon {
-  width: 20px;
-  cursor: pointer;
+        width: 20px;
+        cursor: pointer;
 }
 </style>

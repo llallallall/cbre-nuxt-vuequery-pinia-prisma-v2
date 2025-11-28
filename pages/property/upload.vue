@@ -130,7 +130,6 @@
 </template>
 
 <script setup lang="ts">
-import { createToast } from 'mosha-vue-toastify';
 import { useStatusStore } from "~/stores/status";
 
 definePageMeta({
@@ -139,6 +138,7 @@ definePageMeta({
 });
 
 const statusStore = useStatusStore();
+const { showToast } = useToast();
 
 import 'vue3-easy-data-table/dist/style.css';
 import Vue3EasyDataTable from 'vue3-easy-data-table';
@@ -186,10 +186,7 @@ const handleFileUpload = async () => {
 
         if (data.value) {
             console.log('Upload success', data.value);
-            createToast({
-                title: 'File uploaded successfully!',
-                description: 'All properties have been imported.'
-            }, { type: 'success', timeout: 5000, showCloseButton: true, position: 'top-right', transition: 'bounce' });
+            showToast('File uploaded successfully! All properties have been imported.', 'success', { timeout: 5000, showCloseButton: true, position: 'top-right', transition: 'bounce' });
 
             if (status.value === 'success') {
                 console.log('Upload successful, redirecting in 3 seconds...');
@@ -200,18 +197,12 @@ const handleFileUpload = async () => {
 
         } else {
             console.log('Upload failed', error.value);
-            createToast({
-                title: 'File upload failed.',
-                description: error.value?.statusMessage || 'Please check the console for details.'
-            }, { type: 'danger', timeout: 5000, showCloseButton: true, position: 'top-right', transition: 'bounce' });
+            showToast(`File upload failed. ${error.value?.statusMessage || 'Please check the console for details.'}`, 'danger', { timeout: 5000, showCloseButton: true, position: 'top-right', transition: 'bounce' });
         }
 
     } catch (error) {
         console.log(error);
-        createToast({
-            title: 'An error occurred during upload.',
-            description: 'Please check the console.'
-        }, { type: 'danger', timeout: 5000, showCloseButton: true, position: 'top-right', transition: 'bounce' });
+        showToast('An error occurred during upload. Please check the console.', 'danger', { timeout: 5000, showCloseButton: true, position: 'top-right', transition: 'bounce' });
 
     } finally {
         statusStore.setGlobalLoading(false);

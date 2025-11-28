@@ -114,13 +114,13 @@ import { reactive, computed } from 'vue';
 import { storeToRefs } from 'pinia';
 import { usePropertyStore } from '~/stores/property';
 import { useStatusStore } from '~/stores/status';
-import { createToast } from 'mosha-vue-toastify';
 
 const emit = defineEmits(['close']);
 const propertyStore = usePropertyStore();
 const statusStore = useStatusStore();
 const { isGlobalLoading: computedIsLoading } = storeToRefs(statusStore);
 const { currentProperty } = storeToRefs(propertyStore);
+const { showToast } = useToast();
 
 // 초기값 로드
 const getInitialData = () => {
@@ -163,9 +163,9 @@ const onSubmit = async () => {
         try {
                 await propertyStore.updatePropertySection('facility', payload as any);
                 emit('close');
-                createToast({ title: 'Facility saved.' }, { type: 'success' });
+                showToast('Facility saved.', 'success');
         } catch (error) {
-                createToast({ title: 'Error saving facility.' }, { type: 'danger' });
+                showToast('Error saving facility.', 'danger');
         } finally {
                 statusStore.setGlobalLoading(false);
         }
