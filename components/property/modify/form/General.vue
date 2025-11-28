@@ -90,6 +90,7 @@ const formData = reactive({
   subsectorId: '',
 });
 
+// test 
 // 초기 데이터 (Warehouse) - 배열에서 추출
 const getWarehouseVal = (type: string) => currentProperty.value?.warehouse?.find((w: any) => w.temperatureType === type)?.ratio || 0;
 
