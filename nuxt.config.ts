@@ -36,7 +36,7 @@ export default defineNuxtConfig({
         },
         runtimeConfig: {
                 MINIO_SERVER_URL: process.env.MINIO_SERVER_URL,
-                MINIO_SERVER_PORT: Number(process.env.MINIO_SERVER_PORT),
+                MINIO_SERVER_PORT: Number(process.env.MINIO_SERVER_PORT) || 9000,
                 MINIO_ACCESS_KEY: process.env.MINIO_ACCESS_KEY,
                 MINIO_SECRET_KEY: process.env.MINIO_SECRET_KEY,
 
@@ -45,9 +45,11 @@ export default defineNuxtConfig({
                 API_ROUTE_SECRET: process.env.API_ROUTE_SECRET,
 
                 public: {
+                        // 여기에 mapbox를 넣지 마세요!
                         githubClientID: process.env.GITHUB_CLIENT_ID,
                         googleApiToken: process.env.GOOGLE_API_TOKEN,
                         kakaoLocalApiToken: process.env.KAKAO_LOCAL_API_TOKEN,
+                        minioUrl: process.env.NUXT_PUBLIC_MINIO_URL,
                 },
         },
         build: {
@@ -59,7 +61,7 @@ export default defineNuxtConfig({
                 },
         },
         mapbox: {
-                accessToken: process.env.MAPBOX_ACCESS_TOKEN,
+                accessToken: process.env.NUXT_PUBLIC_MAPBOX_ACCESS_TOKEN || process.env.MAPBOX_ACCESS_TOKEN || '',
         },
         headlessui: {
                 prefix: 'Headless',
