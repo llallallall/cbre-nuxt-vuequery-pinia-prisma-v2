@@ -71,6 +71,7 @@
                 <MapboxMap map-id="cbre-minimap" :class="uiStore.showMiniMap ? 'block' : 'hidden'"
                         style="position: absolute; top:calc(100% - 260px); left:0; width: 220px; height:260px; z-index:10;"
                         :options="{
+                                accessToken: mapboxAccessToken,
                                 style: 'mapbox://styles/mapbox/' + mapStyleId,
                                 center: [128, 36],
                                 zoom: 5,
