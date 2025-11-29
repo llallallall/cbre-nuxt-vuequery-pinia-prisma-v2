@@ -3,6 +3,7 @@
 
                 <MapboxMap map-id="cbre-map" style="position: relative; width: 100%; height : calc(100vh - 80px);"
                         :options="{
+                                accessToken: mapboxAccessToken,
                                 style: 'mapbox://styles/mapbox/' + mapStyleId,
                                 center: mapCenter,
                                 zoom: mapZoom,
@@ -111,6 +112,14 @@ const { filteredProperties } = storeToRefs(propertyStore);
 const mapRef = useMapboxRef("cbre-map");
 const miniMapRef = useMapboxRef("cbre-minimap");
 const printArea = ref(null);
+
+// 💡 Runtime Config에서 토큰 가져오기 (Mapbox 오류 해결)
+const config = useRuntimeConfig();
+const mapboxAccessToken = config.public.mapbox.accessToken || '';
+
+if (mapboxAccessToken) {
+    mapboxgl.accessToken = mapboxAccessToken;
+}
 
 // 💡 GeoJSON 데이터 소스 생성 (Getter 활용)
 const cbreDataSource = computed(() => {
