@@ -45,15 +45,15 @@ export default defineNuxtConfig({
                 API_ROUTE_SECRET: process.env.API_ROUTE_SECRET,
 
                 public: {
-                        // 여기에 mapbox를 넣지 마세요!
+                        // 여기에 mapbox를 넣지 마세요! -> 런타임 환경변수 적용을 위해 필요합니다.
                         githubClientID: process.env.GITHUB_CLIENT_ID,
                         googleApiToken: process.env.GOOGLE_API_TOKEN,
                         kakaoLocalApiToken: process.env.KAKAO_LOCAL_API_TOKEN,
                         minioUrl: process.env.NUXT_PUBLIC_MINIO_URL,
+                        mapbox: {
+                                accessToken: process.env.NUXT_PUBLIC_MAPBOX_ACCESS_TOKEN || process.env.MAPBOX_ACCESS_TOKEN || '',
+                        }
                 },
-        },
-        build: {
-                transpile: [],
         },
         vite: {
                 ssr: {

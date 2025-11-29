@@ -1,75 +1,57 @@
-# Nuxt 3 Minimal Starter
+## 📑 주소 정제 및 변환을 위한 3단계 API 연동 전략
 
-Look at the [Nuxt 3 documentation](https://nuxt.com/docs/getting-started/introduction) to learn more.
+이 문서는 사용자가 입력한 한글 또는 영문 주소를 정제하고, 정확한 좌표(위도/경도)를 획득하며, 공식적인 영문 주소로 변환하는 절차를 **카카오 Local API**와 **행정안전부 공공 API**를 조합하여 구현하는 전략을 설명합니다.
 
-## Setup
+---
 
-Make sure to install the dependencies:
+### 1단계. 주소 정제 및 후보 선택 (카카오 Local API 활용)
 
-```bash
-# npm
-npm install
+이 단계는 사용자의 **부정확한 주소** 입력을 처리하여 **정확한 한글 주소**를 획득하고, 좌표까지 확보하는 과정입니다.
 
-# pnpm
-pnpm install
+#### 🛠️ 사용 API
+* **카카오 Local API - 주소 검색 (Address Search)**
 
-# yarn
-yarn install
+#### 🎯 핵심 동작
+1.  **요청:** 사용자가 입력한 한글 또는 영문 주소 쿼리를 API에 전달합니다.
+2.  **응답 처리 (정확도 판별):**
+    * **정확히 일치하는 경우:** API는 1개의 정제된 주소 객체(`documents` 배열 1개)를 반환합니다.
+    * **부정확하거나 모호한 경우:** 관련성이 높은 **후보 주소 리스트**(`documents` 배열 n개)를 반환합니다.
+3.  **사용자 인터페이스:** 후보 리스트가 반환되면, 해당 주소들을 사용자에게 보여주고 **하나의 주소를 선택**하도록 안내합니다.
+4.  **데이터 확보:** 사용자가 최종 선택한 주소 객체에서 **한글 도로명 주소** (없으면 지번 주소), **위도($Y$)**, **경도($X$)** 값을 추출하여 다음 단계에 사용합니다.
 
-# bun
-bun install
-```
+---
 
-## Development Server
+### 2단계. 위도 및 경도 확보 (1단계 결과 활용)
 
-Start the development server on `http://localhost:3000`:
+1단계에서 선택된 주소 객체에는 이미 해당 주소의 정확한 좌표가 포함되어 있습니다. 별도의 추가 API 호출 없이 확보된 데이터를 바로 사용합니다.
 
-```bash
-# npm
-npm run dev
+#### 🛠️ 사용 API
+* **1단계 카카오 Local API 응답 데이터**
 
-# pnpm
-pnpm run dev
+#### 🎯 핵심 동작
+1.  1단계에서 확보한 **위도($Y$)** 및 **경도($X$)** 값을 최종 좌표 데이터로 확정합니다.
 
-# yarn
-yarn dev
+---
 
-# bun
-bun run dev
-```
+### 3단계. 공식 영문 주소 변환 (행정안전부 공공 API 활용)
 
-## Production
+대한민국 공식 우편 업무에 사용되는 가장 정확한 영문 주소를 획득하는 단계입니다.
 
-Build the application for production:
+#### 🛠️ 사용 API
+* **행정안전부 도로명주소 API** (공공 데이터 포털에서 발급)
 
-```bash
-# npm
-npm run build
+#### 🎯 핵심 동작
+1.  **요청:** 1단계에서 정제된 **한글 도로명 주소**를 쿼리로 사용하여 행정안전부 API에 요청합니다.
+2.  **응답:** API는 해당 주소의 **공식 영문 도로명 주소**를 반환합니다.
+3.  **예외 처리:**
+    * 만약 도로명 주소가 없고 지번 주소만 있는 경우, 해당 지번 주소를 도로명 주소로 변환하는 API를 선행하거나, 우체국 표기 규칙에 따라 지번 주소를 로마자 표기로 변환하는 자체 로직을 적용해야 합니다.
 
-# pnpm
-pnpm run build
+---
 
-# yarn
-yarn build
+### ✨ 최종 결과 요약
 
-# bun
-bun run build
-```
-
-Locally preview production build:
-
-```bash
-# npm
-npm run preview
-
-# pnpm
-pnpm run preview
-
-# yarn
-yarn preview
-
-# bun
-bun run preview
-```
-
-Check out the [deployment documentation](https://nuxt.com/docs/getting-started/deployment) for more information.
+| 데이터 유형 | 획득 단계 | 사용 API | 비고 |
+| :--- | :--- | :--- | :--- |
+| **정제된 주소 (한글)** | 1단계 | 카카오 Local API | 후보 리스트 중 사용자 선택 값 |
+| **위도($Y$) & 경도($X$)** | 2단계 | 카카오 Local API 응답 | 좌표 정보는 1단계에서 함께 확보됨 |
+| **공식 영문 주소** | 3단계 | 행정안전부 도로명주소 API | 대한민국 우체국 공식 표기법 준수 |
